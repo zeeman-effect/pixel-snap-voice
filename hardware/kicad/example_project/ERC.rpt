@@ -1,0 +1,135 @@
+ERC report (2026-08-30T16:47:28, Encoding UTF8)
+Report includes: Errors
+
+***** Sheet /
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 68.58 mm): Symbol U1 Pin 19 [GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 71.12 mm): Symbol U1 Pin 20 [GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 76.20 mm): Symbol U1 Pin 35 [MTCK/GPIO39/CLK_OUT3/SUBSPICS1, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 78.74 mm): Symbol U1 Pin 36 [MTDO/GPIO40/CLK_OUT2, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 81.28 mm): Symbol U1 Pin 37 [MTDI/GPIO41/CLK_OUT1, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 83.82 mm): Symbol U1 Pin 38 [MTMS/GPIO42, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 121.92 mm): Symbol U1 Pin 26 [GPIO26, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 124.46 mm): Symbol U1 Pin 28 [SPIIO4/GPIO33/FSPIHD/SUBSPIHD, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 127.00 mm): Symbol U1 Pin 29 [SPIIO5/GPIO34/FSPICS0/SUBSPICS0, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 129.54 mm): Symbol U1 Pin 31 [SPIIO6/GPIO35/FSPID/SUBSPID, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 132.08 mm): Symbol U1 Pin 32 [SPIIO7/GPIO36/FSPICLK/SUBSPICLK, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(97.79 mm, 134.62 mm): Symbol U1 Pin 33 [SPIDQS/GPIO37/FSPIQ/SUBSPIQ, Bidirectional, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(115.57 mm, 43.18 mm): Symbol #PWR02 Pin 1 [Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 78.74 mm): Symbol U1 Pin 4 [GPIO0/BOOT, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 81.28 mm): Symbol U1 Pin 5 [GPIO1/TOUCH1/ADC1_CH0, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 83.82 mm): Symbol U1 Pin 6 [GPIO2/TOUCH2/ADC1_CH1, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 86.36 mm): Symbol U1 Pin 7 [GPIO3/TOUCH3/ADC1_CH2, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 88.90 mm): Symbol U1 Pin 8 [GPIO4/TOUCH4/ADC1_CH3, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 91.44 mm): Symbol U1 Pin 9 [GPIO5/TOUCH5/ADC1_CH4, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 93.98 mm): Symbol U1 Pin 10 [GPIO6/TOUCH6/ADC1_CH5, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 96.52 mm): Symbol U1 Pin 11 [GPIO7/TOUCH7/ADC1_CH6, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 99.06 mm): Symbol U1 Pin 12 [GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 101.60 mm): Symbol U1 Pin 13 [GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 104.14 mm): Symbol U1 Pin 14 [GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 106.68 mm): Symbol U1 Pin 15 [GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 109.22 mm): Symbol U1 Pin 16 [GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 111.76 mm): Symbol U1 Pin 17 [GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 114.30 mm): Symbol U1 Pin 18 [GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 116.84 mm): Symbol U1 Pin 21 [GPIO17/U1TXD/ADC2_CH6, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 119.38 mm): Symbol U1 Pin 22 [GPIO18/U1RXD/ADC2_CH7/CLK_OUT3, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 121.92 mm): Symbol U1 Pin 25 [GPIO21, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 124.46 mm): Symbol U1 Pin 34 [GPIO38/FSPIWP/SUBSPIWP, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 127.00 mm): Symbol U1 Pin 41 [GPIO45, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 129.54 mm): Symbol U1 Pin 44 [GPIO46, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 132.08 mm): Symbol U1 Pin 27 [GPIO47/SPICLK_P/SUBSPICLK_P_DIFF, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(189.23 mm, 134.62 mm): Symbol U1 Pin 30 [GPIO48/SPICLK_N/SUBSPICLK_N_DIFF, Bidirectional, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(213.36 mm, 74.93 mm): Symbol #PWR01 Pin 1 [Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(247.65 mm, 76.20 mm): Symbol P1 Hidden pin B9 [VBUS, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(247.65 mm, 81.28 mm): Symbol P1 Pin A5 [CC, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(247.65 mm, 83.82 mm): Symbol P1 Pin B5 [VCONN, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(270.51 mm, 114.30 mm): Symbol P1 Pin SH [SHIELD, Passive, Line]
+
+ ** ERC messages: 41  Errors 41  Warnings 0
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

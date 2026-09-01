@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.kicad_sym")(options "")(descr "Recorder custom parts"))
+)

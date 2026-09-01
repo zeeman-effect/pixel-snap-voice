@@ -1,0 +1,19 @@
+* USB 5 V -> PTC -> charger -> LiPo -> 3.3 V LDO (ngspice)
+* First-spin power path. Not a substitute for measuring Korvo / SMT current.
+
+.title pixel-snap-voice power path
+Vusb n_vbus 0 DC 5
+Rptc n_vbus n_chg 0.3
+* MCP73831-class: USB present, cell at 3.8 V mid-charge
+Vbat n_bat 0 DC 3.8
+Rchg n_chg n_bat 0.5
+* MCU+codec record load ~160 mA from 3.3 V after LDO
+Rldo n_bat n_3v3 0.4
+Iload n_3v3 0 DC 0.16
+
+.control
+tran 10u 2m
+print v(n_vbus) v(n_chg) v(n_bat) v(n_3v3)
+echo power_path: ok if n_3v3 stays near 3.3-3.7 V with Vbat=3.8
+.endc
+.end

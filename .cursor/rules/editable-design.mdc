@@ -1,0 +1,17 @@
+---
+description: Nothing in this repo is frozen. Checks diagnose. Agents edit toward a fab-ready board.
+alwaysApply: true
+---
+
+# Editable design
+
+Nothing here is frozen. Docs, CAD params, placement, schematic sources, the PCB, firmware pins, and the check scripts can all change when the reason is sound. Write the reason in the same change.
+
+"Locked", "hand-owned", "do not re-run", "source of truth", and "not fab-ready" mean current status or a wipe hazard. They are not a ban on edits.
+
+When a check fails, fix the design or fix the check. Do not end a turn by only running `check_gates.py` and repeating that the board is not ready.
+
+`generate_recorder.py` overwrites schematic sheets only. It does not write `recorder.kicad_pcb`.
+`generate_pcb.py` rebuilds the board from scratch and wipes copper. Run it only when you intend that reset, then pour and route again.
+
+`hardware/kicad/example_project` is a learning tree. Do not treat it as product truth. Do not edit it unless the user is in that lesson. Product work is `hardware/kicad/recorder/`.

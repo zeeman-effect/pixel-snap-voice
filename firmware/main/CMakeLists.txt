@@ -1,0 +1,34 @@
+idf_component_register(
+    SRCS
+        "app_main.c"
+        "../core/recorder.c"
+        "../core/wav.c"
+        "../core/clock_fmt.c"
+        "../hal/storage_sd.c"
+        "../hal/clock_rtc.c"
+        "../hal/audio_es8311.c"
+        "../hal/button.c"
+        "../hal/led.c"
+        "../hal/usb_msc.c"
+        "../hal/power.c"
+    INCLUDE_DIRS
+        "."
+        "../core"
+        "../hal"
+        "../boards"
+    REQUIRES
+        driver
+        fatfs
+        sdmmc
+        nvs_flash
+        esp_timer
+        esp_driver_gpio
+        esp_driver_i2c
+        esp_driver_i2s
+        esp_driver_ledc
+        esp_adc
+        vfs
+        usb
+        esp_codec_dev
+        esp_tinyusb
+)

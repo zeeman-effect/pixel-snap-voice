@@ -1,0 +1,210 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "a1b0c3d4-e5f6-4789-a012-3456789abcde")
+	(paper "A4")
+	(title_block
+		(title "Pixel Snap Voice recorder")
+		(date "2026-08-30")
+		(rev "0")
+	)
+	(lib_symbols)
+	(text "Full product schematic. Global labels join sheets. Not the generated pixel_snap_voice board."
+		(exclude_from_sim no)
+		(at 25.4 20 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left bottom)
+		)
+		(uuid "d5428120-ddc8-5926-bff7-1de48665ee25")
+	)
+	(sheet
+		(at 110 80)
+		(size 71.12 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7adddc89-ba41-537d-99ef-4d604f9ca3f5")
+		(property "Sheetname" "IO"
+			(at 111 78.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "io.kicad_sch"
+			(at 111 111.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "recorder"
+				(path "/a1b0c3d4-e5f6-4789-a012-3456789abcde"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 80)
+		(size 71.12 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "bf0756f6-74a3-5453-a11e-835b4a8f9c65")
+		(property "Sheetname" "Power"
+			(at 26.4 78.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 26.4 111.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "recorder"
+				(path "/a1b0c3d4-e5f6-4789-a012-3456789abcde"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 30.48)
+		(size 71.12 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c1322f1d-5771-5551-ac8d-1796da06e73c")
+		(property "Sheetname" "MCU_USB"
+			(at 26.4 29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu_usb.kicad_sch"
+			(at 26.4 62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "recorder"
+				(path "/a1b0c3d4-e5f6-4789-a012-3456789abcde"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 110 30.48)
+		(size 71.12 30.48)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "e6ad3b73-a2da-5df0-b6b2-aec929c4fe96")
+		(property "Sheetname" "Audio"
+			(at 111 29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "audio.kicad_sch"
+			(at 111 62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "recorder"
+				(path "/a1b0c3d4-e5f6-4789-a012-3456789abcde"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

@@ -1,0 +1,29 @@
+menu "Pixel Snap Voice"
+
+    choice PSV_BOARD
+        prompt "Target board"
+        default PSV_BOARD_KORVO2
+        help
+            Korvo-2 / ESP-BOX for Phase 0. Custom is the slim Pixelsnap PCB.
+
+        config PSV_BOARD_KORVO2
+            bool "ESP32-S3-Korvo-2 (ES8311 play, ES7210 capture)"
+        config PSV_BOARD_ESP_BOX
+            bool "ESP-BOX / ESP-BOX-3 (ES8311 play, ES7210 capture)"
+        config PSV_BOARD_CUSTOM
+            bool "Custom pixel-snap-voice PCB (ES8311 duplex, codec is I2S master)"
+    endchoice
+
+    config PSV_USB_MSC
+        bool "TinyUSB mass storage on the SD volume"
+        default y
+        help
+            When a USB host enumerates, recording and playback stop and the
+            SD card is exposed as a drive. Phase 0 can disable this and use
+            an SD reader instead.
+
+    config PSV_SD_MOUNT_POINT
+        string "SD VFS mount point"
+        default "/sdcard"
+
+endmenu

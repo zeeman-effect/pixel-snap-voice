@@ -1,0 +1,14 @@
+---
+description: recorder/ is the product KiCad tree. example_project is the human sandbox.
+alwaysApply: true
+---
+
+# KiCad trees
+
+`hardware/kicad/example_project` is a hand-made learning project. Do not read it for product truth. Do not edit, generate into, or "fix" it unless the user is in that lesson.
+
+`hardware/kicad/recorder/` is the product schematic and PCB. Open `recorder.kicad_pro`. Edit it. Electrical sheets come from `generate_recorder.py`. That script overwrites sheets only. It does not write `recorder.kicad_pcb`. Footprint XY lives in `hardware/kicad/recorder/placement.json`. Keep that file in sync with the board.
+
+U1 comes from the `mcu` object in `params.json`. Current v1 is a USB recorder with no radio. A PCB-antenna module is a bad fit next to the steel shunt and later aluminum shell. Change the SKU in `params.json` if you have a reason, then update the schematic.
+
+Prove sheet edits with `python hardware/kicad/recorder/generate_recorder.py` then `python hardware/kicad/recorder/verify_schematic.py`. Close KiCad first (look for `~recorder.kicad_pro.lck`).

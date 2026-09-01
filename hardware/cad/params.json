@@ -1,0 +1,83 @@
+{
+  "origin": {
+    "description": "Accessory outline, phone-facing. XY origin is the magnet-ring center (Pixelsnap axis). +X is phone right, +Y is toward the camera bar (phone top), +Z is out of the phone (away from glass).",
+    "pcb_matches_cad": true
+  },
+  "phone": {
+    "width_mm": 72.0,
+    "height_mm": 152.8,
+    "thickness_mm": 8.6,
+    "camera_bar_from_top_mm": 24.0,
+    "camera_bar_height_mm": 24.0,
+    "camera_bar_width_mm": 72.0,
+    "camera_bar_extra_thickness_mm": 3.4,
+    "magnet_center_from_top_mm": 85.0,
+    "magnet_center_from_left_mm": 36.0,
+    "notes": "Pixel 10 published body 152.8 x 72.0 x 8.6 mm (GSMArena / Google). Camera-bar length and Pixelsnap center are published defaults. Replace them after you caliper a real unit. Do not invent caliper numbers."
+  },
+  "magnet": {
+    "od_mm": 56.0,
+    "id_mm": 44.0,
+    "thickness_mm": 1.1,
+    "shunt_thickness_mm": 0.3,
+    "adhesive_mm": 0.15,
+    "vendor": "commodity Qi2 / MagSafe accessory ring + steel shunt; pocket to the measured part (OD/ID vary 1–2 mm)"
+  },
+  "accessory": {
+    "width_mm": 67.0,
+    "height_mm": 90.0,
+    "thickness_mm": 9.0,
+    "wall_mm": 1.2,
+    "shell_back_mm": 1.2
+  },
+  "pcb": {
+    "thickness_mm": 0.8,
+    "width_mm": 64.0,
+    "height_mm": 86.0,
+    "layers": 4,
+    "finish": "ENIG",
+    "usb_diff_ohm": 90
+  },
+  "connectors": {
+    "usb_edge": "bottom",
+    "usb_offset_x_mm": 8.0,
+    "usb_overmold_len_mm": 18.0,
+    "usb_overmold_width_mm": 12.0,
+    "usb_height_mm": 3.2,
+    "mic_edge": "right",
+    "mic_y_mm": 10.0,
+    "mic_faces_glass": false,
+    "button_edge": "left",
+    "button_y_mm": 12.0,
+    "led_edge": "left",
+    "led_y_mm": 18.0,
+    "sd_edge": "left",
+    "speaker_height_mm": 3.0
+  },
+  "battery": {
+    "max_thickness_mm": 5.0,
+    "pocket_width_mm": 40.0,
+    "pocket_height_mm": 30.0,
+    "locked_mah": 500,
+    "chemistry": "LiPo 3.7 V pouch, protected if it still fits"
+  },
+  "mounting": {
+    "hole_d_mm": 1.7,
+    "hole_inset_mm": 3.5,
+    "screw": "M1.6"
+  },
+  "mcu": {
+    "family": "ESP32-S3",
+    "mpn": "ESP32-S3-MINI-1U-N8",
+    "lcsc": "C2980299",
+    "footprint": "PSV:ESP32-S3-MINI-1U",
+    "width_mm": 15.4,
+    "height_mm": 15.4,
+    "thickness_mm": 2.4,
+    "flash_mb": 8,
+    "antenna": "ipex",
+    "antenna_used_v1": false,
+    "wifi_v1": false,
+    "datasheet": "https://documentation.espressif.com/esp32-s3-mini-1_mini-1u_datasheet_en.pdf"
+  }
+}
