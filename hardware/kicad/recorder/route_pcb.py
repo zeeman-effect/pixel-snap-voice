@@ -1599,11 +1599,82 @@ def drop_dangling_vias(board):
     return len(doomed)
 
 
+# JLC will not drill a component pad hole closer than 0.45 mm to its
+# neighbour, and plated holes carry a +0.13 / -0.08 mm tolerance, so anything
+# designed under about 0.6 mm has spent its margin before the panel is drilled.
+CROWDED_PAD_HOLE_MM = 0.6
+
+
+def drop_vias_crowding_pads(board):
+    """Delete vias that crowd a through-hole pad they only duplicate.
+
+    A via dropped beside a through-hole pad on the same net usually adds
+    nothing: the pad's own barrel already passes through every layer, so the
+    via is a second drill hit buying a connection the board already has. It
+    only shows up as a problem when the router parks one close enough to eat
+    the pad hole-to-hole spacing. Candidates are checked one at a time and put
+    back if the board needs them.
+    """
+    holes = []
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetAttribute() != pcbnew.PAD_ATTRIB_PTH:
+                continue
+            holes.append((pad.GetPosition(), pad.GetDrillSizeX() / 2.0,
+                          pad.GetNetCode()))
+    if not holes:
+        return 0
+
+    dropped = 0
+    for via in [t for t in board.GetTracks() if isinstance(t, pcbnew.PCB_VIA)]:
+        pos, radius, net = via.GetPosition(), via.GetDrill() / 2.0, via.GetNetCode()
+        crowded = any(
+            pnet == net
+            and math.hypot(pcbnew.ToMM(pos.x - ppos.x),
+                           pcbnew.ToMM(pos.y - ppos.y))
+            - pcbnew.ToMM(radius) - pcbnew.ToMM(pradius)
+            < CROWDED_PAD_HOLE_MM
+            for ppos, pradius, pnet in holes
+        )
+        if not crowded:
+            continue
+        before = drc_json(PCB)
+        before_score = (len(before.get("violations", [])),
+                        len(before.get("unconnected_items", [])))
+        with open(PCB, "rb") as fh:
+            backup = fh.read()
+        stubs = [t for t in board.GetTracks()
+                 if not isinstance(t, pcbnew.PCB_VIA)
+                 and t.GetNetCode() == net
+                 and pos in (t.GetStart(), t.GetEnd())]
+        board.Delete(via)
+        for stub in stubs:
+            board.Delete(stub)
+        fill_zones(board)
+        save(board)
+        after = drc_json(PCB)
+        after_score = (len(after.get("violations", [])),
+                       len(after.get("unconnected_items", [])))
+        if after_score > before_score:
+            with open(PCB, "wb") as fh:
+                fh.write(backup)
+            board = pcbnew.LoadBoard(PCB)
+            board.BuildListOfNets()
+            continue
+        dropped += 1
+    return dropped
+
+
 def finish(board, half_w, half_h):
     """Last mile: drop stub vias, then find every designator a legible seat."""
     dropped = drop_dangling_vias(board)
     if dropped:
         print(f"  dropped {dropped} dangling vias")
+        board = pcbnew.LoadBoard(PCB)
+        board.BuildListOfNets()
+    crowding = drop_vias_crowding_pads(board)
+    if crowding:
+        print(f"  dropped {crowding} vias crowding a same-net through-hole pad")
         board = pcbnew.LoadBoard(PCB)
         board.BuildListOfNets()
     homeless = tuck_reference_text(board, half_w, half_h)
@@ -1650,9 +1721,24 @@ ROUTED_OPEN_ITEMS = [
     "0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm "
     "differential by first-order microstrip. Re-check if v2 ever needs "
     "high-speed USB, which would mean a thicker top prepreg.",
+    "MK1's land pattern is a locally adapted copy in PSV.pretty, not the "
+    "drawing in the Infineon datasheet. The ring pad and its stencil aperture "
+    "were moved out to 0.95 mm so copper clears the 0.8 mm sound port by "
+    "0.32 mm; the datasheet's own figure would leave 0.18 mm, which no fab "
+    "will drill reliably. The datasheet also assumes solder-mask-defined "
+    "pads and this land is copper-defined, inherited from the KiCad library. "
+    "Check the acoustic seal on the first assembled board: an open solder "
+    "ring leaks and costs low-frequency response.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
+    "kicad-cli pcb drc --schematic-parity still reports 27 notes, and all of "
+    "them are expected: 22 are module pads with no schematic pin (spare "
+    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), 4 are the "
+    "H1-H4 mounting holes, which are mechanical and have no symbol, and 1 is "
+    "SP1's Description field, which says more on the board than in the "
+    "schematic. Copper DRC, unconnected count and footprint/library parity "
+    "are all zero.",
 ]
 
 

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -44,6 +46,48 @@ def has_pcbnew() -> bool:
     return probe.returncode == 0
 
 
+def drc_counts(kicad: Path, extra: list[str]) -> dict:
+    """Run kicad-cli DRC and hand back the parsed JSON."""
+    out = Path(tempfile.gettempdir()) / "psv-drc.json"
+    run([str(kicad), "pcb", "drc", "--severity-all", "--schematic-parity",
+         "--format", "json", "-o", str(out), str(PCB)] + extra)
+    return json.loads(out.read_text(encoding="utf-8"))
+
+
+def drc_gate(kicad: Path) -> None:
+    """Gate on copper errors, and refuse to plot a board with stale pours.
+
+    Two things used to slip past here. The old call passed --severity-error,
+    so every warning-level rule the board is checked against (silk over
+    copper, dangling vias, footprint/library parity) was invisible to the
+    gate. And nothing noticed when the zone fills stored in the board were out
+    of date: kicad-cli plots the stored fill, so a stale one ships to the fab
+    even though DRC refills before checking and reports a clean board.
+    """
+    report = drc_counts(kicad, [])
+    errors = [v for v in report["violations"] if v["severity"] == "error"]
+    warnings = [v for v in report["violations"] if v["severity"] == "warning"]
+    unconnected = report["unconnected_items"]
+    parity = report["schematic_parity"]
+
+    refilled = drc_counts(kicad, ["--refill-zones"])
+    if (len(refilled["violations"]), len(refilled["unconnected_items"])) != \
+            (len(report["violations"]), len(unconnected)):
+        raise SystemExit(
+            "zone fills in recorder.kicad_pcb are stale: DRC disagrees with "
+            "itself once the pours are refilled, and the Gerbers would be "
+            "plotted from the stale copper. Run "
+            "'python3 hardware/kicad/recorder/route_pcb.py --planes-only'."
+        )
+
+    run([str(kicad), "pcb", "drc", "--severity-all", "--schematic-parity",
+         "-o", str(RECORDER / "drc.rpt"), str(PCB)])
+    print(f"drc: {len(errors)} errors, {len(warnings)} warnings, "
+          f"{len(unconnected)} unconnected, {len(parity)} schematic-parity notes")
+    if errors or unconnected:
+        raise SystemExit("DRC is not clean; not writing fab output")
+
+
 def export_fab(kicad: Path) -> None:
     """Write the whole upload package, not just the copper.
 
@@ -54,8 +98,7 @@ def export_fab(kicad: Path) -> None:
     package described a board with none of its vias drilled. Everything the
     fab reads is now written in one pass from one board file.
     """
-    run([str(kicad), "pcb", "drc", "--severity-error", "--exit-code-violations",
-         "-o", str(RECORDER / "drc.rpt"), str(PCB)])
+    drc_gate(kicad)
     run([str(kicad), "pcb", "export", "gerbers", "-o", str(FAB), str(PCB)])
     run([str(kicad), "pcb", "export", "drill", "--generate-map",
          "--excellon-separate-th", "-o", str(FAB) + os.sep, str(PCB)])
