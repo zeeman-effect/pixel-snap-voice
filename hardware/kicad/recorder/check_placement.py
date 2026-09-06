@@ -32,22 +32,36 @@ ANALOG = ["MK1", "U2", "U8", "Y1", "U6", "SP1", "C15", "C16", "C17", "C18"]
 HOLE_KEEPOUT_R = 2.1
 
 
+CRTYD_LAYERS = (pcbnew.F_CrtYd, pcbnew.B_CrtYd)
+
+
 def courtyard_box(fp):
-    box = None
-    for layer in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
-        poly = fp.GetCourtyard(layer)
-        if poly.OutlineCount() == 0:
+    """Bounding box of the courtyard as drawn, in mm.
+
+    KiCad compares courtyard outlines, so this has to be the stroke
+    centreline. Two lifts of that: fp.GetCourtyard() hands back a polygon
+    already inflated past the drawn line, and BOX2I.Merge() mutates in place
+    but returns an unrelated proxy object, so trusting its return value used
+    to invent boxes a metre wide. Read the drawn shapes instead and take half
+    the pen width back off each edge.
+    """
+    edges = []
+    for item in fp.GraphicalItems():
+        if not isinstance(item, pcbnew.PCB_SHAPE):
             continue
-        bb = poly.BBox()
-        box = bb if box is None else (box.Merge(bb) or box)
-    if box is None:
-        box = fp.GetBoundingBox(False, False)
-    return (
-        pcbnew.ToMM(box.GetLeft()),
-        pcbnew.ToMM(box.GetTop()),
-        pcbnew.ToMM(box.GetRight()),
-        pcbnew.ToMM(box.GetBottom()),
-    )
+        if item.GetLayer() not in CRTYD_LAYERS:
+            continue
+        bb = item.GetBoundingBox()
+        pen = item.GetWidth() / 2.0
+        edges.append((bb.GetLeft() + pen, bb.GetTop() + pen,
+                      bb.GetRight() - pen, bb.GetBottom() - pen))
+    if edges:
+        box = (min(e[0] for e in edges), min(e[1] for e in edges),
+               max(e[2] for e in edges), max(e[3] for e in edges))
+    else:
+        bb = fp.GetBoundingBox(False, False)
+        box = (bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom())
+    return tuple(pcbnew.ToMM(v) for v in box)
 
 
 def main():

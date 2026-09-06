@@ -1,4 +1,4 @@
-ERC report (2026-09-01T15:54:33, Encoding UTF8)
+ERC report (2026-09-06T18:12:03, Encoding UTF8)
 Report includes: Errors
 
 ***** Sheet /
@@ -8,13 +8,10 @@ Report includes: Errors
 ***** Sheet /Audio/
 
 ***** Sheet /Power/
-[pin_not_connected]: Pin not connected
-    ; error
-    @(145.00 mm, 66.19 mm): Symbol C5 Pin 1 [Passive, Line]
 
 ***** Sheet /IO/
 
- ** ERC messages: 1  Errors 1  Warnings 0
+ ** ERC messages: 0  Errors 0  Warnings 0
 
  ** Ignored checks:
     - Global label only appears once in the schematic

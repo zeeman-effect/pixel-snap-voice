@@ -472,7 +472,7 @@ def build() -> None:
     for b in (mcu_blk, usb_blk, esd_blk, device_r, device_c, conn4, gnd_blk, vdd33_blk, vbus_blk):
         mcu.add_lib(b)
     ux, uy = 95.25, 114.30
-    mcu.add(inst(mcu_id, "U1", "ESP32-S3-MINI-1U-N8", ux, uy, mcu_pins, "RF_Module:ESP32-S3-MINI-1"))
+    mcu.add(inst(mcu_id, "U1", "ESP32-S3-MINI-1U-N8", ux, uy, mcu_pins, "PSV:ESP32-S3-MINI-1U"))
     mcu.add(text("ESP32-S3-MINI-1U-N8. IPEX unused. S3 is I2S slave.", 25, 20, "mcu-h"))
 
     stub(mcu, ux, uy, mcu_pins, "3", "VDD33", "mcu-3v3")
@@ -611,7 +611,7 @@ def build() -> None:
         aud.add_lib(b)
     aud.add(text("ES8311 is I2S master. 12.288 MHz oscillator drives MCLK. No XI/XO on this codec.", 20, 18, "aud-h"))
     ax, ay = 90, 90
-    aud.add(inst(es_id, "U2", "ES8311", ax, ay, es_pins, "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm"))
+    aud.add(inst(es_id, "U2", "ES8311", ax, ay, es_pins, "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm"))
     stub(aud, ax, ay, es_pins, "1", "I2C_SCL", "es-scl")
     stub(aud, ax, ay, es_pins, "19", "I2C_SDA", "es-sda")
     stub(aud, ax, ay, es_pins, "20", "VDD33", "es-ce")
@@ -625,6 +625,9 @@ def build() -> None:
     stub(aud, ax, ay, es_pins, "11", "3V3A", "es-av")
     stub(aud, ax, ay, es_pins, "5", "GND", "es-dg")
     stub(aud, ax, ay, es_pins, "10", "AGND", "es-ag", False)
+    # Pad 21 is the QFN exposed pad. It is the codec's analog return, so it
+    # belongs on AGND in the netlist, not only on the board.
+    stub(aud, ax, ay, es_pins, "21", "AGND", "es-ep", False)
     stub(aud, ax, ay, es_pins, "12", "AOUTP", "es-op", False)
     stub(aud, ax, ay, es_pins, "13", "AOUTN", "es-on", False)
     stub(aud, ax, ay, es_pins, "18", "MIC_P", "es-mp")
@@ -663,7 +666,7 @@ def build() -> None:
     stub(aud, 90, 160, osc_pins, "3", "I2S_MCLK", "y1out")
     stub(aud, 90, 160, osc_pins, "4", "3V3A", "y1v")
 
-    aud.add(inst(mic_id, "MK1", "IM73A135", 40, 175, mic_pins, "Sensor_Audio:Infineon_PG-LLGA-5-3"))
+    aud.add(inst(mic_id, "MK1", "IM73A135", 40, 175, mic_pins, "PSV:IM73A135_PG-LLGA-5-3"))
     stub(aud, 40, 175, mic_pins, "1", "MIC_OUT", "mk-out", False)
     stub(aud, 40, 175, mic_pins, "2", "3V3A", "mk-v")
     stub(aud, 40, 175, mic_pins, "3", "AGND", "mk-g", False)
@@ -703,7 +706,7 @@ def build() -> None:
     stub(aud, 165, 115, c_pins, "1", "PA_BYP", "c19a", False, rot=270)
     stub(aud, 165, 115, c_pins, "2", "GND", "c19b", rot=270)
 
-    aud.add(inst("Device:Speaker", "SP1", "1511", 250, 90, spk_pins, "Speaker_Audio:Speaker_15x11mm"))
+    aud.add(inst("Device:Speaker", "SP1", "1511", 250, 90, spk_pins, "PSV:Speaker_15x11mm"))
     stub(aud, 250, 90, spk_pins, "1", "SPK_P", "sp1p", False)
     stub(aud, 250, 90, spk_pins, "2", "SPK_N", "sp1n", False)
     aud.add(inst("Device:C", "C20", "10uF", 220, 55, c_pins, "Capacitor_SMD:C_0805_2012Metric"))
@@ -745,7 +748,7 @@ def build() -> None:
     pwr_s.add(inst("Device:C", "C4", "4.7uF", cx, cy, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
     pwr_s.add(inst(chg_id, "U3", "MCP73831-2-OT", u3x, u3y, chg_pins, "Package_TO_SOT_SMD:SOT-23-5"))
     pwr_s.add(inst("Device:C", "C5", "4.7uF", c5x, c5y, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    pwr_s.add(inst("Device:Battery", "BT1", "LiPo 500mAh", btx, bty, bat_pins, "Connector_Wire:SolderWire-2.0sqmm_1x02_D2.0mm_OD5mm"))
+    pwr_s.add(inst("Device:Battery", "BT1", "LiPo 500mAh", btx, bty, bat_pins, "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm"))
 
     vbus_rail = place_rail(pwr_s, "power:VBUS", "#PWR21", "VBUS", fx, 33.02, vbus_pins)
     pwr_flag(pwr_s, "#FLG02", fx, 33.02, pflag_pins)
@@ -849,7 +852,7 @@ def build() -> None:
         stub(io, 150, 50 + i * 12.7, r_pins, "1", "VDD33", f"{ref}v", rot=90)
         stub(io, 150, 50 + i * 12.7, r_pins, "2", net, f"{ref}n", rot=90)
 
-    io.add(inst("Switch:SW_Push", "SW1", "record", 80, 160, sw_pins, "Button_Switch_SMD:SW_SPST_PTS645"))
+    io.add(inst("Switch:SW_Push", "SW1", "record", 80, 160, sw_pins, "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92"))
     stub(io, 80, 160, sw_pins, "1", "GND", "swg")
     stub(io, 80, 160, sw_pins, "2", "BTN", "swb")
     io.add(inst("Device:LED", "D1", "status", 80, 190, led_pins, "LED_SMD:LED_0603_1608Metric"))
@@ -966,33 +969,48 @@ def build() -> None:
 	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.kicad_sym")(options "")(descr "Recorder custom parts"))
 )
 """)
-    write_out(HERE / "fp-lib-table", "(fp_lib_table\n\t(version 7)\n)\n")
+    write_out(HERE / "fp-lib-table", """(fp_lib_table
+	(version 7)
+	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.pretty")(options "")(descr "Recorder land patterns KiCad 10 does not ship"))
+)
+""")
     write_out(HERE / "nets_required.json", json.dumps(NETS_REQUIRED, indent=2) + "\n")
 
-    pro = {
-        "board": {"design_settings": {"defaults": {"board_outline_line_width": 0.05}}},
-        "boards": [],
-        "cvpcb": {"equivalence_files": []},
-        "libraries": {"pinned_footprint_libs": [], "pinned_symbol_libs": []},
-        "meta": {"filename": "recorder.kicad_pro", "version": 3},
-        "net_settings": {
-            "classes": [{"name": "Default", "clearance": 0.12, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1}],
+    # Only the schematic half of the project file belongs to this script. The
+    # board half (design_settings, net_settings) is the PCB's DRC policy and
+    # is what route_pcb.py and kicad-cli pcb drc read. Overwriting the whole
+    # file here used to silently reset the board to KiCad defaults, which is
+    # how the board ended up with a 0.2 mm minimum track width under a 0.15 mm
+    # Default net class. Merge instead.
+    pro_path = HERE / "recorder.kicad_pro"
+    pro = json.loads(pro_path.read_text(encoding="utf-8")) if pro_path.is_file() else {}
+    pro.setdefault("board", {"design_settings": {"defaults": {"board_outline_line_width": 0.05}}})
+    pro.setdefault("boards", [])
+    pro.setdefault("cvpcb", {"equivalence_files": []})
+    pro.setdefault("libraries", {"pinned_footprint_libs": [], "pinned_symbol_libs": []})
+    pro.setdefault(
+        "net_settings",
+        {
+            "classes": [
+                {"name": "Default", "clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1}
+            ],
             "meta": {"version": 5},
         },
-        "schematic": {
-            "meta": {"version": 1},
-            "top_level_sheets": [{"filename": "recorder.kicad_sch", "name": "Root", "uuid": ROOT_UUID}],
-        },
-        "sheets": [
-            [ROOT_UUID, "Root"],
-            [uid("sch-mcu"), "MCU_USB"],
-            [uid("sch-aud"), "Audio"],
-            [uid("sch-pwr"), "Power"],
-            [uid("sch-io"), "IO"],
-        ],
-        "text_variables": {},
+    )
+    pro["meta"] = {"filename": "recorder.kicad_pro", "version": 3}
+    pro["schematic"] = {
+        "meta": {"version": 1},
+        "top_level_sheets": [{"filename": "recorder.kicad_sch", "name": "Root", "uuid": ROOT_UUID}],
     }
-    write_out(HERE / "recorder.kicad_pro", json.dumps(pro, indent=2) + "\n")
+    pro["sheets"] = [
+        [ROOT_UUID, "Root"],
+        [uid("sch-mcu"), "MCU_USB"],
+        [uid("sch-aud"), "Audio"],
+        [uid("sch-pwr"), "Power"],
+        [uid("sch-io"), "IO"],
+    ]
+    pro.setdefault("text_variables", {})
+    write_out(pro_path, json.dumps(pro, indent=2) + "\n")
 
 
 if __name__ == "__main__":

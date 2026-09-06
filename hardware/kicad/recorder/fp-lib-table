@@ -1,3 +1,4 @@
 (fp_lib_table
 	(version 7)
+	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.pretty")(options "")(descr "Recorder land patterns KiCad 10 does not ship"))
 )

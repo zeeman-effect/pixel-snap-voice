@@ -2,7 +2,7 @@
 %TF.CreationDate,2026-09-06T18:12:05+00:00*%
 %TF.ProjectId,recorder,7265636f-7264-4657-922e-6b696361645f,rev?*%
 %TF.SameCoordinates,Original*%
-%TF.FileFunction,Legend,Bot*%
+%TF.FileFunction,Glue,Top*%
 %TF.FilePolarity,Positive*%
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
@@ -11,5 +11,19 @@ G04 Created by KiCad (PCBNEW 10.0.6-10.0.6~ubuntu24.04.1) date 2026-09-06 18:12:
 %LPD*%
 G01*
 G04 APERTURE LIST*
+%ADD10C,0.300000*%
 G04 APERTURE END LIST*
+%TO.C,Y1*%
+D10*
+X16150000Y-24000000D02*
+G75*
+G02*
+X15850000Y-24000000I-150000J0D01*
+G01*
+X15850000Y-24000000D02*
+G75*
+G02*
+X16150000Y-24000000I150000J0D01*
+G01*
+%TD*%
 M02*

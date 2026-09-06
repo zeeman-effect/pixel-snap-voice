@@ -20,6 +20,7 @@ right and +Y is toward the camera bar. These are written straight into the
 """
 
 import json
+import math
 import os
 import re
 
@@ -38,48 +39,105 @@ PLACEMENT_OUT = os.path.join(HERE, "placement.json")
 # KiCad unable to find the hierarchical sheets, so they are put back verbatim.
 SCHEMATIC_OWNED_KEYS = ("sheets", "schematic", "text_variables", "meta")
 
-SYS_FP = r"C:\Users\zachr\AppData\Local\Programs\KiCad\10.0\share\kicad\footprints"
+def _system_footprint_dir():
+    """Where KiCad 10 keeps its shipped .pretty folders on this machine."""
+    env = os.environ.get("KICAD_FOOTPRINT_DIR")
+    candidates = [env] if env else []
+    candidates += [
+        "/usr/share/kicad/footprints",
+        "/usr/local/share/kicad/footprints",
+        os.path.join(
+            os.environ.get("LOCALAPPDATA", ""),
+            "Programs", "KiCad", "10.0", "share", "kicad", "footprints",
+        ),
+        r"C:\Program Files\KiCad\10.0\share\kicad\footprints",
+    ]
+    for path in candidates:
+        if path and os.path.isdir(path):
+            return path
+    raise SystemExit(
+        "cannot find the KiCad 10 footprint libraries. Set KICAD_FOOTPRINT_DIR."
+    )
+
+
+SYS_FP = _system_footprint_dir()
 LOCAL_FP = os.path.join(HERE, "PSV.pretty")
 
+# No footprint substitutions any more. The schematic used to name six
+# footprints that do not exist under that name in KiCad 10, and this script
+# quietly swapped each for a look-alike. Board and schematic now agree:
+# four names were corrected in generate_recorder.py, and the two land
+# patterns KiCad 10 does not ship at all (ESP32-S3-MINI-1U and the
+# IM73A135 PG-LLGA-5-3 with a hole-clearance-legal ring pad) live in
+# PSV.pretty. Keep this table empty; fix the name instead.
+SUBSTITUTIONS = {}
+
 # ---------------------------------------------------------------------------
-# Footprint substitutions.
-#
-# The schematic names six footprints that do not exist under that exact name in
-# the KiCad 10 system libraries. Each is mapped to the real land pattern here
-# rather than by editing the schematic, and every substitution is recorded in
-# placement.json so the schematic can be corrected later in one pass.
+# Fab policy. pcbnew writes recorder.kicad_pro from BOARD defaults on save and
+# generate_recorder.py rewrites the schematic half of the same file, so the
+# DRC numbers have to be re-applied from one place afterwards. These are the
+# numbers the board is designed to, and they are inside JLCPCB's standard
+# 4-layer capability (0.127 mm trace / 0.127 mm space, 0.2 mm drill).
 # ---------------------------------------------------------------------------
-SUBSTITUTIONS = {
-    "RF_Module:ESP32-S3-MINI-1": (
-        "RF_Module:ESP32-S2-MINI-1U",
-        "No ESP32-S3-MINI-1 in KiCad 10. S3-MINI-1U and S2-MINI-1U share the "
-        "same 15.4 x 15.4 mm 65-pad land pattern, and the 1U variant is the "
-        "no-PCB-antenna part this board actually uses.",
-    ),
-    "Sensor_Audio:Infineon_PG-LLGA-5-3": (
-        "Sensor_Audio:Infineon_PG-LLGA-5-2",
-        "PG-LLGA-5-3 is not in KiCad 10. PG-LLGA-5-2 is the library footprint "
-        "whose description cites the IM73A135 datasheet.",
-    ),
-    "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm": (
-        "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm",
-        "Library only ships the size-qualified name. 1.65 mm pad matches the "
-        "ES8311 exposed pad.",
-    ),
-    "Connector_Wire:SolderWire-2.0sqmm_1x02_D2.0mm_OD5mm": (
-        "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm",
-        "Nearest real library name for 2 sq mm battery flying leads.",
-    ),
-    "Button_Switch_SMD:SW_SPST_PTS645": (
-        "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92",
-        "Only PTS645 variant in the library.",
-    ),
-    "Speaker_Audio:Speaker_15x11mm": (
-        "PSV:Speaker_15x11mm",
-        "No Speaker_Audio library in KiCad 10. Placeholder land pattern in the "
-        "local PSV.pretty; replace once a real speaker part is chosen.",
-    ),
+DESIGN_RULES = {
+    "min_clearance": 0.127,
+    "min_track_width": 0.127,
+    "min_copper_edge_clearance": 0.3,
+    "min_hole_clearance": 0.25,
+    "min_hole_to_hole": 0.25,
+    "min_through_hole_diameter": 0.3,
+    "min_via_diameter": 0.45,
+    "min_via_annular_width": 0.1,
 }
+
+# USB_DP / USB_DM are a tightly coupled pair, not an impedance-matched one.
+# See the usb_impedance note in placement.json: the ESP32-S3's USB is
+# full speed only, so 90 ohm control buys nothing on a 0.1 mm prepreg.
+NET_CLASSES = {
+    "Default": {"clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1},
+    "USB": {"clearance": 0.15, "track_width": 0.2, "diff_pair_width": 0.2, "diff_pair_gap": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
+    # Charge and rail currents, up to the 500 mA the MCP73831 PROG resistor
+    # sets. 0.3 mm of 1 oz outer copper carries that with room to spare.
+    "POWER": {"clearance": 0.15, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
+}
+
+NETCLASS_PATTERNS = [
+    ("USB_DP", "USB"),
+    ("USB_DM", "USB"),
+    ("VBUS", "POWER"),
+    ("VBUS_CHG", "POWER"),
+    ("VBAT", "POWER"),
+    ("/Power/3V3_RAW", "POWER"),
+    ("3V3A", "POWER"),
+]
+
+
+def apply_project_policy(project_path=PROJECT):
+    """Write DESIGN_RULES and NET_CLASSES into the .kicad_pro."""
+    data = json.load(open(project_path, encoding="utf-8"))
+    settings = data.setdefault("board", {}).setdefault("design_settings", {})
+    settings.setdefault("rules", {}).update(DESIGN_RULES)
+    # Solid pad-to-zone connections. Thermal spokes on a 0.8 mm board with a
+    # 2-spoke minimum produced starved_thermal errors on every pad the pour
+    # could only reach from one side, and this board is reflowed, not
+    # hand-soldered, so the relief buys nothing.
+    settings.setdefault("defaults", {}).setdefault("zones", {})["pad_connection"] = 3
+
+    net_settings = data.setdefault("net_settings", {})
+    classes = net_settings.setdefault("classes", [])
+    by_name = {c.get("name"): c for c in classes}
+    for name, values in NET_CLASSES.items():
+        target = by_name.get(name)
+        if target is None:
+            target = {"name": name}
+            classes.append(target)
+        target.update(values)
+    net_settings["netclass_patterns"] = [
+        {"pattern": pattern, "netclass": name} for pattern, name in NETCLASS_PATTERNS
+    ]
+    with open(project_path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+        fh.write("\n")
 
 # ---------------------------------------------------------------------------
 # Placement: ref -> (x_mm, y_mm, rotation_deg, note)
@@ -147,11 +205,19 @@ PLACEMENT = {
     # --- Analog island: codec ---
     "U2": (26.0, 22.0, 0, "ES8311 codec, I2S master"),
     "C10": (20.5, 20.0, 0, "VMID"),
-    "C11": (20.5, 23.0, 0, "ADCVREF"),
     "C16": (20.5, 26.0, 0, "MIC_N reference"),
-    "C12": (30.0, 19.0, 0, "DACVREF"),
-    "C17": (30.0, 22.0, 0, "AOUTP DC block"),
-    "C18": (30.0, 25.0, 0, "AOUTN DC block"),
+    # U2's right-hand pins are 3V3A, AOUTP, AOUTN, DACVREF, ADCVREF reading
+    # down from y=22.8 on a 0.4 mm pitch. Escaping that pitch needs a fan
+    # that splays to 0.8 mm about 1.9 mm out from the pad row, and these four
+    # capacitors used to sit lying down right in that landing zone: C17's pad
+    # blocked the AOUTN and DACVREF escapes outright and freerouting called
+    # both unroutable. Stood on end at x = 30.5 they clear the fan by 0.7 mm,
+    # and they now read down the column in the same order as the pins they
+    # bypass, so nothing has to cross anything else to reach them.
+    "C17": (30.5, 26.0, 270, "AOUTP DC block, clear of the codec escape fan"),
+    "C18": (30.5, 23.0, 270, "AOUTN DC block, clear of the codec escape fan"),
+    "C12": (30.5, 20.0, 90, "DACVREF, clear of the codec escape fan"),
+    "C11": (30.5, 17.0, 90, "ADCVREF, moved off U2's west side to its pin"),
     "C13": (26.0, 27.5, 0, "3V3A decoupling at the codec"),
     "Ragnd": (26.0, 16.5, 0, "AGND to GND stitch"),
     "Y1": (16.0, 24.0, 0, "12.288 MHz oscillator into ES8311 MCLK"),
@@ -430,7 +496,7 @@ def main():
     board.BuildListOfNets()
     pcbnew.SaveBoard(PCB_OUT, board)
     patch_saved_board(pcb)
-    restore_project(project_before, pcb["usb_diff_ohm"])
+    restore_project(project_before)
 
     payload = {
         "_comment": (
@@ -449,6 +515,8 @@ def main():
             "layers": ["F.Cu", "In1.Cu (GND)", "In2.Cu (VDD33)", "B.Cu"],
             "finish": pcb["finish"],
             "usb_diff_ohm": pcb["usb_diff_ohm"],
+            "usb_signalling": pcb["usb_signalling"],
+            "usb_diff_note": pcb["usb_diff_note"],
             "outline_rect_mm": [[-half_w, -half_h], [half_w, half_h]],
             "b_cu_faces_phone": True,
         },
@@ -533,60 +601,129 @@ def main():
     print(f"wrote {PLACEMENT_OUT}")
 
 
-def restore_project(before, usb_diff_ohm):
+def restore_project(before):
     """Undo pcbnew's damage to the schematic half of the project file.
 
-    Also adds a USB net class carrying USB_DP and USB_DM. The width and gap in
-    it are a starting point, not a solved 90 ohm geometry: see the open_items
-    note in placement.json about the 0.1 mm prepreg.
+    pcbnew rewrites the whole .kicad_pro on save from BOARD defaults, which
+    blanks the hierarchical sheet list and resets every DRC number. Put the
+    schematic keys back verbatim and re-apply the fab policy.
     """
     after = json.load(open(PROJECT, encoding="utf-8"))
     for key in SCHEMATIC_OWNED_KEYS:
         if key in before:
             after[key] = before[key]
-
-    classes = after.setdefault("net_settings", {}).setdefault("classes", [])
-    if not any(c.get("name") == "USB" for c in classes):
-        default = next((c for c in classes if c.get("name") == "Default"), {})
-        usb = dict(default)
-        usb.update(
-            {
-                "name": "USB",
-                "clearance": 0.2,
-                "track_width": 0.2,
-                "diff_pair_width": 0.2,
-                "diff_pair_gap": 0.2,
-                "priority": 0,
-            }
-        )
-        classes.append(usb)
-    after["net_settings"]["netclass_patterns"] = [
-        {"pattern": "USB_DP", "netclass": "USB"},
-        {"pattern": "USB_DM", "netclass": "USB"},
-    ]
-
     with open(PROJECT, "w", encoding="utf-8") as fh:
         json.dump(after, fh, indent=2)
         fh.write("\n")
+    apply_project_policy()
+
+
+# JLCPCB's published silkscreen floor is 0.8 mm character height and 0.15 mm
+# stroke. Library footprints ship 1.0 mm text, which on a board this dense
+# leaves no legal spot for a third of the designators.
+SILK_HEIGHT = 0.8
+SILK_STROKE = 0.15
+SILK_GAP = 0.12
+
+SILK_STEP = 0.25
+SILK_REACH = 6.0
+
+
+def _box_mm(box):
+    return (pcbnew.ToMM(box.GetLeft()), pcbnew.ToMM(box.GetTop()),
+            pcbnew.ToMM(box.GetRight()), pcbnew.ToMM(box.GetBottom()))
+
+
+def _rects_overlap(a, b, gap=0.0):
+    return not (a[2] + gap <= b[0] or b[2] + gap <= a[0]
+                or a[3] + gap <= b[1] or b[3] + gap <= a[1])
+
+
+def _silk_obstacles(board):
+    """Everything a front designator has to miss: pads and other silk.
+
+    Tracks are deliberately absent. KiCad only reports silk over *exposed*
+    copper, and everything but a pad is under solder mask.
+    """
+    rects = []
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
+                continue
+            if pad.IsOnLayer(pcbnew.F_Cu):
+                rects.append(_box_mm(pad.GetBoundingBox()))
+        for item in fp.GraphicalItems():
+            if isinstance(item, pcbnew.PCB_SHAPE) and item.GetLayer() == pcbnew.F_SilkS:
+                rects.append(_box_mm(item.GetBoundingBox()))
+    return rects
+
+
+def _silk_seats(cx, cy, half_fw, half_fh, half_tw, half_th):
+    """Candidate label centres, nearest gap first.
+
+    Radiating along eight compass lines leaves a part boxed in by its own
+    neighbours with nowhere to go, so sweep a full ring instead and let the
+    angular resolution grow with the radius.
+    """
+    seats = []
+    reach = SILK_STEP
+    while reach <= SILK_REACH:
+        rx = half_fw + half_tw + SILK_GAP + reach
+        ry = half_fh + half_th + SILK_GAP + reach
+        steps = max(8, int(2 * math.pi * reach / SILK_STEP))
+        for i in range(steps):
+            theta = 2 * math.pi * i / steps
+            seats.append((cx + rx * math.cos(theta), cy + ry * math.sin(theta)))
+        reach += SILK_STEP
+    return seats
 
 
 def tuck_reference_text(board, half_w, half_h):
-    """Move a silk designator onto the footprint when the edge would clip it.
+    """Shrink every front designator and park it somewhere legible.
 
-    Library footprints park the reference above or below the part, which falls
-    off the outline for anything sitting on a board edge. Rather than hand-tune
-    each one, any designator that lands within 1 mm of the outline is dropped
-    onto the footprint origin.
+    Library footprints put the reference above the part at 1.0 mm, which on
+    this board put 29 of them over a neighbour's pad, over a neighbour's
+    outline, or off the board edge. Each one is shrunk to the fab's minimum
+    and then walked out from its footprint until it clears the pads, the
+    other silk, and the designators already placed. Only the ones with
+    nowhere to go are left overlapping.
     """
-    for fp in board.GetFootprints():
+    obstacles = _silk_obstacles(board)
+    homeless = []
+    for fp in sorted(board.GetFootprints(),
+                     key=lambda f: f.GetReference()):
         ref = fp.Reference()
-        if not ref.IsVisible():
+        if not ref.IsVisible() or ref.GetLayer() != pcbnew.F_SilkS:
             continue
-        pos = ref.GetPosition()
-        x = pcbnew.ToMM(pos.x)
-        y = pcbnew.ToMM(pos.y)
-        if abs(x) > half_w - 1.0 or abs(y) > half_h - 1.0:
-            ref.SetPosition(fp.GetPosition())
+        ref.SetTextAngle(pcbnew.EDA_ANGLE(0, pcbnew.DEGREES_T))
+        ref.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(SILK_HEIGHT),
+                                        pcbnew.FromMM(SILK_HEIGHT)))
+        ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
+        x0, y0, x1, y1 = _box_mm(ref.GetBoundingBox())
+        half_tw, half_th = (x1 - x0) / 2.0, (y1 - y0) / 2.0
+        fx0, fy0, fx1, fy1 = _box_mm(fp.GetBoundingBox(False, False))
+        cx, cy = (fx0 + fx1) / 2.0, (fy0 + fy1) / 2.0
+
+        seats = [(pcbnew.ToMM(ref.GetPosition().x),
+                  pcbnew.ToMM(ref.GetPosition().y))]
+        seats += _silk_seats(cx, cy, (fx1 - fx0) / 2.0, (fy1 - fy0) / 2.0,
+                             half_tw, half_th)
+
+        for sx, sy in seats:
+            rect = (sx - half_tw, sy - half_th, sx + half_tw, sy + half_th)
+            if (abs(rect[0]) > half_w - 0.4 or abs(rect[2]) > half_w - 0.4
+                    or abs(rect[1]) > half_h - 0.4 or abs(rect[3]) > half_h - 0.4):
+                continue
+            if any(_rects_overlap(rect, other, SILK_GAP) for other in obstacles):
+                continue
+            ref.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(sx), pcbnew.FromMM(sy)))
+            obstacles.append(rect)
+            break
+        else:
+            homeless.append(fp.GetReference())
+    if homeless:
+        print(f"silk: no clear seat for {', '.join(homeless)}")
+    return homeless
 
 
 def dash_keepout_circles(text):
@@ -616,7 +753,7 @@ def dash_keepout_circles(text):
 
 
 def patch_saved_board(pcb):
-    """Add what the SWIG API cannot: the stackup and a USB 90 ohm net class.
+    """Add what the SWIG API cannot: the stackup and the title block.
 
     pcbnew's Python bindings expose no writable stackup descriptor, so the
     physical layer numbers are injected into the saved file instead. The
@@ -633,7 +770,7 @@ def patch_saved_board(pcb):
         '\t(title_block\n'
         '\t\t(title "pixel-snap-voice recorder")\n'
         '\t\t(comment 1 "4-layer 0.8 mm ENIG. Origin = Pixelsnap magnet centre.")\n'
-        f'\t\t(comment 2 "USB D+/D- differential target {pcb["usb_diff_ohm"]} ohm.")\n'
+        f'\t\t(comment 2 "USB D+/D- is a tight pair, not impedance controlled: {pcb["usb_signalling"]}.")\n'
         '\t\t(comment 3 "First-pass placement from generate_pcb.py. Not routed.")\n'
         '\t)\n'
     )
