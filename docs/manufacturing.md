@@ -11,6 +11,9 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Thickness | 0.8 mm (`params.json`). 1.6 mm only if a later envelope check still passes |
 | Finish | ENIG (USB-C and fine pitch) |
 | Impedance | None. Do not order the controlled-impedance option. USB is full speed only, so D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch over In1 GND (~75 Ω). Reasoning in `hardware/kicad/README.md` |
+| Min trace / space | 0.15 mm. Inside standard capability, so no fine-line surcharge |
+| Via | 0.6 mm pad on a 0.3 mm drill, one size everywhere. 0.3 mm is JLC's preferred hole, so no small-via surcharge — do not let a re-route drop below it |
+| Silkscreen | Standard font, 1.0 mm characters on a 0.15 mm stroke. Not the high-precision option |
 | Assembly | JLCPCB SMT, LCSC Basic where possible |
 | Panel | Single board is fine for a one-off |
 

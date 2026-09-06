@@ -26,6 +26,24 @@ Sheets: `mcu_usb`, `audio`, `power`, `io` (global labels join them). Pin map: [`
 
 Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is still an invented land pattern, so that first condition is not met yet.
 
+## Design rules
+
+The board is checked against JLCPCB's published standard 4-layer FR-4 capability rather than a set of house numbers, so a green DRC means the fab can build it. Global floors are `DESIGN_RULES` in [`recorder/generate_pcb.py`](recorder/generate_pcb.py); each entry names the JLC figure it comes from and says where it is deliberately tighter. Two checks depend on what kind of item is involved and cannot be a single global minimum, so they live in [`recorder/recorder.kicad_dru`](recorder/recorder.kicad_dru): pad hole-to-hole spacing (0.45 mm) and minimum non-plated hole (0.5 mm).
+
+What the board actually holds, against what JLC allows:
+
+| | Board | JLC standard |
+| --- | --- | --- |
+| Track width | 0.15 mm | 0.1016 mm |
+| Via | 0.6 mm on a 0.3 mm drill | 0.25 mm on 0.15 mm |
+| Pad hole-to-hole | 0.62 mm | 0.45 mm |
+| Via hole-to-hole | 0.30 mm | 0.20 mm |
+| Hole to copper | 0.30 mm | 0.20 mm |
+| Copper to routed edge | 0.30 mm | 0.20 mm |
+| Silk text | 1.0 mm on a 0.15 mm stroke | 1.0 mm on 0.15 mm |
+
+Hole-to-copper is held at 0.3 mm rather than JLC's 0.2 mm because non-plated holes carry a ±0.2 mm diameter tolerance: a 1.7 mm mounting hole can come back 0.1 mm larger in radius and eat the difference. The same margin is what forced MK1's ring pad outward, since the stock Infineon land leaves only 0.18 mm to the sound port.
+
 ## Stackup (JLC 4-layer 0.8 mm)
 
 | Layer | Role | Copper |
@@ -52,7 +70,7 @@ The pair is long for USB — 45.8 mm on D+, 44.2 mm on D−, 1.65 mm skew (~11 p
 - MINI-1U module (15.4 × 15.4 mm). No PCB-antenna keepout. IPEX unpopulated
 - 4× M1.6 holes. No fiducials on this first pass.
 
-Gerbers: `fab/` after `scripts/check_gates.py`, which runs `kicad-cli pcb drc` first and then writes the Gerbers, both drill files, the pick-and-place CSV and `recorder-jlc.zip` in one pass from `recorder.kicad_pcb`. Do not hand-export only part of that set: a drill file that does not match the copper is a scrap board.
+Gerbers: `fab/` after `scripts/check_gates.py`, which runs `kicad-cli pcb drc` first and then writes the Gerbers, both drill files, the pick-and-place CSV and `recorder-jlc.zip` in one pass from `recorder.kicad_pcb`. Do not hand-export only part of that set: a drill file that does not match the copper is a scrap board. The gate runs DRC at every severity and with `--schematic-parity`, then runs it again with `--refill-zones` and refuses to plot if the answers differ — `kicad-cli` plots the fill stored in the board, so a stale pour would ship while DRC quietly refilled and passed it.
 
 Open `recorder/recorder.kicad_pro` in KiCad 10. ERC/DRC in KiCad is the last human glance. The Python checks are the repo gate.
 
