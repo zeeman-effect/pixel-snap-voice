@@ -1,12 +1,93 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-09-06T18:38:30 **
-** Report includes: Errors **
+** Created on 2026-09-06T19:12:16 **
+** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 0 Footprint errors **
+** Found 27 Footprint errors **
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(9.2500 mm, -41.6450 mm): Pad A8 [unconnected-(J2-SBU1-PadA8)] of J2 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(6.2500 mm, -41.6450 mm): Pad B8 [unconnected-(J2-SBU2-PadB8)] of J2 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(7.0000 mm, -18.8500 mm): Pad 7 [unconnected-(U1-IO3-Pad7)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(15.7000 mm, -11.0000 mm): Pad 25 [unconnected-(U1-IO21-Pad25)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(16.5500 mm, -11.0000 mm): Pad 26 [unconnected-(U1-IO26-Pad26)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(17.4000 mm, -11.0000 mm): Pad 27 [unconnected-(U1-IO47-Pad27)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(18.2500 mm, -11.0000 mm): Pad 28 [unconnected-(U1-IO33-Pad28)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(19.1000 mm, -11.0000 mm): Pad 29 [unconnected-(U1-IO34-Pad29)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(19.9500 mm, -11.0000 mm): Pad 30 [unconnected-(U1-IO48-Pad30)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -12.0500 mm): Pad 31 [unconnected-(U1-IO35-Pad31)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -12.9000 mm): Pad 32 [unconnected-(U1-IO36-Pad32)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -13.7500 mm): Pad 33 [unconnected-(U1-IO37-Pad33)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -14.6000 mm): Pad 34 [unconnected-(U1-IO38-Pad34)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -15.4500 mm): Pad 35 [unconnected-(U1-IO39-Pad35)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -16.3000 mm): Pad 36 [unconnected-(U1-IO40-Pad36)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -17.1500 mm): Pad 37 [unconnected-(U1-IO41-Pad37)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -18.0000 mm): Pad 38 [unconnected-(U1-IO42-Pad38)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -20.5500 mm): Pad 41 [unconnected-(U1-IO45-Pad41)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.0000 mm, -23.1000 mm): Pad 44 [unconnected-(U1-IO46-Pad44)] of U1 on F.Cu
+[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: '15 x 11 mm speaker, placeholder footprint', Schematic: '')
+    Local override; warning
+    @(-4.0000 mm, 32.0000 mm): Footprint SP1
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(-4.8625 mm, -38.5500 mm): Pad 4 [unconnected-(U4-NC-Pad4)] of U4 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(-17.1375 mm, -38.5500 mm): Pad 3 [unconnected-(U5-~{FLG}-Pad3)] of U5 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(27.1375 mm, 31.9500 mm): Pad 4 [unconnected-(U8-NC-Pad4)] of U8 on F.Cu
+[extra_footprint]: Extra footprint
+    Local override; warning
+    @(-28.5000 mm, -39.5000 mm): Footprint H1
+[extra_footprint]: Extra footprint
+    Local override; warning
+    @(-28.5000 mm, 39.5000 mm): Footprint H3
+[extra_footprint]: Extra footprint
+    Local override; warning
+    @(28.5000 mm, -39.5000 mm): Footprint H2
+[extra_footprint]: Extra footprint
+    Local override; warning
+    @(28.5000 mm, 39.5000 mm): Footprint H4
 
 ** Ignored checks **
     - Footprint has no courtyard defined

@@ -6,4 +6,4 @@ Contents: Gerbers, PTH/NPTH Excellon drills and their map PDFs, `recorder-pos.cs
 
 Never hand-export part of this set. These files only mean anything together: an earlier version of the gate script refreshed the Gerbers but left the drill file at whatever date it was committed with, which described a board with none of its vias drilled.
 
-JLC order: 4-layer, 0.8 mm, ENIG. **No controlled impedance** — USB here is full speed and the pair is deliberately uncontrolled. See `hardware/kicad/README.md`.
+JLC order: 4-layer, 0.8 mm, ENIG. **No controlled impedance** — USB here is full speed and the pair is deliberately uncontrolled. Everything else is standard capability too: 0.15 mm minimum trace, 0.6 mm vias on a 0.3 mm drill, standard-font silkscreen. Nothing here should trigger a fine-line, small-via or high-precision-legend surcharge. See `hardware/kicad/README.md`.
