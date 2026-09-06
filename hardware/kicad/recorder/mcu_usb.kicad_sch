@@ -4082,6 +4082,17 @@
 		(effects (font (size 1.27 1.27)) (justify right))
 		(uuid "41beb98a-e380-512a-83dd-e43edfcee14d")
 	)
+	(wire
+		(pts (xy 257.62 112.86) (xy 257.62 120.48))
+		(stroke (width 0) (type default))
+		(uuid "e866a53f-623a-597b-a885-73d4e8e5fe2a")
+	)
+	(global_label "GND"
+		(shape input)
+		(at 257.62 120.48 270)
+		(effects (font (size 1.27 1.27)) (justify right))
+		(uuid "80dbd816-d3b0-57a9-863e-bb91769b0ae9")
+	)
 	(no_connect
 		(at 234.76 102.70)
 		(uuid "5878a83d-6f24-5957-b215-8accdb074c36")
@@ -4089,10 +4100,6 @@
 	(no_connect
 		(at 234.76 105.24)
 		(uuid "68ff8f09-fbaa-5b7c-a857-4e727d8d58c2")
-	)
-	(no_connect
-		(at 257.62 112.86)
-		(uuid "1a8ced90-f2b7-57fb-9592-948c92584f22")
 	)
 	(symbol
 		(lib_id "Power_Protection:USBLC6-2P6")

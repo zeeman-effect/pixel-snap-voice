@@ -851,18 +851,18 @@
   ],
   "routing": {
     "router": "freerouting headless via Specctra DSN/SES, then plane stitching and pours from route_pcb.py",
-    "tracks": 694,
-    "vias": 198,
-    "track_length_mm": 1932.6,
+    "tracks": 696,
+    "vias": 187,
+    "track_length_mm": 1939.7,
     "zones": [
-      "GND_In1",
-      "VDD33_In2",
-      "GND_B",
       "GND_F",
       "AGND_F",
+      "VDD33_F_C14",
       "VDD33_F_C1C3",
       "VDD33_F_C8",
-      "VDD33_F_C14"
+      "GND_B",
+      "GND_In1",
+      "VDD33_In2"
     ],
     "unconnected_items": 0,
     "drc_errors": 0,

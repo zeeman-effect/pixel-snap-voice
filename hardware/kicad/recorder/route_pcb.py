@@ -1109,6 +1109,71 @@ def usb_escape(board, obstacles):
         pcbnew.B_Cu, USB_WIDTH)
 
 
+# Lanes for the long haul from the connector up to the MCU. U1's USB pads sit
+# on the module's top row, the far side of a 15.9 mm module from J2, and the
+# castellations either side leave 0.05 mm between pads, so nothing crosses the
+# footprint. The pair goes up the 3.3 mm channel between J1 and U1 instead.
+USB_PAIR_PITCH = 0.40
+# Far enough west of U1's castellations to leave a 1.3 mm gap. The module's
+# corner GND pad only reaches the plane through a stitching via dropped in
+# that gap, and lanes any closer pinch the F.Cu pour into an island with
+# nowhere to put one.
+USB_DP_LANE = 4.80
+USB_DM_LANE = 5.20
+USB_DP_ROW = -9.85
+USB_DM_ROW = -10.25
+USB_BCU_LINK_Y = -36.90
+USB_F_LINK_Y = -36.00
+
+
+def usb_pair_to_mcu(board, obstacles):
+    """Carry D+/D- from the connector escape to U1 as one coupled pair.
+
+    Left to itself the autorouter sent D+ on a 16.6 mm diagonal across B.Cu.
+    B.Cu is the face that lies against the phone and is otherwise a solid GND
+    pour, so that slotted the shield and put a USB line right against the
+    handset with nothing between them.
+
+    The fix is topological. Both nets already surface west of J2 on their own
+    link -- D- on F.Cu at y = -36.0, D+ on B.Cu at y = -36.9 -- so extending
+    those two links westwards drops each net into its own lane with no
+    crossing anywhere. U7 then hangs off the lanes as a short stub rather than
+    sitting in series. That costs nothing: the array is a shunt TVS, it clamps
+    to GND from the line wherever it is tapped, and 5 mm of stub is invisible
+    at full-speed edge rates.
+
+    Lanes are 0.4 mm apart, 0.05 mm wider than the netclass diff-pair gap, so
+    the corners where one lane turns and the other runs past still hold
+    clearance with margin.
+    """
+    dp, dm = net_of(board, "USB_DP"), net_of(board, "USB_DM")
+
+    def run(net, points, layer):
+        for (x0, y0), (x1, y1) in zip(points, points[1:]):
+            add_track(board, net, x0, y0, x1, y1, layer, USB_WIDTH, protect=True)
+            obstacles.add_track(x0, y0, x1, y1, USB_WIDTH, net.GetNetCode(), layer)
+
+    # D+ reaches its lane on the B.Cu link it already uses to join its two
+    # connector contacts, so the only new copper below the board is 2.45 mm.
+    run(dp, [(J2_FAN["A6"], USB_BCU_LINK_Y), (USB_DP_LANE, USB_BCU_LINK_Y)],
+        pcbnew.B_Cu)
+    add_via(board, dp, USB_DP_LANE, USB_BCU_LINK_Y, protect=True)
+    obstacles.add_via(USB_DP_LANE, USB_BCU_LINK_Y, dp.GetNetCode())
+    run(dp, [(USB_DP_LANE, USB_BCU_LINK_Y), (USB_DP_LANE, USB_DP_ROW),
+             (14.85, USB_DP_ROW), (14.85, -11.00)], pcbnew.F_Cu)
+
+    # D- stays on F.Cu the whole way.
+    run(dm, [(J2_FAN["B7"], USB_F_LINK_Y), (USB_DM_LANE, USB_F_LINK_Y),
+             (USB_DM_LANE, USB_DM_ROW), (14.00, USB_DM_ROW), (14.00, -11.00)],
+        pcbnew.F_Cu)
+
+    # Tap each lane sideways into the ESD array, and bridge its two pads.
+    run(dm, [(USB_DM_LANE, -30.05), (6.862, -30.05), (9.137, -30.05)],
+        pcbnew.F_Cu)
+    run(dp, [(9.20, USB_BCU_LINK_Y), (9.20, -31.95), (6.862, -31.95)],
+        pcbnew.F_Cu)
+
+
 # ---------------------------------------------------------------------------
 # Fine-pitch fanout
 # ---------------------------------------------------------------------------
@@ -1513,6 +1578,9 @@ def drop_dangling_vias(board):
                 doomed.append(obj)
     if not doomed:
         return 0
+    before = drc_json(PCB)
+    before_score = (len(before.get("violations", [])),
+                    len(before.get("unconnected_items", [])))
     with open(PCB, "rb") as fh:
         backup = fh.read()
     for via in doomed:
@@ -1520,7 +1588,9 @@ def drop_dangling_vias(board):
     fill_zones(board)
     save(board)
     after = drc_json(PCB)
-    if after.get("unconnected_items") or after.get("violations"):
+    after_score = (len(after.get("violations", [])),
+                   len(after.get("unconnected_items", [])))
+    if after_score > before_score:
         # A via the checker called dangling was load bearing after all.
         print("  dangling-via cleanup broke connectivity, keeping them")
         with open(PCB, "wb") as fh:
@@ -1657,6 +1727,7 @@ def stage_planes(dsn_path):
     obstacles = Obstacles(board, half_w, half_h)
     print("hand-routing the USB-C D+/D- escape")
     usb_escape(board, obstacles)
+    usb_pair_to_mcu(board, obstacles)
     stubs, vias = fanout_fine_pitch(board, obstacles)
     print(f"fine-pitch fanout: {stubs} stubs, {vias} vias")
     print(f"protected {relock(board)} hand-routed items from the autorouter")

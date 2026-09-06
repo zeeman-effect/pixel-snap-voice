@@ -15,12 +15,32 @@ import uuid
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-KICAD_SYM = Path(
-    os.environ.get(
-        "KICAD_SYMBOL_DIR",
-        str(Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "KiCad" / "10.0" / "share" / "kicad" / "symbols"),
+
+
+def _system_symbol_dir() -> Path:
+    """Where KiCad 10 keeps its shipped .kicad_sym files on this machine.
+
+    This used to assume the Windows install path, so the script only ran on
+    one laptop and died with a FileNotFoundError anywhere else.
+    """
+    env = os.environ.get("KICAD_SYMBOL_DIR")
+    candidates = [Path(env)] if env else []
+    candidates += [
+        Path("/usr/share/kicad/symbols"),
+        Path("/usr/local/share/kicad/symbols"),
+        Path(os.environ.get("LOCALAPPDATA", ""))
+        / "Programs" / "KiCad" / "10.0" / "share" / "kicad" / "symbols",
+        Path(r"C:\Program Files\KiCad\10.0\share\kicad\symbols"),
+    ]
+    for path in candidates:
+        if path.is_dir():
+            return path
+    raise SystemExit(
+        "cannot find the KiCad 10 symbol libraries. Set KICAD_SYMBOL_DIR."
     )
-)
+
+
+KICAD_SYM = _system_symbol_dir()
 SCH_VER = 20260306
 ROOT_UUID = "a1b0c3d4-e5f6-4789-a012-3456789abcde"
 STUB_MM = 7.62
@@ -570,6 +590,11 @@ def build() -> None:
         ("A12", "GND", "j2-a12"),
         ("B1", "GND", "j2-b1"),
         ("B12", "GND", "j2-b12"),
+        # The shell was a no-connect, which left the four retention tabs on a
+        # placeholder net that DRC then wanted joined to each other. Grounding
+        # it is what the shell wants anyway: it is the return path for the
+        # cable braid, and the tabs are the connector's mechanical anchors.
+        ("SH", "GND", "j2-sh"),
     ):
         if num in usb_pins:
             j2_end[num] = stub(mcu, jx, jy, usb_pins, num, net, ident, mirror="y")
