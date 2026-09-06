@@ -38,7 +38,7 @@
     "finish": "ENIG",
     "usb_diff_ohm": null,
     "usb_signalling": "USB 2.0 full speed, 12 Mbps",
-    "usb_diff_note": "Not impedance controlled, on purpose. The ESP32-S3 USB-OTG peripheral is full speed only (12 Mbps, no high-speed PHY: Espressif's USB overview table marks ESP32-S3 'USB OTG High-Speed = X'). F.Cu sits 0.1 mm above the In1 GND plane in this stackup, where a 90 ohm differential pair would need roughly 0.06 mm traces, well under the 0.127 mm any quick-turn fab will run. Rather than thicken the prepreg for a requirement the silicon does not have, D+/D- run as a tight 0.2 mm / 0.15 mm pair over solid In1 GND, under 20 mm from J2 to U1 through U7. That geometry lands near 70 ohm differential, which is electrically short at full-speed edge rates."
+    "usb_diff_note": "Not impedance controlled, on purpose. The ESP32-S3 USB-OTG peripheral is full speed only (12 Mbps, no high-speed PHY: Espressif's USB overview table marks ESP32-S3 'USB OTG High-Speed = X'). F.Cu sits 0.1 mm above the In1 GND plane in this stackup, where a 90 ohm differential pair would need roughly 0.06 mm traces, well under the 0.127 mm any quick-turn fab will run. Rather than thicken the prepreg for a requirement the silicon does not have, D+/D- run as a 0.2 mm pair on a 0.4 mm pitch over solid In1 GND, which is near 75 ohm differential by first-order microstrip. The run is long for a USB pair (45.8 mm on D+, 44.2 mm on D-, 1.65 mm skew) because U1's USB pads are on the module's top row, the far side of a 15.9 mm module from the connector, and its castellations leave 0.05 mm between pads so nothing crosses the footprint. At full-speed edge rates 45 mm is still electrically short and the skew is about 11 ps."
   },
   "connectors": {
     "usb_edge": "bottom",

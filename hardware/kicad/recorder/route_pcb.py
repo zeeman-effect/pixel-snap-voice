@@ -1644,13 +1644,41 @@ ROUTED_OPEN_ITEMS = [
     "SW1 is a top-actuated PTS645. The case still needs a lever over the "
     "plunger, or the part has to change to a side-actuated switch. This is a "
     "case job, not a board job: the footprint and its routing are done.",
-    "Silkscreen: kicad-cli reports silk-over-pad and silk-overlap warnings on "
-    "the tightly packed designators. Cosmetic only, no copper impact, and "
-    "left alone so the reference designators stay readable for hand rework.",
+    "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB "
+    "peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would "
+    "need traces narrower than any quick-turn fab will run. The pair is "
+    "0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm "
+    "differential by first-order microstrip. Re-check if v2 ever needs "
+    "high-speed USB, which would mean a thicker top prepreg.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
 ]
+
+
+def usb_summary(board):
+    """Measure the pair, so the documented geometry cannot drift from copper."""
+    out = {}
+    for name in ("USB_DP", "USB_DM"):
+        per_layer = collections.Counter()
+        vias = 0
+        for track in board.GetTracks():
+            if track.GetNetname() != name:
+                continue
+            if isinstance(track, pcbnew.PCB_VIA):
+                vias += 1
+            else:
+                per_layer[board.GetLayerName(track.GetLayer())] += \
+                    pcbnew.ToMM(track.GetLength())
+        out[name] = {
+            "copper_mm": {k: round(v, 2) for k, v in sorted(per_layer.items())},
+            "vias": vias,
+        }
+    out["geometry"] = (
+        f"{USB_WIDTH} mm traces on a {USB_PAIR_PITCH} mm pitch, F.Cu over the "
+        "solid In1 GND plane, not impedance controlled (full-speed only)"
+    )
+    return out
 
 
 def update_placement_open_items(board, unconnected, violations):
@@ -1671,6 +1699,7 @@ def update_placement_open_items(board, unconnected, violations):
         "zones": [z.GetZoneName() for z in board.Zones()],
         "unconnected_items": unconnected,
         "drc_errors": violations,
+        "usb": usb_summary(board),
         "note": "Re-run: python3 hardware/kicad/recorder/route_pcb.py",
     }
     data["open_items"] = list(ROUTED_OPEN_ITEMS)
@@ -1852,7 +1881,11 @@ def main():
 
     if "--finish-only" in argv:
         board, half_w, half_h = load()
-        board, homeless = finish(board, half_w, half_h)
+        board, _ = finish(board, half_w, half_h)
+        data = drc_json(PCB)
+        update_placement_open_items(board,
+                                    len(data.get("unconnected_items", [])),
+                                    len(data.get("violations", [])))
         report(board)
         return
 

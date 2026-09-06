@@ -10,7 +10,7 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Layers | 4 (F.Cu, In1.Cu, In2.Cu, B.Cu) |
 | Thickness | 0.8 mm (`params.json`). 1.6 mm only if a later envelope check still passes |
 | Finish | ENIG (USB-C and fine pitch) |
-| Impedance | USB 2.0 D+/D− ~90 Ω differential; document stackup in KiCad |
+| Impedance | None. Do not order the controlled-impedance option. USB is full speed only, so D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch over In1 GND (~75 Ω). Reasoning in `hardware/kicad/README.md` |
 | Assembly | JLCPCB SMT, LCSC Basic where possible |
 | Panel | Single board is fine for a one-off |
 

@@ -50,12 +50,14 @@ Update this section when it stops being true.
 - Phase 0 ESP-IDF app is in `firmware/` (Korvo-2 / ESP-BOX / custom pin maps). CAD is in `hardware/cad` (`params.json` + `case.scad`, draft PETG).
 - Product KiCad is `hardware/kicad/recorder/` (open `recorder.kicad_pro`). Sheets come from `generate_recorder.py`. The board file is `recorder.kicad_pcb`. Footprint XY is `hardware/kicad/recorder/placement.json`.
 - The PETG tray ducts MK1's B.Cu NPTH under the board to the right-wall mic port. MK1 is on F.Cu.
-- The board has Edge.Cuts, H1–H4, and copper pours. Signals are still open. That is the next design job, not a reason to stop.
+- **The board is routed.** 696 tracks, 187 vias, ~1940 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
+- USB D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch, **not** impedance controlled: the ESP32-S3 is full speed only. Do not order the controlled-impedance option. Reasoning in `hardware/kicad/README.md`.
 - Current pouch size is 500 mAh from leftover CAD volume.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
+- SP1 is still an invented 15 × 11 mm land. It is DRC clean and routed, but nobody has picked a real speaker yet.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 
-Do not send Gerbers until `python scripts/check_gates.py` is clean **and** `kicad-cli` wrote `hardware/kicad/fab/` from `recorder.kicad_pcb` **and** `kicad-cli pcb drc` is clean. Those are ship gates. They are not a reason to leave the board unedited.
+`python scripts/check_gates.py` is the ship gate and it now does the whole job itself: it runs `check_placement.py` when `pcbnew` is importable, runs `kicad-cli pcb drc`, and then writes Gerbers, both drill files, the pick-and-place CSV and `recorder-jlc.zip` from `recorder.kicad_pcb` in one pass. Do not hand-export part of that set — a drill file that does not match the copper is a scrap board. The one thing still between here and an order is a real speaker part number for SP1.
 
 ## How to change the hardware
 
@@ -67,7 +69,7 @@ Close KiCad before running the generators. Lock files look like `~recorder.kicad
 | Footprint XY | `placement.json` and `recorder.kicad_pcb` together | Keep them twins. Also update `hardware/cad/params.json` / `case.scad` if a wall cut or pocket moves. |
 | A clean placement rebuild | `generate_pcb.py` (KiCad 10 `python.exe`, not system Python) | This **wipes** copper. Re-pour planes and re-route after. Do not run it as a status check. |
 | Planes | `route_pcb.py --planes-only` (same KiCad interpreter) | Loads the existing board. Does not move parts. |
-| Signal traces | `recorder.kicad_pcb` (KiCad, `route_pcb.py`, or both) | The script autorouter is experimental. Use it as a start if it helps, then fix what DRC and a glance say is wrong. Do not refuse to route. |
+| Signal traces | `recorder.kicad_pcb` (KiCad, `route_pcb.py`, or both) | `route_pcb.py` with no flag clears copper, hand-routes and locks the awkward parts, then drives freerouting and repairs until DRC is clean. `--finish-only` just drops stub vias, re-seats silk and refreshes `placement.json`. |
 | Envelope / case | `params.json`, `params.scad`, `case.scad` | `python hardware/cad/check_envelope.py` |
 | GPIO map | `hardware/kicad/pins.py`, `firmware/boards/custom.h`, and `pinmap.md` | `check_pins.py` is a consistency check. Change all three. |
 | MCU SKU | `params.json` `mcu` | Update schematic sources and regenerate sheets. |

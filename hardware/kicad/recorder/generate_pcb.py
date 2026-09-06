@@ -90,12 +90,14 @@ DESIGN_RULES = {
     "min_via_annular_width": 0.1,
 }
 
-# USB_DP / USB_DM are a tightly coupled pair, not an impedance-matched one.
-# See the usb_impedance note in placement.json: the ESP32-S3's USB is
-# full speed only, so 90 ohm control buys nothing on a 0.1 mm prepreg.
+# USB_DP / USB_DM are a coupled pair, not an impedance-matched one. See
+# usb_diff_note in hardware/cad/params.json: the ESP32-S3's USB is full speed
+# only, so 90 ohm control buys nothing on a 0.1 mm prepreg. The 0.2 mm gap is
+# what route_pcb.py actually lays, chosen over the 0.15 mm minimum so the
+# corners where one lane turns and the other runs past keep some margin.
 NET_CLASSES = {
     "Default": {"clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1},
-    "USB": {"clearance": 0.15, "track_width": 0.2, "diff_pair_width": 0.2, "diff_pair_gap": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
+    "USB": {"clearance": 0.15, "track_width": 0.2, "diff_pair_width": 0.2, "diff_pair_gap": 0.2, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
     # Charge and rail currents, up to the 500 mA the MCP73831 PROG resistor
     # sets. 0.3 mm of 1 oz outer copper carries that with room to spare.
     "POWER": {"clearance": 0.15, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
@@ -547,39 +549,23 @@ def main():
         "footprint_substitutions": {
             k: {"placed": v[0], "reason": v[1]} for k, v in SUBSTITUTIONS.items()
         },
+        # This script only ever produces a bare placement, so the first two
+        # items are always true right after it runs. route_pcb.py replaces
+        # this whole list once it has poured and routed the board.
         "open_items": [
-            "Not routed. kicad-cli pcb drc reports 184 unconnected items, which "
-            "is every ratsnest line on the board.",
+            "Not routed. This script writes placement only, so every net is "
+            "still a ratsnest line. Run route_pcb.py next.",
             "No copper pours. In1.Cu (GND) and In2.Cu (VDD33) are named and in "
-            "the stackup but carry no zones yet.",
-            "MK1 sound port. The mic is on F.Cu and its port is an NPTH through "
-            "the board, so the acoustic path currently opens on the B.Cu side, "
-            "which faces the phone. params.json says mic_faces_glass is false, "
-            "so either the case has to duct the port out to the right wall or "
-            "the mic has to move to B.Cu. Decide before routing.",
-            "U2 pad 21 (ES8311 exposed pad) has no net. The schematic symbol "
-            "has no EP pin, so the netlist never assigns it. It should be tied "
-            "to AGND with thermal vias; that needs a schematic change.",
-            "kicad-cli DRC also reports one hole-clearance error inside "
-            "Sensor_Audio:Infineon_PG-LLGA-5-2 (pad 5 sits 0.18 mm from the "
-            "port hole against a 0.25 mm rule). That is internal to the KiCad "
-            "library footprint, not a placement problem.",
-            "21 silkscreen warnings are designators overlapping neighbouring "
-            "silk and pads. Cosmetic; clean up during routing.",
+            "the stackup but carry no zones until route_pcb.py runs.",
+            "MK1 sound port. The mic is on F.Cu and its port is an NPTH "
+            "through the board, so the acoustic path opens on the B.Cu side, "
+            "which faces the phone. The PETG tray ducts it out to the right "
+            "wall; keep case.scad in step if the mic ever moves.",
             "SW1 is a top-actuated PTS645. A left-edge button needs either a "
-            "case lever over the plunger or a side-actuated switch.",
+            "case lever over the plunger or a side-actuated switch. Case job, "
+            "not a board job.",
             "SP1 uses a placeholder land pattern in PSV.pretty. Replace once a "
             "real 15 x 11 mm speaker part number is chosen.",
-            "Six schematic footprint names do not exist in KiCad 10 and were "
-            "substituted here. Fix them in generate_recorder.py so the "
-            "schematic and board agree.",
-            "USB 90 ohm is not solved. A USB net class exists and USB_DP / "
-            "USB_DM are assigned to it, but its 0.2 mm width and gap are "
-            "placeholders. F.Cu sits 0.1 mm above In1.Cu in this stackup, and "
-            "90 ohm differential over 0.1 mm of FR4 needs traces far narrower "
-            "than any quick-turn fab will run. Either thicken the top prepreg "
-            "or reference the pair differently, then re-solve with the fab's "
-            "impedance calculator before routing.",
         ],
         "parts": sorted(placed_rows, key=lambda r: r["ref"]),
     }
