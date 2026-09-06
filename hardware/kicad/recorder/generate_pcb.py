@@ -75,19 +75,39 @@ SUBSTITUTIONS = {}
 # ---------------------------------------------------------------------------
 # Fab policy. pcbnew writes recorder.kicad_pro from BOARD defaults on save and
 # generate_recorder.py rewrites the schematic half of the same file, so the
-# DRC numbers have to be re-applied from one place afterwards. These are the
-# numbers the board is designed to, and they are inside JLCPCB's standard
-# 4-layer capability (0.127 mm trace / 0.127 mm space, 0.2 mm drill).
+# DRC numbers have to be re-applied from one place afterwards.
+#
+# Every number below is JLCPCB's published standard 4-layer FR-4 capability or
+# tighter, and the comment says which. The rules KiCad cannot express as a
+# single global minimum (pad hole spacing, NPTH size) live in
+# recorder.kicad_dru so that DRC checks the fab, not just the board.
 # ---------------------------------------------------------------------------
 DESIGN_RULES = {
+    # JLC allows 0.1016 mm (4 mil) trace and space on 1 oz outer copper. Held
+    # at 5 mil so a re-route cannot quietly drift onto their fine-line pricing.
     "min_clearance": 0.127,
     "min_track_width": 0.127,
+    # JLC wants 0.2 mm copper to a routed edge. 0.3 absorbs their +/-0.2 mm
+    # routing tolerance.
     "min_copper_edge_clearance": 0.3,
-    "min_hole_clearance": 0.25,
+    # JLC wants 0.2 mm from any hole wall to copper. Non-plated holes carry a
+    # +/-0.2 mm diameter tolerance, so a 1.7 mm mounting hole can come back
+    # 0.1 mm larger in radius. 0.2 + 0.1 = 0.3 keeps the spec at worst case.
+    "min_hole_clearance": 0.3,
+    # Via hole-to-hole floor is 0.2 mm at JLC. Pads need 0.45 mm, which is a
+    # separate rule in recorder.kicad_dru because it depends on item type.
     "min_hole_to_hole": 0.25,
+    # JLC drills down to 0.15 mm on multilayer; 0.3 is their preferred size and
+    # what every via on this board uses.
     "min_through_hole_diameter": 0.3,
     "min_via_diameter": 0.45,
-    "min_via_annular_width": 0.1,
+    # Multilayer 1 oz PTH annular ring: 0.20 mm recommended, 0.15 mm absolute.
+    # Every via here is 0.6/0.3, so 0.15 mm per side is what the board holds.
+    "min_via_annular_width": 0.15,
+    # Standard-font legend. JLC's capability table says characters under
+    # 1.0 mm tall or 0.15 mm wide "will be unidentifiable".
+    "min_text_height": 1.0,
+    "min_text_thickness": 0.15,
 }
 
 # USB_DP / USB_DM are a coupled pair, not an impedance-matched one. See
@@ -348,6 +368,29 @@ def add_text(board, message, x_mm, y_mm, layer, size=1.2):
     board.Add(t)
 
 
+def write_fp_lib_table(libs, path=None):
+    """List every library the board cites so KiCad can resolve the names.
+
+    Only PSV used to be in here, which was enough while the board stored bare
+    footprint names. Now that each footprint carries its library nickname,
+    anything missing from this table resolves to nothing and DRC reports it as
+    a lib_footprint_issues warning. System libraries go through
+    KICAD10_FOOTPRINT_DIR so the path works on whichever machine has KiCad.
+    """
+    path = path or os.path.join(HERE, "fp-lib-table")
+    rows = ['(fp_lib_table', '\t(version 7)']
+    for lib in sorted(libs):
+        uri = ("${KIPRJMOD}/PSV.pretty" if lib == "PSV"
+               else "${KICAD10_FOOTPRINT_DIR}/" + lib + ".pretty")
+        descr = ("Recorder land patterns KiCad 10 does not ship" if lib == "PSV"
+                 else "KiCad 10 stock library")
+        rows.append(f'\t(lib (name "{lib}")(type "KiCad")(uri "{uri}")'
+                    f'(options "")(descr "{descr}"))')
+    rows.append(')')
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(rows) + "\n")
+
+
 def resolve_footprint(fpid):
     """Return (loaded FOOTPRINT, placed fpid, substitution note or None)."""
     placed, note = SUBSTITUTIONS.get(fpid, (fpid, None))
@@ -356,6 +399,11 @@ def resolve_footprint(fpid):
     fp = pcbnew.FootprintLoad(libdir, name)
     if fp is None:
         raise SystemExit(f"could not load footprint {placed} from {libdir}")
+    # FootprintLoad takes a directory, so what comes back is stamped with the
+    # bare name. Leaving it that way makes every footprint on the board look
+    # like a different part from the one the schematic asked for, which is 57
+    # footprint_symbol_mismatch hits under kicad-cli pcb drc --schematic-parity.
+    fp.SetFPID(pcbnew.LIB_ID(lib, name))
     return fp, placed, note
 
 
@@ -438,6 +486,12 @@ def main():
         if rot:
             fp.SetOrientationDegrees(rot)
         fp.SetPath(pcbnew.KIID_PATH())
+        # The schematic decides what is on the BOM, not the land pattern. The
+        # stock SolderWire land BT1 uses is flagged out of the BOM because it
+        # is just two wire pads, which would have silently dropped the battery
+        # itself from the parts list. Pick-and-place exclusion is left alone:
+        # that one really is a property of the land.
+        fp.SetExcludedFromBOM(False)
         for pad in fp.Pads():
             name = pad_net.get((ref, pad.GetNumber()))
             if name and name in netmap:
@@ -467,6 +521,7 @@ def main():
         fp = pcbnew.FootprintLoad(LOCAL_FP, "MountingHole_1.7mm_M1.6")
         if fp is None:
             raise SystemExit("could not load PSV:MountingHole_1.7mm_M1.6")
+        fp.SetFPID(pcbnew.LIB_ID("PSV", "MountingHole_1.7mm_M1.6"))
         fp.SetReference(ref)
         fp.SetValue("M1.6 NPTH")
         fp.SetPosition(vec(x, y))
@@ -492,6 +547,8 @@ def main():
         )
 
     tuck_reference_text(board, half_w, half_h)
+    write_fp_lib_table({fp.GetFPIDAsString().split(":")[0]
+                        for fp in board.GetFootprints()})
 
     project_before = json.load(open(PROJECT, encoding="utf-8"))
 
@@ -604,10 +661,14 @@ def restore_project(before):
     apply_project_policy()
 
 
-# JLCPCB's published silkscreen floor is 0.8 mm character height and 0.15 mm
-# stroke. Library footprints ship 1.0 mm text, which on a board this dense
-# leaves no legal spot for a third of the designators.
-SILK_HEIGHT = 0.8
+# JLCPCB prints two silkscreen classes. The standard font needs 1.0 mm
+# characters on a 0.15 mm stroke; 0.8 mm is only legal on their high-precision
+# line, and their capability table warns that anything under 1.0 mm "will be
+# unidentifiable". This board is dense, so an earlier pass shrank every
+# designator to 0.8 mm to win seats. That bought placement with illegible
+# silk. Print at the standard 1.0 mm instead and let the seat search work
+# harder; a designator nobody can read is not worth the space it saves.
+SILK_HEIGHT = 1.0
 SILK_STROKE = 0.15
 SILK_GAP = 0.12
 

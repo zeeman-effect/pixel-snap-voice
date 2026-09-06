@@ -1,0 +1,25 @@
+(version 1)
+
+# JLCPCB standard 4-layer FR-4 capability, for the checks that depend on what
+# kind of item is involved and so cannot be a single global minimum in
+# recorder.kicad_pro. The global floors live in DESIGN_RULES in
+# generate_pcb.py; these two are the leftovers.
+#
+# Source: https://jlcpcb.com/capabilities/pcb-capabilities (Drilling).
+
+# JLC lists two hole-spacing floors: 0.2 mm between via holes and 0.45 mm once
+# a component pad is involved, because pad holes are drilled larger and carry a
+# +0.13 / -0.08 mm plated-hole tolerance. The 0.25 mm global minimum covers the
+# via case; this covers the pad case. Designed spacing has to beat 0.45 mm by
+# more than the tolerance, so aim for 0.6 mm and let this rule catch drift.
+(rule "JLC pad hole-to-hole spacing"
+	(constraint hole_to_hole (min 0.45mm))
+	(condition "A.Type == 'Pad' || B.Type == 'Pad'"))
+
+# JLC will not drill a non-plated hole under 0.5 mm. H1-H4 are 1.7 mm, the two
+# J2 board locks are 0.65 mm and the MK1 sound port is 0.8 mm, so this rule is
+# headroom rather than a live constraint. It exists so shrinking the mic port
+# or the connector locks fails DRC instead of failing at the fab.
+(rule "JLC non-plated hole minimum size"
+	(constraint hole_size (min 0.5mm))
+	(condition "A.Pad_Type == 'NPTH, mechanical'"))
