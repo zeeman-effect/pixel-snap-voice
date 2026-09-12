@@ -105,12 +105,15 @@ def write_cpl(board, placed):
         x = round(pcbnew.ToMM(fp.GetPosition().x), 4)
         y = -round(pcbnew.ToMM(fp.GetPosition().y), 4)
         rot = round(fp.GetOrientationDegrees()) % 360
+        side = "top" if fp.GetLayer() == pcbnew.F_Cu else "bottom"
         pos_x, pos_y = float(row["PosX"]), float(row["PosY"])
         pos_rot = round(float(row["Rot"])) % 360
-        if abs(pos_x - x) > 0.01 or abs(pos_y - y) > 0.01 or pos_rot != rot:
+        pos_side = row["Side"].strip().lower()
+        if (abs(pos_x - x) > 0.01 or abs(pos_y - y) > 0.01
+                or pos_rot != rot or pos_side != side):
             drifted.append(
-                f"{ref}: pos ({pos_x},{pos_y},{pos_rot}) vs "
-                f"board ({x},{y},{rot})")
+                f"{ref}: pos ({pos_x},{pos_y},{pos_rot},{pos_side}) vs "
+                f"board ({x},{y},{rot},{side})")
     if drifted:
         raise SystemExit(
             "hardware/kicad/fab/recorder-pos.csv is stale; its refs match "
