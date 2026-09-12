@@ -28,7 +28,7 @@ Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb 
 
 ## Design rules
 
-The board is checked against JLCPCB's published standard 4-layer FR-4 capability rather than a set of house numbers, so a green DRC means the fab can build it. Global floors are `DESIGN_RULES` in [`recorder/generate_pcb.py`](recorder/generate_pcb.py); each entry names the JLC figure it comes from and says where it is deliberately tighter. Two checks depend on what kind of item is involved and cannot be a single global minimum, so they live in [`recorder/recorder.kicad_dru`](recorder/recorder.kicad_dru): pad hole-to-hole spacing (0.45 mm) and minimum non-plated hole (0.5 mm).
+The board is checked against JLCPCB's published standard 4-layer FR-4 capability rather than a set of house numbers, so a green DRC means the fab can build it. Global floors are `DESIGN_RULES` in [`recorder/generate_pcb.py`](recorder/generate_pcb.py); each entry names the JLC figure it comes from and says where it is deliberately tighter. Two checks depend on what kind of item is involved and cannot be a single global minimum, so they live in [`recorder/recorder.kicad_dru`](recorder/recorder.kicad_dru): pad hole-to-hole spacing at 0.6 mm (JLC's floor is 0.45 mm; 0.6 mm keeps the plated-hole tolerance) and minimum non-plated hole (0.5 mm).
 
 What the board actually holds, against what JLC allows:
 
