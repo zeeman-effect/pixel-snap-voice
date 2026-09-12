@@ -186,13 +186,27 @@ def export_fab(kicad: Path) -> None:
     disk predated the routed board and had no 0.3 mm tool in it, so the
     package described a board with none of its vias drilled. Everything the
     fab reads is now written in one pass from one board file.
+
+    That now includes the two assembly CSVs. docs/manufacturing.md tells you
+    to upload them beside the Gerbers and they were hand-typed, so four
+    decoupling capacitors still sat at their pre-route coordinates and SW1
+    named a land the board had stopped using. Half a fresh package is worse
+    than none, so a missing pcbnew stops the export instead of writing
+    Gerbers that no longer agree with the CSVs next to them.
     """
     drc_gate(kicad)
+    if not has_pcbnew():
+        raise SystemExit(
+            "no pcbnew in this interpreter, so hardware/kicad/jlcpcb_bom.csv "
+            "and jlcpcb_cpl.csv cannot be rewritten from the board and would "
+            "not match the Gerbers. On Windows, run this with KiCad 10's "
+            "python.exe.")
     run([str(kicad), "pcb", "export", "gerbers", "-o", str(FAB), str(PCB)])
     run([str(kicad), "pcb", "export", "drill", "--generate-map",
          "--excellon-separate-th", "-o", str(FAB) + os.sep, str(PCB)])
     run([str(kicad), "pcb", "export", "pos", "--format", "csv", "--units", "mm",
          "-o", str(FAB / "recorder-pos.csv"), str(PCB)])
+    run([sys.executable, str(RECORDER / "generate_jlc.py")])
 
     # JLCPCB wants the layers and the drills in one archive. Fab/courtyard and
     # the user layers are internal documentation, so they stay out of it.

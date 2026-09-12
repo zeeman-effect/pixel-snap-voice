@@ -264,6 +264,15 @@ PLACEMENT = {
     "C20": (-16.0, 26.0, 0, "VBAT bulk at the cell"),
 }
 
+# JLCPCB's SMT line places surface-mount parts only, so a through-hole part
+# left in the pick-and-place file is a feeder the machine cannot fill. BT1's
+# SolderWire land already carries the flag; J1's stock header land does not,
+# because a 2.54 mm header is normally machine-placed. This one is not: it is
+# the bring-up UART, soldered by hand and clipped off afterwards.
+NO_PICK_AND_PLACE = {
+    "J1": "2.54 mm UART header, hand-soldered at bring-up",
+}
+
 MOUNTING_HOLES = [
     ("H1", -28.5, -39.5),
     ("H2", 28.5, -39.5),
@@ -472,9 +481,10 @@ def main():
         # The schematic decides what is on the BOM, not the land pattern. The
         # stock SolderWire land BT1 uses is flagged out of the BOM because it
         # is just two wire pads, which would have silently dropped the battery
-        # itself from the parts list. Pick-and-place exclusion is left alone:
-        # that one really is a property of the land.
+        # itself from the parts list.
         fp.SetExcludedFromBOM(False)
+        if ref in NO_PICK_AND_PLACE:
+            fp.SetExcludedFromPosFiles(True)
         for pad in fp.Pads():
             name = pad_net.get((ref, pad.GetNumber()))
             if name and name in netmap:

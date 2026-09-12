@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-09-12T15:47:10")
+		(date "2026-09-12T15:49:22")
 		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
 		(sheet
 			(number "1")

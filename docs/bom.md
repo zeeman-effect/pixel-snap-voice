@@ -3,6 +3,8 @@
 Quantities are for **one** device plus a few passives of margin. Prefer JLCPCB SMT / LCSC Basic. Do not design around **INMP441** (EOL).
 
 LCSC numbers below were captured from the public catalog (Aug 2026). Re-check stock and Basic vs Extended before the SMT order.
+
+The LCSC column of the **Electrical** table is the only place order codes are typed. `hardware/kicad/recorder/generate_jlc.py` reads it, joins it to `recorder.kicad_pcb`, and writes `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` during `python scripts/check_gates.py`. Do not hand-edit those two CSVs — put the number here and re-run the gates.
 ## Electrical
 
 | Ref | Function | MPN | LCSC | Package | Notes | SMT |
