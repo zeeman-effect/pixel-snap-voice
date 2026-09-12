@@ -58,7 +58,7 @@ Hole-to-copper is held at 0.3 mm rather than JLC's 0.2 mm because non-plated hol
 
 USB pair: 0.20 mm traces on a 0.40 mm pitch, F.Cu over the solid In1 GND plane. **Not impedance controlled, and no controlled-impedance option needs ordering.** The ESP32-S3 USB peripheral is full speed only (12 Mbps, no high-speed PHY), and 90 Ω on this 0.1 mm top prepreg would need roughly 0.06 mm traces, half what a quick-turn fab will run. The geometry above lands near 75 Ω differential by first-order microstrip, which is fine at full-speed edge rates. If a later revision ever needs high-speed USB, thicken the top prepreg first.
 
-The pair is long for USB — 45.8 mm on D+, 44.2 mm on D−, 1.65 mm skew (~11 ps). That is placement, not sloppiness: U1's USB pads sit on the module's top row, the far side of a 15.9 mm module from J2, and the castellations leave 0.05 mm between pads, so the pair has to go around the module rather than under it. It runs up the 3.3 mm channel between J1 and U1.
+The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit on the module's top row, the far side of a 15.9 mm module from J2, and the castellations leave 0.05 mm between pads, so the pair has to go around the module rather than under it. It runs up the 3.3 mm channel between J1 and U1. The millimetres used to be typed here too. They are measured off the board by `route_pcb.py` and written to [`recorder/placement.json`](recorder/placement.json) under `routing.usb`; read them there, because a copy in prose goes stale the first time anyone reroutes.
 
 ## Keepouts
 
