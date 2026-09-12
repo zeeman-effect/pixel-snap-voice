@@ -14,6 +14,8 @@ import re
 import uuid
 from pathlib import Path
 
+from fp_lib_table import write_fp_lib_table
+
 HERE = Path(__file__).resolve().parent
 
 
@@ -994,11 +996,12 @@ def build() -> None:
 	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.kicad_sym")(options "")(descr "Recorder custom parts"))
 )
 """)
-    write_out(HERE / "fp-lib-table", """(fp_lib_table
-	(version 7)
-	(lib (name "PSV")(type "KiCad")(uri "${KIPRJMOD}/PSV.pretty")(options "")(descr "Recorder land patterns KiCad 10 does not ship"))
-)
-""")
+    # Not written inline. This used to be a hardcoded PSV-only table, which
+    # deleted the thirteen stock-library rows generate_pcb.py had put there and
+    # left every non-PSV land unresolvable. fp_lib_table rebuilds the whole set
+    # from the sheets just written plus the board on disk, so running either
+    # generator gives the same table.
+    write_fp_lib_table()
     write_out(HERE / "nets_required.json", json.dumps(NETS_REQUIRED, indent=2) + "\n")
 
     # Only the schematic half of the project file belongs to this script. The
@@ -1023,10 +1026,14 @@ def build() -> None:
         },
     )
     pro["meta"] = {"filename": "recorder.kicad_pro", "version": 3}
-    pro["schematic"] = {
+    # Merge, for the same reason the board half is merged above: replacing the
+    # block wholesale dropped bus_aliases and the legacy_lib_* keys that
+    # Eeschema adds on save, so re-running this script dirtied the tree even
+    # when the schematic had not changed.
+    pro.setdefault("schematic", {}).update({
         "meta": {"version": 1},
         "top_level_sheets": [{"filename": "recorder.kicad_sch", "name": "Root", "uuid": ROOT_UUID}],
-    }
+    })
     pro["sheets"] = [
         [ROOT_UUID, "Root"],
         [uid("sch-mcu"), "MCU_USB"],

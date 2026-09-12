@@ -26,6 +26,8 @@ import re
 
 import pcbnew
 
+from fp_lib_table import write_fp_lib_table
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 PARAMS = os.path.join(REPO, "hardware", "cad", "params.json")
@@ -368,29 +370,6 @@ def add_text(board, message, x_mm, y_mm, layer, size=1.2):
     board.Add(t)
 
 
-def write_fp_lib_table(libs, path=None):
-    """List every library the board cites so KiCad can resolve the names.
-
-    Only PSV used to be in here, which was enough while the board stored bare
-    footprint names. Now that each footprint carries its library nickname,
-    anything missing from this table resolves to nothing and DRC reports it as
-    a lib_footprint_issues warning. System libraries go through
-    KICAD10_FOOTPRINT_DIR so the path works on whichever machine has KiCad.
-    """
-    path = path or os.path.join(HERE, "fp-lib-table")
-    rows = ['(fp_lib_table', '\t(version 7)']
-    for lib in sorted(libs):
-        uri = ("${KIPRJMOD}/PSV.pretty" if lib == "PSV"
-               else "${KICAD10_FOOTPRINT_DIR}/" + lib + ".pretty")
-        descr = ("Recorder land patterns KiCad 10 does not ship" if lib == "PSV"
-                 else "KiCad 10 stock library")
-        rows.append(f'\t(lib (name "{lib}")(type "KiCad")(uri "{uri}")'
-                    f'(options "")(descr "{descr}"))')
-    rows.append(')')
-    with open(path, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(rows) + "\n")
-
-
 def resolve_footprint(fpid):
     """Return (loaded FOOTPRINT, placed fpid, substitution note or None)."""
     placed, note = SUBSTITUTIONS.get(fpid, (fpid, None))
@@ -547,6 +526,8 @@ def main():
         )
 
     tuck_reference_text(board, half_w, half_h)
+    # The board is still in memory here, so hand its libraries over as extras;
+    # fp_lib_table picks the schematic's up off disk by itself.
     write_fp_lib_table({fp.GetFPIDAsString().split(":")[0]
                         for fp in board.GetFootprints()})
 
