@@ -81,16 +81,43 @@ def read_pos():
 
 
 def write_cpl(board, placed):
-    """Copy kicad-cli's position export into the column names JLC expects."""
-    expected = {fp.GetReference() for fp in board.GetFootprints()
+    """Copy kicad-cli's position export into the column names JLC expects.
+
+    The ref-set check is not enough. A stale recorder-pos.csv that still
+    lists the same parts, just at last week's coordinates, would pass that
+    and write a pick-and-place file the Gerbers no longer match. kicad-cli
+    flips Y (physical +Y, opposite the editor) and may emit -90 where the
+    board stores 270, so compare after those two transforms.
+    """
+    expected = {fp.GetReference(): fp for fp in board.GetFootprints()
                 if not fp.IsExcludedFromPosFiles()}
-    if expected != set(placed):
+    if set(expected) != set(placed):
         raise SystemExit(
             "hardware/kicad/fab/recorder-pos.csv does not describe this "
             "board. Only in the board: "
-            f"{sorted(expected - set(placed))}; only in the export: "
-            f"{sorted(set(placed) - expected)}. Re-run "
+            f"{sorted(set(expected) - set(placed))}; only in the export: "
+            f"{sorted(set(placed) - set(expected))}. Re-run "
             "'python3 scripts/check_gates.py' so kicad-cli rewrites it.")
+
+    drifted = []
+    for ref, fp in expected.items():
+        row = placed[ref]
+        x = round(pcbnew.ToMM(fp.GetPosition().x), 4)
+        y = -round(pcbnew.ToMM(fp.GetPosition().y), 4)
+        rot = round(fp.GetOrientationDegrees()) % 360
+        pos_x, pos_y = float(row["PosX"]), float(row["PosY"])
+        pos_rot = round(float(row["Rot"])) % 360
+        if abs(pos_x - x) > 0.01 or abs(pos_y - y) > 0.01 or pos_rot != rot:
+            drifted.append(
+                f"{ref}: pos ({pos_x},{pos_y},{pos_rot}) vs "
+                f"board ({x},{y},{rot})")
+    if drifted:
+        raise SystemExit(
+            "hardware/kicad/fab/recorder-pos.csv is stale; its refs match "
+            "the board but the coordinates do not:\n  "
+            + "\n  ".join(drifted)
+            + "\nRe-run 'python3 scripts/check_gates.py' so kicad-cli "
+            "rewrites it.")
 
     with open(CPL_CSV, "w", encoding="utf-8", newline="\n") as fh:
         out = csv.writer(fh, lineterminator="\n")
