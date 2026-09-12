@@ -46,8 +46,8 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | USB-C footprint (J2) | +8.0 | −37.6 | 3.2 mm (F.Cu). Mouth at y=−43. Rectangular wall slot this pass |
 | Mic port (wall) | +33.5 (right long wall) | +10.0 | 3 × 2 mm hole at the tray/lid split (`mic_port()`). Tray `mic_duct()` joins this hole. |
 | Mic capsule (MK1) | +30.0 | +10.0 | IM73A135 on **F.Cu**, rot 90°. Bottom-port NPTH is at (30.00, 9.32) on **B.Cu**. Port must not face glass. The tray ducts that hole under the PCB to the right wall. |
-| Button edge | −33.5 (left long wall) | +12.0 | first-pass hole only |
-| Button (SW1) | −26.0 | +12.0 | top-actuated PTS645, inset so it stays on the board |
+| Button edge | −33.5 (left long wall) | +12.0 | 3 × 2.2 mm press-through slot (`button_hole()`). Needs a moulded nub to span the 0.9 mm from the inner wall face to the actuator tip. |
+| Button (SW1) | −29.3 | +12.0 | side-actuated Panasonic EVQP7C01P, rot 270° so the actuator faces the left wall. Tip 0.6 mm inside the board edge; copper 1.46 mm off it. |
 | LED (D1) | −29.0 | +18.0 | side window in the lid wall, not through the back |
 | SD slot (J3) | see placement.json |  | no mouth in this pass |
 | Speaker (SP1) | +24.0 | +13.0 | omitted from the case so the back skin stays closed |

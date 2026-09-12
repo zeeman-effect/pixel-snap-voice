@@ -146,9 +146,16 @@ module mic_duct() {
     }
 }
 
+// SW1 is a side-actuated EVQP7C01P aimed at this wall, so the aperture is a
+// straight press-through path and not somewhere to hide a lever. It used to
+// be 7.0 x 3.5 mm, sized for "whatever mechanism this ends up needing" back
+// when the switch was a top plunger. The actuator is 1.7 mm wide and the body
+// stands 1.35 mm off the board, so 3.0 x 2.2 mm covers it with margin for
+// print tolerance and keeps the opening small enough to take a moulded nub.
+// The nub has to span 0.9 mm from the inner wall face to the actuator tip.
 module button_hole() {
-    translate([-acc_w / 2 - 1.0, btn_y - 3.5, parts_z - 0.3])
-        cube([wall + 2.5, 7.0, 3.5]);
+    translate([-acc_w / 2 - 1.0, btn_y - 1.5, parts_z - 0.3])
+        cube([wall + 2.5, 3.0, 2.2]);
 }
 
 module led_window() {

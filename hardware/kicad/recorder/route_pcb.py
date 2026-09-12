@@ -1719,9 +1719,16 @@ ROUTED_OPEN_ITEMS = [
     "DRC clean and its two pads are routed, but the pad size and spacing are "
     "invented. Replace with the vendor drawing once a real speaker part "
     "number is picked, then re-run generate_pcb.py and route_pcb.py.",
-    "SW1 is a top-actuated PTS645. The case still needs a lever over the "
-    "plunger, or the part has to change to a side-actuated switch. This is a "
-    "case job, not a board job: the footprint and its routing are done.",
+    "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing "
+    "the top-actuated PTS645. The record button is on the left wall, so a top "
+    "plunger would have needed a case lever; this one is pressed straight "
+    "through the wall aperture. Its actuator tip sits 0.6 mm inside the board "
+    "edge and 0.9 mm from the inner wall face, so the case still needs a "
+    "short moulded nub to span that gap. Pin 1 carries BTN and pin 2 carries "
+    "GND, the opposite of the old part: a push button's terminals are "
+    "interchangeable, and pin 2 is the pad row nearest the board edge, where "
+    "the F.Cu GND pour reaches it without a trace. Check the press feel on "
+    "the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB "
     "peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would "
     "need traces narrower than any quick-turn fab will run. The pair is "

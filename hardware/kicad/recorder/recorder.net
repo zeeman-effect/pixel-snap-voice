@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-09-06T19:12:11")
+		(date "2026-09-12T15:47:10")
 		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -3598,11 +3598,11 @@
 		(comp
 			(ref "SW1")
 			(value "record")
-			(footprint "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92")
+			(footprint "Button_Switch_SMD:SW_SPST_EVQP7C")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92")
+					(name "Footprint") "Button_Switch_SMD:SW_SPST_EVQP7C")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -5446,8 +5446,8 @@
 			(class "Default")
 			(node
 				(ref "SW1")
-				(pin "2")
-				(pinfunction "2_2")
+				(pin "1")
+				(pinfunction "1_1")
 				(pintype "passive")
 			)
 			(node
@@ -5667,8 +5667,8 @@
 			)
 			(node
 				(ref "SW1")
-				(pin "1")
-				(pinfunction "1_1")
+				(pin "2")
+				(pinfunction "2_2")
 				(pintype "passive")
 			)
 			(node

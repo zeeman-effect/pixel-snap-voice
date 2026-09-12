@@ -1367,7 +1367,7 @@
 			(effects (font (size 1.27 1.27))))
 		(property "Value" "record" (at 80.00 154.50 0)
 			(effects (font (size 1.27 1.27))))
-		(property "Footprint" "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92" (at 80.00 160.00 0)
+		(property "Footprint" "Button_Switch_SMD:SW_SPST_EVQP7C" (at 80.00 160.00 0)
 			(effects (font (size 1.27 1.27)) hide))
 		(property "Datasheet" "~" (at 80.00 160.00 0)
 			(effects (font (size 1.27 1.27)) hide))
@@ -1377,24 +1377,24 @@
 	(wire
 		(pts (xy 74.92 160.00) (xy 67.30 160.00))
 		(stroke (width 0) (type default))
-		(uuid "f525b83e-12b5-55e9-b73e-e96189c9d973")
-	)
-	(global_label "GND"
-		(shape input)
-		(at 67.30 160.00 180)
-		(effects (font (size 1.27 1.27)) (justify right))
-		(uuid "24ed12f2-4de4-5482-8ce5-9197abe7f4bc")
-	)
-	(wire
-		(pts (xy 85.08 160.00) (xy 92.70 160.00))
-		(stroke (width 0) (type default))
 		(uuid "86f1eb7c-013d-5599-a234-1af16acf6698")
 	)
 	(global_label "BTN"
 		(shape input)
+		(at 67.30 160.00 180)
+		(effects (font (size 1.27 1.27)) (justify right))
+		(uuid "1e709feb-385e-52eb-a53d-6ff805804c2d")
+	)
+	(wire
+		(pts (xy 85.08 160.00) (xy 92.70 160.00))
+		(stroke (width 0) (type default))
+		(uuid "f525b83e-12b5-55e9-b73e-e96189c9d973")
+	)
+	(global_label "GND"
+		(shape input)
 		(at 92.70 160.00 0)
 		(effects (font (size 1.27 1.27)) (justify left))
-		(uuid "1e709feb-385e-52eb-a53d-6ff805804c2d")
+		(uuid "24ed12f2-4de4-5482-8ce5-9197abe7f4bc")
 	)
 	(symbol
 		(lib_id "Device:LED")

@@ -63,7 +63,7 @@
   "footprint_substitutions": {},
   "open_items": [
     "SP1 is still a placeholder 15 x 11 mm land pattern in PSV.pretty. It is DRC clean and its two pads are routed, but the pad size and spacing are invented. Replace with the vendor drawing once a real speaker part number is picked, then re-run generate_pcb.py and route_pcb.py.",
-    "SW1 is a top-actuated PTS645. The case still needs a lever over the plunger, or the part has to change to a side-actuated switch. This is a case job, not a board job: the footprint and its routing are done.",
+    "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing the top-actuated PTS645. The record button is on the left wall, so a top plunger would have needed a case lever; this one is pressed straight through the wall aperture. Its actuator tip sits 0.6 mm inside the board edge and 0.9 mm from the inner wall face, so the case still needs a short moulded nub to span that gap. Pin 1 carries BTN and pin 2 carries GND, the opposite of the old part: a push button's terminals are interchangeable, and pin 2 is the pad row nearest the board edge, where the F.Cu GND pour reaches it without a trace. Check the press feel on the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would need traces narrower than any quick-turn fab will run. The pair is 0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm differential by first-order microstrip. Re-check if v2 ever needs high-speed USB, which would mean a thicker top prepreg.",
     "MK1's land pattern is a locally adapted copy in PSV.pretty, not the drawing in the Infineon datasheet. The ring pad and its stencil aperture were moved out to 0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm; the datasheet's own figure would leave 0.18 mm, which no fab will drill reliably. The datasheet also assumes solder-mask-defined pads and this land is copper-defined, inherited from the KiCad library. Check the acoustic seal on the first assembled board: an open solder ring leaks and costs low-frequency response.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are published defaults. Caliper a real phone and a real magnet ring before cutting metal.",
@@ -724,14 +724,14 @@
       "ref": "SW1",
       "value": "record",
       "sheet": "IO",
-      "x_mm": -26.0,
+      "x_mm": -29.3,
       "y_mm": 12.0,
-      "rot_deg": 0,
+      "rot_deg": 270,
       "layer": "F.Cu",
-      "footprint": "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92",
-      "footprint_in_schematic": "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92",
+      "footprint": "Button_Switch_SMD:SW_SPST_EVQP7C",
+      "footprint_in_schematic": "Button_Switch_SMD:SW_SPST_EVQP7C",
       "substitution_reason": null,
-      "note": "record button, params button_y_mm = 12"
+      "note": "record button, side actuator faces the left wall, params button_y_mm = 12"
     },
     {
       "ref": "U1",
@@ -853,15 +853,15 @@
   ],
   "routing": {
     "router": "freerouting headless via Specctra DSN/SES, then plane stitching and pours from route_pcb.py",
-    "tracks": 695,
-    "vias": 185,
-    "track_length_mm": 1938.6,
+    "tracks": 700,
+    "vias": 186,
+    "track_length_mm": 1940.9,
     "zones": [
       "VDD33_F_C14",
-      "AGND_F",
-      "VDD33_F_C1C3",
       "GND_F",
       "VDD33_F_C8",
+      "VDD33_F_C1C3",
+      "AGND_F",
       "GND_B",
       "GND_In1",
       "VDD33_In2"

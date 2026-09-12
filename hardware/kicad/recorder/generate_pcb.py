@@ -220,7 +220,11 @@ PLACEMENT = {
     "Rsd4": (-11.0, -15.0, 0, "SD_D3 pull-up"),
     "C14": (-11.0, -12.0, 0, "VDD33 decoupling for the SD rail"),
     # --- Left edge user IO ---
-    "SW1": (-26.0, 12.0, 0, "record button, params button_y_mm = 12"),
+    # Rotated 270 so the side actuator points at -X, the left wall, and pushed
+    # out to x = -29.3 so the plunger tip sits 0.6 mm inside the board edge and
+    # 0.9 mm from the inner wall face. Copper stays 1.46 mm off the edge.
+    "SW1": (-29.3, 12.0, 270, "record button, side actuator faces the left "
+                              "wall, params button_y_mm = 12"),
     "D1": (-29.0, 18.0, 90, "status LED, params led_y_mm = 18"),
     "Rled": (-29.0, 22.0, 90, "status LED series resistor"),
     # --- Analog island: microphone ---
@@ -599,9 +603,10 @@ def main():
             "through the board, so the acoustic path opens on the B.Cu side, "
             "which faces the phone. The PETG tray ducts it out to the right "
             "wall; keep case.scad in step if the mic ever moves.",
-            "SW1 is a top-actuated PTS645. A left-edge button needs either a "
-            "case lever over the plunger or a side-actuated switch. Case job, "
-            "not a board job.",
+            "SW1 is a side-actuated Panasonic EVQP7C01P aimed at the left "
+            "wall, so the case aperture presses it directly and needs no "
+            "lever. Its two 0.7 mm NPTH board guides take the sideways load "
+            "instead of the solder joints.",
             "SP1 uses a placeholder land pattern in PSV.pretty. Replace once a "
             "real 15 x 11 mm speaker part number is chosen.",
         ],

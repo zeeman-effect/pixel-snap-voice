@@ -64,7 +64,7 @@ NETS_REQUIRED = {
     "VDD33": ["U5.1", "U1.3"],
     "3V3A": ["U8.5", "U2.11"],
     "GND": ["U1.1", "J2.A1", "BT1.2"],
-    "BTN": ["U1.5", "SW1.2"],
+    "BTN": ["U1.5", "SW1.1"],
     "LED": ["U1.6", "D1.1"],
     "CHG_STAT": ["U1.13", "U3.1"],
     "SD_CLK": ["U1.19", "J3.5"],
@@ -879,9 +879,19 @@ def build() -> None:
         stub(io, 150, 50 + i * 12.7, r_pins, "1", "VDD33", f"{ref}v", rot=90)
         stub(io, 150, 50 + i * 12.7, r_pins, "2", net, f"{ref}n", rot=90)
 
-    io.add(inst("Switch:SW_Push", "SW1", "record", 80, 160, sw_pins, "Button_Switch_SMD:SW_SPST_PTS645Sx43SMTR92"))
-    stub(io, 80, 160, sw_pins, "1", "GND", "swg")
-    stub(io, 80, 160, sw_pins, "2", "BTN", "swb")
+    # Side-actuated, not the top-actuated PTS645 this used to be. The record
+    # button is on the left wall, so a top plunger needed a case lever to bend
+    # a sideways press into a downward one. The EVQP7C01P presses straight
+    # through the wall instead. Panasonic EVQP7 series, JLCPCB C388883.
+    io.add(inst("Switch:SW_Push", "SW1", "record", 80, 160, sw_pins, "Button_Switch_SMD:SW_SPST_EVQP7C"))
+    # Pin 1 carries BTN and pin 2 carries GND, which is the other way round
+    # from the top-actuated part this replaced. A push button's two terminals
+    # are interchangeable, and on the rotated side-actuated land pin 2 is the
+    # row nearest the board edge with only 1.46 mm of copper to the cut.
+    # Putting the plane net there lets the F.Cu GND pour reach it directly and
+    # leaves BTN on the inner row, where it has room to leave the part.
+    stub(io, 80, 160, sw_pins, "1", "BTN", "swb")
+    stub(io, 80, 160, sw_pins, "2", "GND", "swg")
     io.add(inst("Device:LED", "D1", "status", 80, 190, led_pins, "LED_SMD:LED_0603_1608Metric"))
     io.add(inst("Device:R", "Rled", "1k", 110, 190, r_pins, "Resistor_SMD:R_0603_1608Metric"))
     stub(io, 80, 190, led_pins, "1", "LED", "d1a")

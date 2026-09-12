@@ -3,7 +3,6 @@
 Quantities are for **one** device plus a few passives of margin. Prefer JLCPCB SMT / LCSC Basic. Do not design around **INMP441** (EOL).
 
 LCSC numbers below were captured from the public catalog (Aug 2026). Re-check stock and Basic vs Extended before the SMT order.
-
 ## Electrical
 
 | Ref | Function | MPN | LCSC | Package | Notes | SMT |
@@ -24,7 +23,7 @@ LCSC numbers below were captured from the public catalog (Aug 2026). Re-check st
 | J3 | microSD socket | TF-01 / equivalent | C91145 | low-profile | 4-bit SDMMC on the custom PCB | Basic/Ext |
 | U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |
 | BT1 | LiPo pouch | 3.7 V **500 mAh** | — | 5.0 × 30 × 40 mm class | CAD leftover ~6000 mm³ (~600 mAh est.); 500 mAh is the current pick with margin | hand |
-| SW1 | Tactile | side-fire | C318885 | 3–4 mm | Short = record, long = power | Basic/Ext |
+| SW1 | Record button | Panasonic EVQP7C01P | C388883 | 3.5 × 2.9 × 1.35 mm | **Side push**: the plunger fires sideways at the left wall, so nothing has to poke through the phone-facing face. SPST, 2.2 N, 0.2 mm travel, 100k cycles, reflow. Short = record, long = power. Two moulded bosses drop into NPTH holes and take the sideways load off the solder. Was listed here as "side-fire, C318885": that code is an XKB TS-1187A-C-J-B, a 5.1 × 5.1 × 5 mm **top-actuated** switch, so the line was wrong on both the part and the direction | Extended |
 | D1 | Status LED | 0603 red | C2286 | 0603 | Record / error (GPIO2) | Basic |
 | D2 | Charge LED | 0603 | C2286 | 0603 | On U3 STAT / **CHG_STAT** | Basic |
 | R2 / R3 | CC pulldowns | 5.11 kΩ 1% | C23186 | 0603 | USB-C UFP / sink on J2 | Basic |
