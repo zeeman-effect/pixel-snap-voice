@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import collections
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -54,25 +56,87 @@ def drc_counts(kicad: Path, extra: list[str]) -> dict:
     return json.loads(out.read_text(encoding="utf-8"))
 
 
-def drc_gate(kicad: Path) -> None:
-    """Gate on copper errors, and refuse to plot a board with stale pours.
+# kicad-cli pcb drc --schematic-parity reports these 27 notes and every one is
+# expected. Counting them is not a check: a new extra footprint, or a pad that
+# quietly lost its net, lands in the same list and the old gate still plotted.
+# Each key is (violation type, reference, pad or field name). Add a key only
+# together with the reason it is allowed to be there.
+EXPECTED_PARITY: dict[tuple[str, str, str], str] = {}
+EXPECTED_PARITY.update({
+    # NPTH mounting holes. Mechanical, so no symbol, so nothing in the
+    # schematic to match. Giving them symbols would put four fake parts in the
+    # BOM to silence a note that is telling the truth.
+    ("extra_footprint", ref, ""): "NPTH mounting hole, mechanical only"
+    for ref in ("H1", "H2", "H3", "H4")
+})
+EXPECTED_PARITY.update({
+    # The module breaks out far more GPIO than v1 uses. The schematic only
+    # draws the castellations that go somewhere; the rest are left floating on
+    # purpose so a v2 can pick them up.
+    ("net_conflict", "U1", pad): "spare ESP32-S3-MINI-1U castellation"
+    for pad in ("7", "25", "26", "27", "28", "29", "30", "31", "32", "33",
+                "34", "35", "36", "37", "38", "41", "44")
+})
+EXPECTED_PARITY.update({
+    ("net_conflict", "J2", "A8"): "USB-C SBU1: v1 is a 5 V sink, no alt mode",
+    ("net_conflict", "J2", "B8"): "USB-C SBU2: v1 is a 5 V sink, no alt mode",
+    ("net_conflict", "U4", "4"): "AP2112K-3.3 pin 4 is NC",
+    ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
+    ("net_conflict", "U8", "4"): "LP5907MFX-3.3 pin 4 is NC",
+    ("footprint_symbol_field_mismatch", "SP1", "Description"):
+        "placeholder speaker land: the board describes it, the schematic "
+        "symbol does not, until a real part number lands",
+})
 
-    Two things used to slip past here. The old call passed --severity-error,
-    so every warning-level rule the board is checked against (silk over
-    copper, dangling vias, footprint/library parity) was invisible to the
-    gate. And nothing noticed when the zone fills stored in the board were out
-    of date: kicad-cli plots the stored fill, so a stale one ships to the fab
-    even though DRC refills before checking and reports a clean board.
+_PAD = re.compile(r"^Pad (\S+) \[.*\] of (\w+) on ")
+_FOOTPRINT = re.compile(r"^Footprint (\w+)$")
+_FIELD = re.compile(r"^Field '([^']+)' differs")
+
+
+def parity_key(note: dict) -> tuple[str, str, str]:
+    """Boil a parity note down to what it is about, dropping coordinates."""
+    kind = note["type"]
+    ref = subject = ""
+    for item in note.get("items", []):
+        text = item.get("description", "")
+        pad = _PAD.match(text)
+        if pad:
+            subject, ref = pad.group(1), pad.group(2)
+            break
+        fp = _FOOTPRINT.match(text)
+        if fp:
+            ref = fp.group(1)
+            break
+    field = _FIELD.match(note.get("description", ""))
+    if field:
+        subject = field.group(1)
+    return kind, ref, subject
+
+
+def drc_gate(kicad: Path) -> None:
+    """Refuse to plot unless the board is clean, poured, and matches the sheets.
+
+    Three things used to slip past. The old call passed --severity-error, so
+    every warning-level rule (silk over copper, dangling vias, missing
+    footprint libraries, and the JLC pad hole-spacing rule in
+    recorder.kicad_dru) was invisible. Nothing noticed when the zone fills
+    stored in the board were out of date, and kicad-cli plots the stored fill,
+    so a stale one ships. And the schematic-parity notes were printed, then
+    ignored, so a new one changed a number nobody was checking.
+
+    Warnings fail here too. A DRC rule this project has decided not to care
+    about belongs in rule_severities in recorder.kicad_pro, set to 'ignore',
+    where the decision shows up in a diff and someone reviews it. It does not
+    belong in an allowlist that quietly grows.
     """
     report = drc_counts(kicad, [])
-    errors = [v for v in report["violations"] if v["severity"] == "error"]
-    warnings = [v for v in report["violations"] if v["severity"] == "warning"]
+    violations = report["violations"]
     unconnected = report["unconnected_items"]
     parity = report["schematic_parity"]
 
     refilled = drc_counts(kicad, ["--refill-zones"])
     if (len(refilled["violations"]), len(refilled["unconnected_items"])) != \
-            (len(report["violations"]), len(unconnected)):
+            (len(violations), len(unconnected)):
         raise SystemExit(
             "zone fills in recorder.kicad_pcb are stale: DRC disagrees with "
             "itself once the pours are refilled, and the Gerbers would be "
@@ -82,10 +146,35 @@ def drc_gate(kicad: Path) -> None:
 
     run([str(kicad), "pcb", "drc", "--severity-all", "--schematic-parity",
          "-o", str(RECORDER / "drc.rpt"), str(PCB)])
-    print(f"drc: {len(errors)} errors, {len(warnings)} warnings, "
-          f"{len(unconnected)} unconnected, {len(parity)} schematic-parity notes")
-    if errors or unconnected:
-        raise SystemExit("DRC is not clean; not writing fab output")
+    counts = collections.Counter(
+        f"{v['type']} ({v['severity']})" for v in violations)
+    print(f"drc: {len(violations)} violations, {len(unconnected)} unconnected, "
+          f"{len(parity)} schematic-parity notes")
+
+    problems = []
+    for name, count in sorted(counts.items()):
+        problems.append(f"  {count} x {name}")
+    if unconnected:
+        problems.append(f"  {len(unconnected)} unconnected items")
+
+    seen = collections.Counter(parity_key(note) for note in parity)
+    for key, count in sorted(seen.items()):
+        if key not in EXPECTED_PARITY:
+            kind, ref, subject = key
+            problems.append(
+                f"  unexpected schematic-parity note: {kind} on "
+                f"{ref or '?'}{' ' + subject if subject else ''}")
+        elif count > 1:
+            problems.append(f"  schematic-parity note {key} seen {count} times")
+    for key, reason in sorted(EXPECTED_PARITY.items()):
+        if key not in seen:
+            problems.append(
+                f"  schematic-parity note {key} is gone ({reason}). If that "
+                f"is the fix, drop it from EXPECTED_PARITY.")
+
+    if problems:
+        raise SystemExit("DRC is not clean; not writing fab output:\n"
+                         + "\n".join(problems))
 
 
 def export_fab(kicad: Path) -> None:

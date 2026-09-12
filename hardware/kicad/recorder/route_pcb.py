@@ -1361,15 +1361,22 @@ def normalise_widths(board):
     return fixed
 
 
-def drc_json(pcb_path, errors_only=True):
+def drc_json(pcb_path):
+    """Read the board's DRC state, warnings included.
+
+    This used to default to --severity-error, which made the whole repair loop
+    blind to warning-level rules. Every score below compares violation counts
+    before and after a change, so a rip-up or a via deletion that traded one
+    error for four warnings looked like an improvement and was kept. The JLC
+    pad hole-spacing rule in recorder.kicad_dru is one of those warnings.
+    """
     kicad = shutil.which("kicad-cli") or os.environ.get("KICAD_CLI")
     if not kicad:
         raise SystemExit("kicad-cli not found; cannot check the routed board")
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as fh:
         out = fh.name
-    cmd = [kicad, "pcb", "drc", "--format", "json", "-o", out, pcb_path]
-    if errors_only:
-        cmd.insert(3, "--severity-error")
+    cmd = [kicad, "pcb", "drc", "--severity-all", "--format", "json",
+           "-o", out, pcb_path]
     subprocess.run(
         cmd,
         capture_output=True,
@@ -1566,7 +1573,7 @@ def drop_dangling_vias(board):
     reflection on an analog net. Locked status is ignored here on purpose,
     because these are exactly the hand-placed vias the fanout protected.
     """
-    report_data = drc_json(PCB, errors_only=False)
+    report_data = drc_json(PCB)
     index = board_items_by_uuid(board)
     doomed = []
     for violation in report_data.get("violations", []):
@@ -1764,6 +1771,14 @@ def usb_summary(board):
         f"{USB_WIDTH} mm traces on a {USB_PAIR_PITCH} mm pitch, F.Cu over the "
         "solid In1 GND plane, not impedance controlled (full-speed only)"
     )
+    # Say what the number is. USB_DP and USB_DM each run J2 to U7 to U1, and
+    # J2 is a reversible USB-C receptacle, so both halves of its flip pair sit
+    # on the net. copper_mm is therefore all copper on the net, which is longer
+    # than the signal path, and is not comparable to a point-to-point length.
+    out["measures"] = (
+        "total copper on each net, including the second half of the USB-C "
+        "flip pair and the U7 ESD array pads; not a point-to-point length"
+    )
     return out
 
 
@@ -1773,6 +1788,13 @@ def update_placement_open_items(board, unconnected, violations):
         return
     with open(PLACEMENT, encoding="utf-8") as fh:
         data = json.load(fh)
+    # The USB note was written by hand into placement.json and again into
+    # params.json, and only params.json was kept up to date. The stale copy
+    # still described a 0.15 mm gap pair under 20 mm long at 70 ohm, which is
+    # not what is on the board, and placement.json is what the next agent reads
+    # as XY truth. Copy the one in params.json rather than keep two.
+    params = json.load(open(PARAMS, encoding="utf-8"))
+    data.setdefault("board", {})["usb_diff_note"] = params["pcb"]["usb_diff_note"]
     tracks = [t for t in board.GetTracks() if not isinstance(t, pcbnew.PCB_VIA)]
     vias = [t for t in board.GetTracks() if isinstance(t, pcbnew.PCB_VIA)]
     length = sum(pcbnew.ToMM(t.GetLength()) for t in tracks)
@@ -1784,7 +1806,7 @@ def update_placement_open_items(board, unconnected, violations):
         "track_length_mm": round(length, 1),
         "zones": [z.GetZoneName() for z in board.Zones()],
         "unconnected_items": unconnected,
-        "drc_errors": violations,
+        "drc_violations": violations,
         "usb": usb_summary(board),
         "note": "Re-run: python3 hardware/kicad/recorder/route_pcb.py",
     }
@@ -1891,9 +1913,10 @@ def stage_pour(board, half_w, half_h, passes=8):
     for attempt in range(1, passes + 1):
         data = drc_json(PCB)
         open_items = len(data.get("unconnected_items", []))
-        errors = len(data.get("violations", []))
-        score = (errors, open_items)
-        print(f"  pass {attempt}: {open_items} open connections, {errors} DRC errors")
+        violations = len(data.get("violations", []))
+        score = (violations, open_items)
+        print(f"  pass {attempt}: {open_items} open connections, "
+              f"{violations} DRC violations")
         if best is None or score < best[0]:
             with open(PCB, "rb") as fh:
                 best = (score, fh.read())
@@ -1904,7 +1927,7 @@ def stage_pour(board, half_w, half_h, passes=8):
             print("    regressed, stopping")
             break
         previous = score
-        if not open_items and not errors:
+        if not open_items and not violations:
             break
         ripped = delete_bad_tracks(board, data)
         if ripped:
@@ -1944,7 +1967,7 @@ def stage_pour(board, half_w, half_h, passes=8):
     if best is not None and best[0] < score:
         # Rip-up is a gamble: cutting a wall can leave the board worse than
         # it started. Keep the best board the loop actually saw.
-        print(f"  restoring the best pass ({best[0][0]} errors, "
+        print(f"  restoring the best pass ({best[0][0]} violations, "
               f"{best[0][1]} open)")
         with open(PCB, "wb") as fh:
             fh.write(best[1])
@@ -1999,10 +2022,11 @@ def main():
 
     data = drc_json(PCB)
     unconnected = len(data.get("unconnected_items", []))
-    errors = len(data.get("violations", []))
-    update_placement_open_items(board, unconnected, errors)
-    print(f"kicad-cli pcb drc: {errors} errors, {unconnected} open connections")
-    if errors or unconnected:
+    violations = len(data.get("violations", []))
+    update_placement_open_items(board, unconnected, violations)
+    print(f"kicad-cli pcb drc: {violations} violations, "
+          f"{unconnected} open connections")
+    if violations or unconnected:
         print("not fab clean yet - fix the board, then re-run")
         raise SystemExit(2)
     print(f"wrote {PCB}")
