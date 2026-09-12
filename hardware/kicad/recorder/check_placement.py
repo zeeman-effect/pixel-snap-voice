@@ -11,6 +11,7 @@ Checks, in order:
   3. nothing collides with a mounting hole keepout
   4. the analog chain stays clear of the magnet ring
   5. every pad that the netlist gives a net actually carries that net
+  6. placement.json still describes the board it claims to describe
 
 This is a placement check, not a DRC. It says nothing about routing.
 """
@@ -24,6 +25,7 @@ import pcbnew
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PCB = os.path.join(HERE, "recorder.kicad_pcb")
+PLACEMENT = os.path.join(HERE, "placement.json")
 PARAMS = os.path.abspath(
     os.path.join(HERE, "..", "..", "cad", "params.json")
 )
@@ -62,6 +64,46 @@ def courtyard_box(fp):
         bb = fp.GetBoundingBox(False, False)
         box = (bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom())
     return tuple(pcbnew.ToMM(v) for v in box)
+
+
+def placement_twin_problems(board):
+    """Compare placement.json against the board it is supposed to mirror.
+
+    AGENTS.md asks for these two files to be kept as twins, and nothing
+    checked it. placement.json is what the CAD side and the next agent read as
+    placement truth, so when the board moved ahead of it, as it did when SW1
+    was swapped for a side-actuated part, the drift was invisible until
+    someone cut a case against the wrong number.
+    """
+    if not os.path.isfile(PLACEMENT):
+        return ["MISSING    placement.json"]
+    with open(PLACEMENT, encoding="utf-8") as fh:
+        rows = {row["ref"]: row for row in json.load(fh).get("parts", [])}
+    problems = []
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
+        row = rows.pop(ref, None)
+        if row is None:
+            problems.append(f"UNLISTED   {ref} is on the board, not in placement.json")
+            continue
+        actual = {
+            "footprint": fp.GetFPIDAsString(),
+            "x_mm": round(pcbnew.ToMM(fp.GetPosition().x), 3),
+            "y_mm": round(pcbnew.ToMM(fp.GetPosition().y), 3),
+            "rot_deg": round(fp.GetOrientationDegrees()) % 360,
+            "layer": board.GetLayerName(fp.GetLayer()),
+        }
+        for key, value in actual.items():
+            said = row.get(key)
+            if key == "rot_deg":
+                said = round(said or 0) % 360
+            if said != value:
+                problems.append(
+                    f"DRIFT      {ref:6s} {key}: placement.json says {said!r}, "
+                    f"board says {value!r}")
+    for ref in sorted(rows):
+        problems.append(f"GHOST      {ref} is in placement.json, not on the board")
+    return problems
 
 
 def main():
@@ -138,6 +180,8 @@ def main():
             if pad.GetNumber() and pad.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH:
                 if pad.GetNetname() == "":
                     unnetted.append(f"{fp.GetReference()}.{pad.GetNumber()}")
+    problems += placement_twin_problems(board)
+
     print(f"\nfootprints: {len(fps)}")
     print(f"pads with no net: {len(unnetted)} {' '.join(unnetted)}")
 
