@@ -27,6 +27,7 @@ MCU choice and why we did **not** switch off Espressif: [`docs/audio-platform.md
 | [`sim/spice/`](sim/spice/) | USB → charger → battery → 3.3 V model |
 | [`hardware/cad/`](hardware/cad/) | Parametric envelope (OpenSCAD) + keepout checker |
 | [`hardware/kicad/`](hardware/kicad/) | KiCad 10 schematic / PCB / stackup notes |
+| [`.cursor/skills/`](.cursor/skills/) | Agent skills, including vendored [KiStack](https://github.com/American-Embedded/kistack) KiCad workflows |
 | [`software/`](software/) | Local whisper.cpp CLI (`transcribe.py`) |
 
 ## Simulate first

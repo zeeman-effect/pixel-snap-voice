@@ -1,0 +1,6 @@
+Vendored from https://github.com/American-Embedded/kistack
+Commit: 97934211326a03c0541b784c616c6582cdc14107
+Date: 2026-09-05
+Install: npx skills add American-Embedded/kistack -a cursor --skill '*' -y --copy
+Cursor discovery path: .cursor/skills/<skill-name>/SKILL.md
+Do not copy the American Embedded logo (LICENSE restriction).

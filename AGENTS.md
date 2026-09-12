@@ -32,6 +32,25 @@ When a check fails, edit the design (or the check if the check is wrong). Do not
 
 The only tree that is not product is `hardware/kicad/example_project`. Do not treat it as truth. Do not edit it unless the user is in that lesson.
 
+## KiCad agent skills (KiStack)
+
+This repo vendors the KiCad skills from [American-Embedded/KiStack](https://github.com/American-Embedded/kistack) so Cursor agents can load them with the project.
+
+| Skill | Use when |
+| --- | --- |
+| `kicad-schematic` | Wiring or reviewing schematics |
+| `kicad-pcb` | Placement, routing, layout review |
+| `kicad-symbol` / `kicad-footprint` | New library parts |
+| `kicad-bom` | Exact part numbers and manufacturer fields |
+| `kicad-export` | `kicad-cli` ERC, DRC, Gerbers, BOM, 3D |
+| `kicad-gerbers` | Visual Gerber inspection |
+| `kicad-panelize` | KiKit panelization |
+| `pcb-product-render` | Blender product shots of the board |
+
+Files live in `.cursor/skills/<skill-name>/`, next to this repo's existing `make-board-manufacturable` skill. Cursor Cloud Agents inject that tree at session start. Source pin: `skills-lock.json`. License: `.cursor/skills/kistack-LICENSE`.
+
+These skills do not replace this project's generators. Product sheets still come from `generate_recorder.py`. Product copper still lives in `hardware/kicad/recorder/recorder.kicad_pcb`. If a KiStack workflow and a repo rule disagree, follow `AGENTS.md` and the `.cursor/rules` files.
+
 ## Current solution
 
 **Architecture:** ESP32-S3-MINI-1U MCU (IPEX, no cable in v1), Everest ES8311 codec as I2S master (12.288 MHz oscillator into MCLK; the S3 is slave), analog MEMS microphone, class-D speaker (or headphone jack if 9 mm is too thick), microSD, USB-C as a 5 V sink only. Analog codec power is a separate low-noise regulator from the MCU supply. Chassis is 3D-print first, then CNC 6061 aluminum. Not steel, which would steal hold from the magnet ring. The module SKU is the no-PCB-antenna MINI-1U because v1 has no radio and a steel shunt plus later aluminum shell sit next to the MCU. Full electrical and mechanical notes: `docs/architecture.md`. Why this MCU/codec pair: `docs/audio-platform.md`. U1 numbers live in `hardware/cad/params.json` under `mcu`. The product KiCad project is `hardware/kicad/recorder/` (schematic + PCB).
@@ -54,6 +73,7 @@ Update this section when it stops being true.
 - Current pouch size is 500 mAh from leftover CAD volume.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
+- KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
 
 Do not send Gerbers until `python scripts/check_gates.py` is clean **and** `kicad-cli` wrote `hardware/kicad/fab/` from `recorder.kicad_pcb` **and** `kicad-cli pcb drc` is clean. Those are ship gates. They are not a reason to leave the board unedited.
 
