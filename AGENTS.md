@@ -65,7 +65,7 @@ Update this section when it stops being true.
 
 `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` are **generated**, by `hardware/kicad/recorder/generate_jlc.py`. They were hand-typed and had drifted: C11, C12, C17 and C18 still carried pre-route coordinates. LCSC order codes come from the table in `docs/bom.md`; which parts the machine handles comes from each footprint's own `exclude_from_pos_files` / `exclude_from_bom` flag in the board.
 
-DRC parity leaves 27 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), the 4 mounting holes, which are mechanical and have no symbol, and SP1's Description field. The one thing still between here and an order is a real speaker part number for SP1.
+DRC parity leaves 27 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), the 4 mounting holes, which are mechanical and have no symbol, and SP1's Description field. A Gerber upload still needs a real speaker part number for SP1 (the placeholder land is DRC-clean on purpose). The accessory is not finished after that: MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
 
 ## How to change the hardware
 

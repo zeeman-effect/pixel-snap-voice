@@ -11,9 +11,13 @@
 # a component pad is involved, because pad holes are drilled larger and carry a
 # +0.13 / -0.08 mm plated-hole tolerance. The 0.25 mm global minimum covers the
 # via case; this covers the pad case. Designed spacing has to beat 0.45 mm by
-# more than the tolerance, so aim for 0.6 mm and let this rule catch drift.
+# more than that tolerance (0.45 + 0.13 = 0.58, rounded to 0.6). The min here
+# is that 0.6 mm, not the fab's 0.45 mm: KiCad treats (min) as inclusive, so a
+# 0.45 mm rule would accept a via sitting exactly on the fab reject line and
+# call it clean. Drift from the board's current 0.62 mm down toward 0.45 mm
+# now fails DRC before the Gerbers are written.
 (rule "JLC pad hole-to-hole spacing"
-	(constraint hole_to_hole (min 0.45mm))
+	(constraint hole_to_hole (min 0.6mm))
 	(condition "A.Type == 'Pad' || B.Type == 'Pad'"))
 
 # JLC will not drill a non-plated hole under 0.5 mm. H1-H4 are 1.7 mm, the two
