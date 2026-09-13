@@ -733,7 +733,7 @@ def build() -> None:
     stub(aud, 165, 115, c_pins, "1", "PA_BYP", "c19a", False, rot=270)
     stub(aud, 165, 115, c_pins, "2", "GND", "c19b", rot=270)
 
-    aud.add(inst("Device:Speaker", "SP1", "1511", 250, 90, spk_pins, "PSV:Speaker_15x11mm"))
+    aud.add(inst("Device:Speaker", "SP1", "KLJ-01304T-08R07W", 250, 90, spk_pins, "PSV:Speaker_KLJ-01304T"))
     stub(aud, 250, 90, spk_pins, "1", "SPK_P", "sp1p", False)
     stub(aud, 250, 90, spk_pins, "2", "SPK_N", "sp1n", False)
     aud.add(inst("Device:C", "C20", "10uF", 220, 55, c_pins, "Capacitor_SMD:C_0805_2012Metric"))

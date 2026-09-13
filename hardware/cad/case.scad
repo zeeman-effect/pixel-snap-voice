@@ -20,8 +20,6 @@ pocket_extra = 0.3;
 magnet_floor = 0.4;
 pcb_clear = 0.3;
 batt_xy_clear = 0.6;
-batt_off_x = 0.0;
-batt_off_y = 16.0;
 corner_r = 2.5;
 // Lip outer sits on the rim outside the PCB rebate (0.45 mm/side at these numbers).
 lip_inset = 0.75;
@@ -205,7 +203,7 @@ module lid_inner() {
         );
 }
 
-// 40×30×5 leftover pocket, shifted +Y so it misses U1 (+14, −18) and J2 on the bottom edge.
+// 40×30×5 leftover pocket at (0, 12): +Y of U1 (+14, −18) and J2, −Y of SP1 (0, 36).
 // Closed 1.2 mm back: the fence hangs from the inner face of shell_back.
 module battery_fence() {
     outer_w = batt_w + 2 * batt_xy_clear + 2.4;
@@ -249,6 +247,17 @@ module tray() {
     }
 }
 
+// SP1 faces the lid. Seven holes through shell_back, centred on the can.
+module speaker_grille() {
+    translate([speaker_x, speaker_y, acc_t - shell_back - eps]) {
+        cylinder(h = shell_back + 2 * eps, d = 2.2);
+        for (a = [0:60:300])
+            rotate([0, 0, a])
+                translate([3.5, 0, 0])
+                    cylinder(h = shell_back + 2 * eps, d = 1.8);
+    }
+}
+
 module lid() {
     difference() {
         union() {
@@ -265,6 +274,7 @@ module lid() {
             battery_fence();
         }
         lid_screws();
+        speaker_grille();
     }
 }
 

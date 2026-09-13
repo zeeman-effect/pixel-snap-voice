@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -61,6 +62,12 @@ def scad_matches(p: dict, scad: dict[str, float], errors: list[str]) -> None:
         "pcb_h": p["pcb"]["height_mm"],
         "magnet_cy_from_top": p["phone"]["magnet_center_from_top_mm"],
         "camera_bar_from_top": p["phone"]["camera_bar_from_top_mm"],
+        "speaker_h": p["connectors"]["speaker_height_mm"],
+        "speaker_x": p["connectors"]["speaker_x_mm"],
+        "speaker_y": p["connectors"]["speaker_y_mm"],
+        "speaker_od": p["connectors"]["speaker_od_mm"],
+        "batt_off_x": p["battery"]["offset_x_mm"],
+        "batt_off_y": p["battery"]["offset_y_mm"],
     }
     for k, v in expect.items():
         if k not in scad:
@@ -153,8 +160,35 @@ def check(p: dict) -> list[str]:
         errors.append(f"battery height stack {batt_stack:.2f} mm exceeds {limit} mm envelope")
     if spk_stack > limit + 1e-6:
         errors.append(
-            f"speaker height stack {spk_stack:.2f} mm exceeds {limit} mm — drop the 1511 and use the ES8311 HP jack"
+            f"speaker height stack {spk_stack:.2f} mm exceeds {limit} mm — use the ES8311 HP jack"
         )
+
+    spk = Rect(
+        con["speaker_x_mm"] - con["speaker_od_mm"] / 2,
+        con["speaker_y_mm"] - con["speaker_od_mm"] / 2,
+        con["speaker_x_mm"] + con["speaker_od_mm"] / 2,
+        con["speaker_y_mm"] + con["speaker_od_mm"] / 2,
+    )
+    pcb_rect = Rect(
+        -pcb["width_mm"] / 2,
+        -pcb["height_mm"] / 2,
+        pcb["width_mm"] / 2,
+        pcb["height_mm"] / 2,
+    )
+    if not pcb_rect.contains_rect(spk):
+        errors.append("speaker body extends past the PCB outline")
+    bat_rect = Rect(
+        bat["offset_x_mm"] - bat["pocket_width_mm"] / 2,
+        bat["offset_y_mm"] - bat["pocket_height_mm"] / 2,
+        bat["offset_x_mm"] + bat["pocket_width_mm"] / 2,
+        bat["offset_y_mm"] + bat["pocket_height_mm"] / 2,
+    )
+    if spk.overlaps(bat_rect):
+        errors.append("speaker body overlaps the battery pocket")
+    qx = min(max(0.0, spk.x0), spk.x1)
+    qy = min(max(0.0, spk.y0), spk.y1)
+    if math.hypot(qx, qy) < mag["od_mm"] / 2:
+        errors.append("speaker body intersects the magnet ring")
 
     if pcb["width_mm"] + 2 * acc["wall_mm"] > acc["width_mm"] + 1e-6:
         errors.append("PCB does not fit inside accessory walls in X")
@@ -208,6 +242,8 @@ def fit_report(p: dict) -> str:
         f"  camera-bar XY gap: {bar_gap:.2f} mm (must be > 0)",
         f"  USB stack (phone->shell): {usb_stack:.2f} mm",
         f"  battery stack: {batt_stack:.2f} mm",
+        f"  speaker stack: {mag['adhesive_mm'] + mag['thickness_mm'] + mag['shunt_thickness_mm'] + pcb['thickness_mm'] + con['speaker_height_mm'] + acc['shell_back_mm']:.2f} mm "
+        f"(SP1 {con['speaker_od_mm']:.1f} mm at {con['speaker_x_mm']:.1f}, {con['speaker_y_mm']:.1f})",
         f"  battery pocket: {bat['pocket_width_mm']} x {bat['pocket_height_mm']} x {bat['max_thickness_mm']} mm "
         f"= {vol:.0f} mm3 -> ~{est} mAh (current pick {bat['locked_mah']} mAh)",
         "  PETG checklist (physical, after print):",

@@ -35,7 +35,7 @@ When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Stora
 | MCU | ESP32-S3-MINI-1U (≥8 MB flash) | Native USB. Same pins as MINI-1, 15.4 × 15.4 mm, no PCB antenna. **Not** the audio bottleneck. |
 | Codec | Everest ES8311, I2S master, 12.288 MHz oscillator → MCLK | PGA/ALC/ADC + DAC + HP. Dedicated analog LDO (U8). No XI/XO on this codec. |
 | Mic | Analog MEMS: IM73A135 or ICS-40730 (~73–74 dBA) | Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
-| Playback | NS4150 or MAX98357A into 1511 speaker | If 9 mm loses: 3.5 mm jack on ES8311 HP, no speaker |
+| Playback | NS4150B into KELIKING KLJ-01304T-08R07W (13 mm SMD, LCSC C18186315) | 8 Ω 0.7 W can JLC can place. If 9 mm loses: 3.5 mm jack on ES8311 HP |
 | Storage | Low-profile microSD (FAT32) | Switch to eMMC only if CAD proves SD is too thick |
 | USB-C | 5 V sink only, 5.1 kΩ CC1/CC2 pulldowns, USB 2.0 | No USB-PD |
 | Charge | MCP73831 or BQ24074 class, 500 mA default | Charge LED only; no fuel gauge in v1 |

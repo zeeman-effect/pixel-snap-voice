@@ -26,6 +26,15 @@ import re
 
 import pcbnew
 
+try:
+    import wx
+except ImportError:
+    wx = None
+else:
+    # KiCad 10's Windows build asserts in PCB_VIA::GetWidth() when no layer
+    # is given. That pops a modal dialog and stops a headless script.
+    wx.DisableAsserts()
+
 from fp_lib_table import write_fp_lib_table
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -258,7 +267,7 @@ PLACEMENT = {
     "U6": (12.0, 31.0, 0, "NS4150B class-D amp"),
     "C19": (12.0, 27.5, 0, "PA bypass"),
     "R7": (16.5, 27.5, 0, "PA input bias"),
-    "SP1": (-4.0, 32.0, 0, "1511 speaker, placeholder land pattern"),
+    "SP1": (0.0, 36.0, 0, "KELIKING 13 mm SMD speaker, LCSC C18186315"),
     # --- Battery leads ---
     "BT1": (-23.5, 34.0, 0, "LiPo flying leads, 500 mAh pouch above on F.Cu"),
     "C20": (-16.0, 26.0, 0, "VBAT bulk at the cell"),
@@ -474,6 +483,10 @@ def main():
         fp, placed_fpid, sub_note = resolve_footprint(comp["footprint"])
         fp.SetReference(ref)
         fp.SetValue(comp["value"])
+        # generate_recorder.py writes Datasheet "~" on every symbol.
+        # Library lands ship a URL or an empty field, and schematic-parity
+        # flags the difference on every part.
+        fp.SetField("Datasheet", "~")
         fp.SetPosition(vec(x, y))
         if rot:
             fp.SetOrientationDegrees(rot)
@@ -617,8 +630,6 @@ def main():
             "wall, so the case aperture presses it directly and needs no "
             "lever. Its two 0.7 mm NPTH board guides take the sideways load "
             "instead of the solder joints.",
-            "SP1 uses a placeholder land pattern in PSV.pretty. Replace once a "
-            "real 15 x 11 mm speaker part number is chosen.",
         ],
         "parts": sorted(placed_rows, key=lambda r: r["ref"]),
     }

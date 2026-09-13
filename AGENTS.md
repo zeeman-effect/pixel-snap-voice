@@ -53,7 +53,7 @@ These skills do not replace this project's generators. Product sheets still come
 
 ## Current solution
 
-**Architecture:** ESP32-S3-MINI-1U MCU (IPEX, no cable in v1), Everest ES8311 codec as I2S master (12.288 MHz oscillator into MCLK; the S3 is slave), analog MEMS microphone, class-D speaker (or headphone jack if 9 mm is too thick), microSD, USB-C as a 5 V sink only. Analog codec power is a separate low-noise regulator from the MCU supply. Chassis is 3D-print first, then CNC 6061 aluminum. Not steel, which would steal hold from the magnet ring. The module SKU is the no-PCB-antenna MINI-1U because v1 has no radio and a steel shunt plus later aluminum shell sit next to the MCU. Full electrical and mechanical notes: `docs/architecture.md`. Why this MCU/codec pair: `docs/audio-platform.md`. U1 numbers live in `hardware/cad/params.json` under `mcu`. The product KiCad project is `hardware/kicad/recorder/` (schematic + PCB).
+**Architecture:** ESP32-S3-MINI-1U MCU (IPEX, no cable in v1), Everest ES8311 codec as I2S master (12.288 MHz oscillator into MCLK; the S3 is slave), analog MEMS microphone, NS4150B into a KELIKING KLJ-01304T-08R07W SMD speaker (JLCPCB C18186315), microSD, USB-C as a 5 V sink only. Analog codec power is a separate low-noise regulator from the MCU supply. Chassis is 3D-print first, then CNC 6061 aluminum. Not steel, which would steal hold from the magnet ring. The module SKU is the no-PCB-antenna MINI-1U because v1 has no radio and a steel shunt plus later aluminum shell sit next to the MCU. Full electrical and mechanical notes: `docs/architecture.md`. Why this MCU/codec pair: `docs/audio-platform.md`. U1 numbers live in `hardware/cad/params.json` under `mcu`. The product KiCad project is `hardware/kicad/recorder/` (schematic + PCB).
 
 Those are the current choices. Change them when the envelope, parts, or bring-up says they are wrong, and update the docs in the same pass.
 
@@ -69,14 +69,14 @@ Update this section when it stops being true.
 - Phase 0 ESP-IDF app is in `firmware/` (Korvo-2 / ESP-BOX / custom pin maps). CAD is in `hardware/cad` (`params.json` + `case.scad`, draft PETG).
 - Product KiCad is `hardware/kicad/recorder/` (open `recorder.kicad_pro`). Sheets come from `generate_recorder.py`. The board file is `recorder.kicad_pcb`. Footprint XY is `hardware/kicad/recorder/placement.json`.
 - The PETG tray ducts MK1's B.Cu NPTH under the board to the right-wall mic port. MK1 is on F.Cu.
-- **The board is routed.** 700 tracks, 186 vias, ~1941 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
+- **The board is routed.** 720 tracks, 187 vias, ~1930 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
 - **The DRC rules are JLCPCB's published capability**, not house numbers. Global floors live in `DESIGN_RULES` in `generate_pcb.py`. The two checks that depend on item type live in `recorder/recorder.kicad_dru`: pad hole-to-hole at **0.6 mm** (JLC's floor is 0.45 mm; 0.6 mm keeps the +0.13 mm plated-hole tolerance), and 0.5 mm minimum non-plated hole. The board holds 0.15 mm tracks, 0.6/0.3 vias, 0.62 mm minimum pad hole spacing and 0.3 mm hole-to-copper.
 - Silkscreen is 1.0 mm on a 0.15 mm stroke, JLC's standard font. It used to be 0.8 mm, which is only legal on their high-precision line and which their own capability table calls unidentifiable. Every designator still found a clear seat at the larger size.
 - USB D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch, **not** impedance controlled: the ESP32-S3 is full speed only. Do not order the controlled-impedance option. Reasoning in `hardware/kicad/README.md`.
 - MK1's land pattern in `PSV.pretty` is adapted, not the datasheet drawing: the ring pad and its stencil sit at r=0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm. Infineon's own figure leaves 0.18 mm, under JLC's 0.2 mm floor before drill tolerance. Check the acoustic seal on the first assembled board.
 - Current pouch size is 500 mAh from leftover CAD volume.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
-- SP1 is still an invented 15 × 11 mm land. It is DRC clean and routed, but nobody has picked a real speaker yet.
+- SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), 13 × 13 × 4.0 mm SMD can at (0, 36). JLC places it. The lid has a grille over the can. The 40 × 30 mm pouch sits at (0, 12) so it misses both U1 and the speaker.
 - SW1 is a **side-actuated** Panasonic EVQP7C01P (LCSC C388883, 3.5 × 2.9 × 1.35 mm, 2.2 N), not the top-actuated PTS645 it used to be. The record button is on the left wall, so a top plunger needed a case lever; this one is pressed straight through a 3 × 2.2 mm slot. Its actuator tip stops 0.9 mm short of the inner wall face, so the case still needs a moulded nub to span the gap.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
@@ -85,7 +85,7 @@ Update this section when it stops being true.
 
 `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` are **generated**, by `hardware/kicad/recorder/generate_jlc.py`. They were hand-typed and had drifted: C11, C12, C17 and C18 still carried pre-route coordinates. LCSC order codes come from the table in `docs/bom.md`; which parts the machine handles comes from each footprint's own `exclude_from_pos_files` / `exclude_from_bom` flag in the board.
 
-DRC parity leaves 27 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), the 4 mounting holes, which are mechanical and have no symbol, and SP1's Description field. A Gerber upload still needs a real speaker part number for SP1 (the placeholder land is DRC-clean on purpose). The accessory is not finished after that: MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
+DRC parity leaves 26 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair) and the 4 mounting holes, which are mechanical and have no symbol. MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
 
 ## How to change the hardware
 

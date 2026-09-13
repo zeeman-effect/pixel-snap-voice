@@ -23,6 +23,15 @@ import sys
 
 import pcbnew
 
+try:
+    import wx
+except ImportError:
+    wx = None
+else:
+    # KiCad 10's Windows build asserts in PCB_VIA::GetWidth() when no layer
+    # is given. That pops a modal dialog and stops a headless script.
+    wx.DisableAsserts()
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 PCB = os.path.join(HERE, "recorder.kicad_pcb")
 PLACEMENT = os.path.join(HERE, "placement.json")

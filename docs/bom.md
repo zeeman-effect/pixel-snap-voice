@@ -18,7 +18,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | MK1 | Analog MEMS | IM73A135 / ICS-40730 | — | 4 × 3 | ~73–74 dBA; **hand-place**; acoustic port on free long edge | hand |
 | MK1 alt | Digital MEMS | ICS-43434 | C5656610 | 3.5 × 2.65 | 65 dBA fallback if analog capsule misses SMT | Extended |
 | U6 | Class-D PA | NS4150B | C189961 | MSOP-8 | Analog-in from ES8311 AOUT (Korvo path). Alt: MAX98357A I2S | Extended |
-| SP1 | Speaker | 1511 8 Ω | — | 15 × 11 × 3.0 | Drop and use ES8311 3.5 mm HP jack if the 9 mm stack loses | hand |
+| SP1 | Speaker | KLJ-01304T-08R07W | C18186315 | 13 × 13 × 4.0 | KELIKING 8 Ω 0.7 W SMD can. JLC Extended, tape-and-reel. Sound faces the lid | Extended |
 | U3 | Li-ion charger | MCP73831T-2ACI/OT | C424093 | SOT-23-5 | ~500 mA (`RPROG` 2 kΩ); STAT LED | Extended |
 | J1 | UART 1×4 | pin header | — | 2.54 mm | 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND | hand |
 | J2 | USB-C receptacle | 16-pin mid-mount | C165948 | ~3.2 mm | 5.1 kΩ on CC1/CC2; short edge; overmold must miss the phone | Extended |

@@ -1,12 +1,12 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-09-12T15:49:27 **
+** Created on 2026-09-13T10:19:23 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 27 Footprint errors **
+** Found 26 Footprint errors **
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(9.2500 mm, -41.6450 mm): Pad A8 [unconnected-(J2-SBU1-PadA8)] of J2 on F.Cu
@@ -64,9 +64,6 @@
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(21.0000 mm, -23.1000 mm): Pad 44 [unconnected-(U1-IO46-Pad44)] of U1 on F.Cu
-[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: '15 x 11 mm speaker, placeholder footprint', Schematic: '')
-    Local override; warning
-    @(-4.0000 mm, 32.0000 mm): Footprint SP1
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(-4.8625 mm, -38.5500 mm): Pad 4 [unconnected-(U4-NC-Pad4)] of U4 on F.Cu

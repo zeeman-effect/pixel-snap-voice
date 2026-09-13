@@ -24,7 +24,7 @@ python scripts/check_gates.py
 
 Sheets: `mcu_usb`, `audio`, `power`, `io` (global labels join them). Pin map: [`pinmap.md`](pinmap.md).
 
-Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is still an invented land pattern, so that first condition is not met yet.
+Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is the KELIKING KLJ-01304T-08R07W land in `PSV.pretty`.
 
 ## Design rules
 

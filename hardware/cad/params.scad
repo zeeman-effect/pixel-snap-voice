@@ -39,8 +39,13 @@ led_y = 18.0;
 batt_t = 5.0;
 batt_w = 40.0;
 batt_h = 30.0;
+batt_off_x = 0.0;
+batt_off_y = 12.0;
 
 hole_d = 1.7;
 hole_inset = 3.5;
 
-speaker_h = 3.0;
+speaker_x = 0.0;
+speaker_y = 36.0;
+speaker_od = 13.0;
+speaker_h = 4.0;

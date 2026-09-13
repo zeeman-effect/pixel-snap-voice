@@ -54,12 +54,17 @@
     "led_edge": "left",
     "led_y_mm": 18.0,
     "sd_edge": "left",
-    "speaker_height_mm": 3.0
+    "speaker_x_mm": 0.0,
+    "speaker_y_mm": 36.0,
+    "speaker_od_mm": 13.0,
+    "speaker_height_mm": 4.0
   },
   "battery": {
     "max_thickness_mm": 5.0,
     "pocket_width_mm": 40.0,
     "pocket_height_mm": 30.0,
+    "offset_x_mm": 0.0,
+    "offset_y_mm": 12.0,
     "locked_mah": 500,
     "chemistry": "LiPo 3.7 V pouch, protected if it still fits"
   },
