@@ -2,7 +2,7 @@
 
 Do this on the first SMT board **after** `python scripts/check_gates.py` is green. Do not power a board that failed ERC/DRC/envelope/`recorder_test`.
 
-Gerbers + JLC BOM/CPL: `hardware/kicad/fab/` and `hardware/kicad/jlcpcb_bom.csv`. Prefer a `kicad-cli` export from `hardware/kicad/recorder/recorder.kicad_pcb` when KiCad is installed. Do not power or order from an export that still fails DRC.
+Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. A green `check_gates.py` writes all three from `hardware/kicad/recorder/recorder.kicad_pcb`, so order from the files that run just produced. Do not power or order from an export that still fails DRC.
 
 ## Order of tests
 

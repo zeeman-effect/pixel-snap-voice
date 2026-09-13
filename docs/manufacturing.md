@@ -10,7 +10,10 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Layers | 4 (F.Cu, In1.Cu, In2.Cu, B.Cu) |
 | Thickness | 0.8 mm (`params.json`). 1.6 mm only if a later envelope check still passes |
 | Finish | ENIG (USB-C and fine pitch) |
-| Impedance | USB 2.0 D+/D− ~90 Ω differential; document stackup in KiCad |
+| Impedance | None. Do not order the controlled-impedance option. USB is full speed only, so D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch over In1 GND (~75 Ω). Reasoning in `hardware/kicad/README.md` |
+| Min trace / space | 0.15 mm. Inside standard capability, so no fine-line surcharge |
+| Via | 0.6 mm pad on a 0.3 mm drill, one size everywhere. 0.3 mm is JLC's preferred hole, so no small-via surcharge — do not let a re-route drop below it |
+| Silkscreen | Standard font, 1.0 mm characters on a 0.15 mm stroke. Not the high-precision option |
 | Assembly | JLCPCB SMT, LCSC Basic where possible |
 | Panel | Single board is fine for a one-off |
 
@@ -42,9 +45,9 @@ Pouch LiPo sized after CAD. Use a protected cell if it still fits; otherwise a P
 ## Order checklist
 
 1. If you changed schematic sources, run `python hardware/kicad/recorder/generate_recorder.py` then `python hardware/kicad/recorder/verify_schematic.py`. That overwrites sheets only. It does not write `recorder.kicad_pcb`.
-2. `python scripts/check_gates.py` (envelope, `recorder_test`, schematic ERC, outline/holes, MCU SKU, pins). Official copper DRC is `kicad-cli pcb drc`. Send `hardware/kicad/fab/` only if that DRC is clean and `kicad-cli` just wrote the folder from `hardware/kicad/recorder/recorder.kicad_pcb`. If gates or DRC fail, edit the board. Do not stop at the report.
+2. `python scripts/check_gates.py` (envelope, `recorder_test`, schematic ERC, outline/holes, MCU SKU, pins). Official copper DRC is `kicad-cli pcb drc`. A clean run writes the whole upload package in one pass: `hardware/kicad/fab/` from `kicad-cli`, and `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` from `generate_jlc.py`. Send them only if that run just happened. If gates or DRC fail, edit the board. Do not stop at the report.
 3. Optional: ngspice `sim/spice/power_path.cir`
 4. Human glance in KiCad 10: USB length/impedance, courtyard collisions, 3D vs case. Footprint XY: `hardware/kicad/recorder/placement.json`.
-5. Upload `hardware/kicad/fab/` Gerbers + `jlcpcb_bom.csv` + `jlcpcb_cpl.csv` to JLCPCB
+5. Upload `hardware/kicad/fab/` Gerbers + `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` to JLCPCB. Step 2 writes all three from `recorder.kicad_pcb`, so upload the files that run just produced. Do not hand-edit the CSVs: LCSC order codes come from the table in [`docs/bom.md`](bom.md), and which parts the machine places comes from the board's own `exclude_from_pos_files` / `exclude_from_bom` flags
 6. Order magnet ring and LiPo **before** locking CNC metal
 7. SMT board: follow [`docs/bringup-custom.md`](bringup-custom.md)

@@ -1,9 +1,9 @@
 (export
 	(version "E")
 	(design
-		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
-		(date "2026-09-01T15:54:34")
-		(tool "Eeschema 10.0.5")
+		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
+		(date "2026-09-12T15:49:22")
+		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
 		(sheet
 			(number "1")
 			(name "/")
@@ -516,19 +516,16 @@
 							(num "SH")
 						)
 						(pin
-							(num "A1")
-						)
-						(pin
-							(num "A12")
-						)
-						(pin
 							(num "B1")
 						)
 						(pin
 							(num "B12")
 						)
 						(pin
-							(num "A4")
+							(num "A1")
+						)
+						(pin
+							(num "A12")
 						)
 						(pin
 							(num "A9")
@@ -538,6 +535,9 @@
 						)
 						(pin
 							(num "B9")
+						)
+						(pin
+							(num "A4")
 						)
 						(pin
 							(num "A5")
@@ -786,11 +786,11 @@
 		(comp
 			(ref "U1")
 			(value "ESP32-S3-MINI-1U-N8")
-			(footprint "RF_Module:ESP32-S3-MINI-1")
+			(footprint "PSV:ESP32-S3-MINI-1U")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "RF_Module:ESP32-S3-MINI-1")
+					(name "Footprint") "PSV:ESP32-S3-MINI-1U")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -891,46 +891,10 @@
 							(num "3")
 						)
 						(pin
-							(num "2")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "56")
-						)
-						(pin
-							(num "58")
-						)
-						(pin
-							(num "59")
-						)
-						(pin
-							(num "60")
-						)
-						(pin
-							(num "61")
-						)
-						(pin
-							(num "62")
-						)
-						(pin
-							(num "63")
-						)
-						(pin
-							(num "64")
+							(num "55")
 						)
 						(pin
 							(num "65")
-						)
-						(pin
-							(num "57")
-						)
-						(pin
-							(num "42")
-						)
-						(pin
-							(num "43")
 						)
 						(pin
 							(num "46")
@@ -960,7 +924,43 @@
 							(num "54")
 						)
 						(pin
-							(num "55")
+							(num "56")
+						)
+						(pin
+							(num "57")
+						)
+						(pin
+							(num "58")
+						)
+						(pin
+							(num "59")
+						)
+						(pin
+							(num "60")
+						)
+						(pin
+							(num "61")
+						)
+						(pin
+							(num "62")
+						)
+						(pin
+							(num "63")
+						)
+						(pin
+							(num "64")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
 						)
 						(pin
 							(num "39")
@@ -1689,11 +1689,11 @@
 		(comp
 			(ref "MK1")
 			(value "IM73A135")
-			(footprint "Sensor_Audio:Infineon_PG-LLGA-5-3")
+			(footprint "PSV:IM73A135_PG-LLGA-5-3")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Sensor_Audio:Infineon_PG-LLGA-5-3")
+					(name "Footprint") "PSV:IM73A135_PG-LLGA-5-3")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -1964,11 +1964,11 @@
 		(comp
 			(ref "SP1")
 			(value "1511")
-			(footprint "Speaker_Audio:Speaker_15x11mm")
+			(footprint "PSV:Speaker_15x11mm")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Speaker_Audio:Speaker_15x11mm")
+					(name "Footprint") "PSV:Speaker_15x11mm")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -2014,11 +2014,11 @@
 		(comp
 			(ref "U2")
 			(value "ES8311")
-			(footprint "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm")
+			(footprint "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm")
+					(name "Footprint") "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -2092,6 +2092,9 @@
 						)
 						(pin
 							(num "10")
+						)
+						(pin
+							(num "21")
 						)
 						(pin
 							(num "7")
@@ -2246,11 +2249,11 @@
 		(comp
 			(ref "BT1")
 			(value "LiPo 500mAh")
-			(footprint "Connector_Wire:SolderWire-2.0sqmm_1x02_D2.0mm_OD5mm")
+			(footprint "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Connector_Wire:SolderWire-2.0sqmm_1x02_D2.0mm_OD5mm")
+					(name "Footprint") "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -3595,11 +3598,11 @@
 		(comp
 			(ref "SW1")
 			(value "record")
-			(footprint "Button_Switch_SMD:SW_SPST_PTS645")
+			(footprint "Button_Switch_SMD:SW_SPST_EVQP7C")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Button_Switch_SMD:SW_SPST_PTS645")
+					(name "Footprint") "Button_Switch_SMD:SW_SPST_EVQP7C")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -4178,7 +4181,7 @@
 				(field
 					(name "Value") "ES8311")
 				(field
-					(name "Footprint") "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm")
+					(name "Footprint") "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm")
 				(field
 					(name "Datasheet") "https://dl.espressif.com/dl/schematics/Audio_ES8311.pdf")
 				(field
@@ -4285,6 +4288,11 @@
 					(name "CE")
 					(type "input")
 				)
+				(pin
+					(num "21")
+					(name "EP")
+					(type "power_in")
+				)
 			)
 		)
 		(libpart
@@ -4298,7 +4306,7 @@
 				(field
 					(name "Value") "IM73A135")
 				(field
-					(name "Footprint") "Sensor_Audio:Infineon_PG-LLGA-5-3")
+					(name "Footprint") "PSV:IM73A135_PG-LLGA-5-3")
 				(field
 					(name "Datasheet") "https://www.infineon.com/dgdl/Infineon-IM73A135-DataSheet-v01_00-EN.pdf")
 				(field
@@ -4971,48 +4979,8 @@
 	)
 	(libraries
 		(library
-			(logical "Battery_Management")
-			(uri "${KICAD10_SYMBOL_DIR}/Battery_Management.kicad_sym")
-		)
-		(library
-			(logical "Connector")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
-		)
-		(library
-			(logical "Connector_Generic")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
-		)
-		(library
-			(logical "Device")
-			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
-		)
-		(library
-			(logical "Oscillator")
-			(uri "${KICAD10_SYMBOL_DIR}/Oscillator.kicad_sym")
-		)
-		(library
 			(logical "PSV")
 			(uri "${KIPRJMOD}/PSV.kicad_sym")
-		)
-		(library
-			(logical "Power_Management")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Management.kicad_sym")
-		)
-		(library
-			(logical "Power_Protection")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
-		)
-		(library
-			(logical "RF_Module")
-			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
-		)
-		(library
-			(logical "Regulator_Linear")
-			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
-		)
-		(library
-			(logical "Switch")
-			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
 		)
 	)
 	(nets
@@ -5088,6 +5056,12 @@
 				(ref "U2")
 				(pin "10")
 				(pinfunction "AGND_10")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U2")
+				(pin "21")
+				(pinfunction "EP_21")
 				(pintype "power_in")
 			)
 		)
@@ -5364,7 +5338,7 @@
 		(net
 			(code "19")
 			(name "/Power/3V3_RAW")
-			(class "Default")
+			(class "POWER,Default")
 			(node
 				(ref "C7")
 				(pin "1")
@@ -5424,7 +5398,7 @@
 		(net
 			(code "22")
 			(name "3V3A")
-			(class "Default")
+			(class "POWER,Default")
 			(node
 				(ref "C13")
 				(pin "1")
@@ -5472,8 +5446,8 @@
 			(class "Default")
 			(node
 				(ref "SW1")
-				(pin "2")
-				(pinfunction "2_2")
+				(pin "1")
+				(pinfunction "1_1")
 				(pintype "passive")
 			)
 			(node
@@ -5644,6 +5618,12 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "J2")
+				(pin "SH")
+				(pinfunction "SHIELD_SH")
+				(pintype "passive")
+			)
+			(node
 				(ref "J3")
 				(pin "6")
 				(pinfunction "VSS_6")
@@ -5687,8 +5667,8 @@
 			)
 			(node
 				(ref "SW1")
-				(pin "1")
-				(pinfunction "1_1")
+				(pin "2")
+				(pinfunction "2_2")
 				(pintype "passive")
 			)
 			(node
@@ -6269,7 +6249,7 @@
 		(net
 			(code "46")
 			(name "VBAT")
-			(class "Default")
+			(class "POWER,Default")
 			(node
 				(ref "BT1")
 				(pin "1")
@@ -6278,6 +6258,11 @@
 			)
 			(node
 				(ref "C20")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C5")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -6320,7 +6305,7 @@
 		(net
 			(code "47")
 			(name "VBUS")
-			(class "Default")
+			(class "POWER,Default")
 			(node
 				(ref "F1")
 				(pin "1")
@@ -6360,7 +6345,7 @@
 		(net
 			(code "48")
 			(name "VBUS_CHG")
-			(class "Default")
+			(class "POWER,Default")
 			(node
 				(ref "C4")
 				(pin "1")
@@ -6508,16 +6493,6 @@
 		)
 		(net
 			(code "50")
-			(name "unconnected-(C5-Pad1)")
-			(class "Default")
-			(node
-				(ref "C5")
-				(pin "1")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "51")
 			(name "unconnected-(J2-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -6528,7 +6503,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "51")
 			(name "unconnected-(J2-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -6539,18 +6514,7 @@
 			)
 		)
 		(net
-			(code "53")
-			(name "unconnected-(J2-SHIELD-PadSH)")
-			(class "Default")
-			(node
-				(ref "J2")
-				(pin "SH")
-				(pinfunction "SHIELD_SH")
-				(pintype "passive+no_connect")
-			)
-		)
-		(net
-			(code "54")
+			(code "52")
 			(name "unconnected-(U1-IO3-Pad7)")
 			(class "Default")
 			(node
@@ -6561,7 +6525,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "53")
 			(name "unconnected-(U1-IO21-Pad25)")
 			(class "Default")
 			(node
@@ -6572,7 +6536,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "54")
 			(name "unconnected-(U1-IO26-Pad26)")
 			(class "Default")
 			(node
@@ -6583,7 +6547,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "55")
 			(name "unconnected-(U1-IO33-Pad28)")
 			(class "Default")
 			(node
@@ -6594,7 +6558,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "56")
 			(name "unconnected-(U1-IO34-Pad29)")
 			(class "Default")
 			(node
@@ -6605,7 +6569,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "57")
 			(name "unconnected-(U1-IO35-Pad31)")
 			(class "Default")
 			(node
@@ -6616,7 +6580,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "58")
 			(name "unconnected-(U1-IO36-Pad32)")
 			(class "Default")
 			(node
@@ -6627,7 +6591,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "59")
 			(name "unconnected-(U1-IO37-Pad33)")
 			(class "Default")
 			(node
@@ -6638,7 +6602,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "60")
 			(name "unconnected-(U1-IO38-Pad34)")
 			(class "Default")
 			(node
@@ -6649,7 +6613,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "61")
 			(name "unconnected-(U1-IO39-Pad35)")
 			(class "Default")
 			(node
@@ -6660,7 +6624,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "62")
 			(name "unconnected-(U1-IO40-Pad36)")
 			(class "Default")
 			(node
@@ -6671,7 +6635,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "63")
 			(name "unconnected-(U1-IO41-Pad37)")
 			(class "Default")
 			(node
@@ -6682,7 +6646,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "64")
 			(name "unconnected-(U1-IO42-Pad38)")
 			(class "Default")
 			(node
@@ -6693,7 +6657,7 @@
 			)
 		)
 		(net
-			(code "67")
+			(code "65")
 			(name "unconnected-(U1-IO45-Pad41)")
 			(class "Default")
 			(node
@@ -6704,7 +6668,7 @@
 			)
 		)
 		(net
-			(code "68")
+			(code "66")
 			(name "unconnected-(U1-IO46-Pad44)")
 			(class "Default")
 			(node
@@ -6715,7 +6679,7 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "67")
 			(name "unconnected-(U1-IO47-Pad27)")
 			(class "Default")
 			(node
@@ -6726,7 +6690,7 @@
 			)
 		)
 		(net
-			(code "70")
+			(code "68")
 			(name "unconnected-(U1-IO48-Pad30)")
 			(class "Default")
 			(node
@@ -6737,7 +6701,7 @@
 			)
 		)
 		(net
-			(code "71")
+			(code "69")
 			(name "unconnected-(U4-NC-Pad4)")
 			(class "Default")
 			(node
@@ -6748,7 +6712,7 @@
 			)
 		)
 		(net
-			(code "72")
+			(code "70")
 			(name "unconnected-(U5-~{FLG}-Pad3)")
 			(class "Default")
 			(node
@@ -6759,7 +6723,7 @@
 			)
 		)
 		(net
-			(code "73")
+			(code "71")
 			(name "unconnected-(U8-NC-Pad4)")
 			(class "Default")
 			(node

@@ -69,13 +69,23 @@ Update this section when it stops being true.
 - Phase 0 ESP-IDF app is in `firmware/` (Korvo-2 / ESP-BOX / custom pin maps). CAD is in `hardware/cad` (`params.json` + `case.scad`, draft PETG).
 - Product KiCad is `hardware/kicad/recorder/` (open `recorder.kicad_pro`). Sheets come from `generate_recorder.py`. The board file is `recorder.kicad_pcb`. Footprint XY is `hardware/kicad/recorder/placement.json`.
 - The PETG tray ducts MK1's B.Cu NPTH under the board to the right-wall mic port. MK1 is on F.Cu.
-- The board has Edge.Cuts, H1–H4, and copper pours. Signals are still open. That is the next design job, not a reason to stop.
+- **The board is routed.** 700 tracks, 186 vias, ~1941 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
+- **The DRC rules are JLCPCB's published capability**, not house numbers. Global floors live in `DESIGN_RULES` in `generate_pcb.py`. The two checks that depend on item type live in `recorder/recorder.kicad_dru`: pad hole-to-hole at **0.6 mm** (JLC's floor is 0.45 mm; 0.6 mm keeps the +0.13 mm plated-hole tolerance), and 0.5 mm minimum non-plated hole. The board holds 0.15 mm tracks, 0.6/0.3 vias, 0.62 mm minimum pad hole spacing and 0.3 mm hole-to-copper.
+- Silkscreen is 1.0 mm on a 0.15 mm stroke, JLC's standard font. It used to be 0.8 mm, which is only legal on their high-precision line and which their own capability table calls unidentifiable. Every designator still found a clear seat at the larger size.
+- USB D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch, **not** impedance controlled: the ESP32-S3 is full speed only. Do not order the controlled-impedance option. Reasoning in `hardware/kicad/README.md`.
+- MK1's land pattern in `PSV.pretty` is adapted, not the datasheet drawing: the ring pad and its stencil sit at r=0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm. Infineon's own figure leaves 0.18 mm, under JLC's 0.2 mm floor before drill tolerance. Check the acoustic seal on the first assembled board.
 - Current pouch size is 500 mAh from leftover CAD volume.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
+- SP1 is still an invented 15 × 11 mm land. It is DRC clean and routed, but nobody has picked a real speaker yet.
+- SW1 is a **side-actuated** Panasonic EVQP7C01P (LCSC C388883, 3.5 × 2.9 × 1.35 mm, 2.2 N), not the top-actuated PTS645 it used to be. The record button is on the left wall, so a top plunger needed a case lever; this one is pressed straight through a 3 × 2.2 mm slot. Its actuator tip stops 0.9 mm short of the inner wall face, so the case still needs a moulded nub to span the gap.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
 
-Do not send Gerbers until `python scripts/check_gates.py` is clean **and** `kicad-cli` wrote `hardware/kicad/fab/` from `recorder.kicad_pcb` **and** `kicad-cli pcb drc` is clean. Those are ship gates. They are not a reason to leave the board unedited.
+`python scripts/check_gates.py` is the ship gate and it now does the whole job itself: it runs `check_placement.py` when `pcbnew` is importable, runs `kicad-cli pcb drc` at every severity and with `--schematic-parity`, and then writes Gerbers, both drill files, the pick-and-place CSV, `recorder-jlc.zip` and the two JLCPCB assembly CSVs from `recorder.kicad_pcb` in one pass. Do not hand-export or hand-edit part of that set — a drill file that does not match the copper is a scrap board, and a pick-and-place row that does not match it is a misassembled one. It also runs DRC a second time with `--refill-zones` and refuses to plot if the two disagree, because `kicad-cli` plots the fill stored in the board: a stale pour would otherwise ship while DRC quietly refilled and called it clean.
+
+`hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` are **generated**, by `hardware/kicad/recorder/generate_jlc.py`. They were hand-typed and had drifted: C11, C12, C17 and C18 still carried pre-route coordinates. LCSC order codes come from the table in `docs/bom.md`; which parts the machine handles comes from each footprint's own `exclude_from_pos_files` / `exclude_from_bom` flag in the board.
+
+DRC parity leaves 27 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), the 4 mounting holes, which are mechanical and have no symbol, and SP1's Description field. A Gerber upload still needs a real speaker part number for SP1 (the placeholder land is DRC-clean on purpose). The accessory is not finished after that: MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
 
 ## How to change the hardware
 
@@ -84,10 +94,11 @@ Close KiCad before running the generators. Lock files look like `~recorder.kicad
 | If you need to change | Edit | Then |
 | --- | --- | --- |
 | Nets, parts, pins on the schematic | `generate_recorder.py`, `PSV.kicad_sym` | `python hardware/kicad/recorder/generate_recorder.py` then `python hardware/kicad/recorder/verify_schematic.py`. This overwrites sheets only. It does not write the PCB. |
-| Footprint XY | `placement.json` and `recorder.kicad_pcb` together | Keep them twins. Also update `hardware/cad/params.json` / `case.scad` if a wall cut or pocket moves. |
+| Footprint XY | `placement.json` and `recorder.kicad_pcb` together | Keep them twins. `check_placement.py` now compares them part by part and fails on drift. Also update `hardware/cad/params.json` / `case.scad` if a wall cut or pocket moves. |
+| An LCSC order code, or which parts JLC assembles | the LCSC column of `docs/bom.md`, or the footprint's `exclude_from_pos_files` / `exclude_from_bom` flag in the board | `python scripts/check_gates.py` rewrites `jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. Never hand-edit those two. |
 | A clean placement rebuild | `generate_pcb.py` (KiCad 10 `python.exe`, not system Python) | This **wipes** copper. Re-pour planes and re-route after. Do not run it as a status check. |
 | Planes | `route_pcb.py --planes-only` (same KiCad interpreter) | Loads the existing board. Does not move parts. |
-| Signal traces | `recorder.kicad_pcb` (KiCad, `route_pcb.py`, or both) | The script autorouter is experimental. Use it as a start if it helps, then fix what DRC and a glance say is wrong. Do not refuse to route. |
+| Signal traces | `recorder.kicad_pcb` (KiCad, `route_pcb.py`, or both) | `route_pcb.py` with no flag clears copper, hand-routes and locks the awkward parts, then drives freerouting and repairs until DRC is clean. `--finish-only` just drops stub vias, re-seats silk and refreshes `placement.json`. |
 | Envelope / case | `params.json`, `params.scad`, `case.scad` | `python hardware/cad/check_envelope.py` |
 | GPIO map | `hardware/kicad/pins.py`, `firmware/boards/custom.h`, and `pinmap.md` | `check_pins.py` is a consistency check. Change all three. |
 | MCU SKU | `params.json` `mcu` | Update schematic sources and regenerate sheets. |

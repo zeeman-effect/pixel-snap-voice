@@ -1,9 +1,9 @@
 # Fab export
 
-`kicad-cli` writes this folder from `hardware/kicad/recorder/recorder.kicad_pcb`. On this machine the binary is `%LOCALAPPDATA%\Programs\KiCad\10.0\bin\kicad-cli.exe` (not on PATH). `python scripts/check_gates.py` finds that same path.
+`python scripts/check_gates.py` writes this whole folder from `hardware/kicad/recorder/recorder.kicad_pcb`, in one pass, after running `kicad-cli pcb drc`. It needs `kicad-cli`: on Linux that is on PATH, on Windows it is `%LOCALAPPDATA%\Programs\KiCad\10.0\bin\kicad-cli.exe`.
 
-This folder has Gerbers, PTH/NPTH drills, and `recorder-jlc.zip`. BOM/CPL sit one level up: `jlcpcb_bom.csv`, `jlcpcb_cpl.csv`.
+Contents: Gerbers, PTH/NPTH Excellon drills and their map PDFs, `recorder-pos.csv` (pick and place), and `recorder-jlc.zip`. The zip holds the copper, mask, silk, outline and drills only — the Fab, Courtyard, Adhesive, Margin and User layers are internal documentation and JLCPCB should not see them. BOM/CPL sit one level up: `jlcpcb_bom.csv`, `jlcpcb_cpl.csv`.
 
-If the board is still unrouted, do not send this folder to a board house. Export again after routing and DRC.
+Never hand-export part of this set. These files only mean anything together: an earlier version of the gate script refreshed the Gerbers but left the drill file at whatever date it was committed with, which described a board with none of its vias drilled.
 
-JLC: 4-layer, 0.8 mm, ENIG, 90 ohm USB on the documented stackup.
+JLC order: 4-layer, 0.8 mm, ENIG. **No controlled impedance** — USB here is full speed and the pair is deliberately uncontrolled. Everything else is standard capability too: 0.15 mm minimum trace, 0.6 mm vias on a 0.3 mm drill, standard-font silkscreen. Nothing here should trigger a fine-line, small-via or high-precision-legend surcharge. See `hardware/kicad/README.md`.
