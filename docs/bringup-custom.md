@@ -12,7 +12,7 @@ Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` an
 4. **I2S** — codec is master. Y1 is the 12.288 MHz oscillator into ES8311 MCLK. Scope MCLK/BCLK/WS. Play a tone / loopback before trusting the mic.
 5. **Mic capture** — short press records `/recordings/YYYYMMDD-HHMMSS.wav` at 48 kHz. Copy off via SD reader if MSC is not up yet. Play on a desktop.
 6. **SD** — 4-bit SDMMC. `storage_sd_mount` log line.
-7. **Playback** — double-press plays last file through NS4150 / SP1 (KELIKING KLJ-01304T). Check the lid grille is over the can.
+7. **Playback** — double-press plays last file through NS4150 / SP1 (KELIKING KLJ-01304T). Check the lid grille is over the can. NS4150B runs from VBAT; at 4.2 V into 8 Ω the PA can sit on the speaker's 1 W max. Firmware still advertises `pa_voltage = 5.0`, which keeps digital gain down. Confirm polarity (a left-right JLC mismatch only inverts phase; a 180° mismatch is silent) and that playback volume is comfortable, not a copper change.
 8. **Charger** — USB-C 5 V, MCP73831 STAT, ~500 mA. No brownout while recording or playing.
 9. **TinyUSB MSC** — plug into a PC; recording stops; volume mounts; unplug returns to idle. Drop `set_time.txt` to set the RTC.
 10. **Sleep** — long press; current should drop (U5 off). Wake on the record button.

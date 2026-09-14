@@ -23,7 +23,7 @@ The KiCad board origin matches. Edge.Cuts is the 64 × 86 mm PCB, not the 67 × 
 | PCB | 1.55–2.35 | 0.8 mm; **B.Cu** is the flat phone-facing side |
 | Tray / lid split | 2.35 | `tray_h` = adhesive + magnet + shunt + PCB = 2.35 mm. `lid_h` = 6.65 mm |
 | Tall parts | 2.35–5.55 | USB-C 3.2 mm, module 2.4 mm, SD on **F.Cu**. In the lid |
-| LiPo pocket | 2.35–7.35 | 5.0 mm pouch at (0, 12), +Y of U1/J2 and −Y of SP1 |
+| LiPo pocket | 2.35–7.35 | 5.0 mm pouch at (0, 10), +Y of U1/J2 and −Y of SP1 |
 | Speaker (SP1) | 2.35–6.35 | 4.0 mm KELIKING can on F.Cu. Sound faces the lid |
 | Back shell | 7.80–9.00 | 1.2 mm PETG (`shell_back`). `speaker_grille()` opens the skin over SP1 |
 
@@ -52,6 +52,7 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | LED (D1) | −29.0 | +18.0 | side window in the lid wall, not through the back |
 | SD slot (J3) | see placement.json |  | no mouth in this pass |
 | Speaker (SP1) | 0.0 | +36.0 | 4.0 mm KELIKING KLJ-01304T on F.Cu. Sound faces the lid; `speaker_grille()` opens the back skin |
+| LiPo pocket | 0.0 | +10.0 | 40 × 30 × 5 mm pouch. Lid `battery_fence()` outer is 43.6 × 33.6 mm around this. Was y=12; that put the +Y wall 0.7 mm from SP1. |
 | MCU module (U1) | +14.0 | −18.0 | 2.4 mm, next to USB; MINI-1U, IPEX unused |
 | Mounting holes | ±(32−3.5), ±(43−3.5) | M1.6 clearance |
 
@@ -78,7 +79,7 @@ Export KiCad STEP (`File → Export → STEP`) and import next to `case.scad` (O
 1. Print in PETG. Tray sits phone-face down. Lid sits mating-face down (the rabbet groove is on the bed).
 2. Magnet pocket is 0.3 mm loose on OD. Drop in the bought ring + steel shunt (shunt **behind** the ring, away from the phone). Shim with tape. Do not chase a tight magnet until the real ring is on the desk. Isolate the shunt from any later metal lid with tape.
 3. M1.6 screws. `hole_d` 1.7 mm and the boss bore are **clearance**, not a tap. Do not thread PETG. Nuts or heat-set inserts come later. Keep screw heads off the phone glass.
-4. Drop in a dummy PCB (or the first fab) and a 5 mm dummy pouch. The pouch pocket is 40 × 30 × 5 mm at (0, 12), clear of U1, J2 and SP1. Confirm the lid grille sits over the speaker.
+4. Drop in a dummy PCB (or the first fab) and a 5 mm dummy pouch. The pouch pocket is 40 × 30 × 5 mm at (0, 10), clear of U1, J2 and SP1. Confirm the lid grille sits over the speaker and the fence wall does not hit the can.
 5. Snap to the Pixel. Confirm:
    - camera bar not covered
    - USB-C cable overmold misses the phone

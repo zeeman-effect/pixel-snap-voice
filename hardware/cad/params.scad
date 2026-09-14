@@ -40,7 +40,8 @@ batt_t = 5.0;
 batt_w = 40.0;
 batt_h = 30.0;
 batt_off_x = 0.0;
-batt_off_y = 12.0;
+batt_off_y = 10.0;
+batt_xy_clear = 0.6;
 
 hole_d = 1.7;
 hole_inset = 3.5;

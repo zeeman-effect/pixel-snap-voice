@@ -19,7 +19,6 @@ lid_h = acc_t - tray_h;
 pocket_extra = 0.3;
 magnet_floor = 0.4;
 pcb_clear = 0.3;
-batt_xy_clear = 0.6;
 corner_r = 2.5;
 // Lip outer sits on the rim outside the PCB rebate (0.45 mm/side at these numbers).
 lip_inset = 0.75;
@@ -203,11 +202,13 @@ module lid_inner() {
         );
 }
 
-// 40×30×5 leftover pocket at (0, 12): +Y of U1 (+14, −18) and J2, −Y of SP1 (0, 36).
+// 40×30×5 leftover pocket at (0, 10): +Y of U1 (+14, −18) and J2, −Y of SP1 (0, 36).
 // Closed 1.2 mm back: the fence hangs from the inner face of shell_back.
+// Wall thickness is `wall` (1.2 mm). At batt_off_y=12 the +Y face sat 0.7 mm
+// from the 13 mm can and overlapped it in Z; 10 mm is the printable seat.
 module battery_fence() {
-    outer_w = batt_w + 2 * batt_xy_clear + 2.4;
-    outer_h = batt_h + 2 * batt_xy_clear + 2.4;
+    outer_w = batt_w + 2 * batt_xy_clear + 2 * wall;
+    outer_h = batt_h + 2 * batt_xy_clear + 2 * wall;
     inner_w = batt_w + 2 * batt_xy_clear;
     inner_h = batt_h + 2 * batt_xy_clear;
     fence_h = 3.5;

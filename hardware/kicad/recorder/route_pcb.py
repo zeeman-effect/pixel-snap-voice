@@ -1835,9 +1835,14 @@ ROUTED_OPEN_ITEMS = [
     "SMD can that JLCPCB can place. The land is the vendor/EasyEDA "
     "BUZ-SMD_4P-L13.0-W13.0-P11.4-BL pattern: 2.0 x 2.5 mm pads, electrical "
     "pair on 11.4 mm centres toward the analog island, dummy pair toward the "
-    "top edge with no pin numbers. Pad 1 is + / SPK_P. The lid has a grille "
-    "over this part; check polarity and the acoustic path on the first "
-    "assembled board.",
+    "top edge with no pin numbers. Pad 1 is + / SPK_P at (+5.7, -4.35), "
+    "bottom-right in this file's 0°. EasyEDA -BL means pin 1 is bottom-left "
+    "in *their* library 0°, which is what JLC places C18186315 from. CPL "
+    "rotation is 0. A left-right mismatch only inverts polarity; 180° puts "
+    "the coil on the dummy pads and the speaker is open. Confirm against "
+    "JLC's assembly preview before the order. The lid has a grille over this "
+    "part; check polarity, volume (NS4150 on VBAT into 8 ohm, 1 W max) and "
+    "the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing "
     "the top-actuated PTS645. The record button is on the left wall, so a top "
     "plunger would have needed a case lever; this one is pressed straight "

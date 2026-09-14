@@ -76,7 +76,7 @@ Update this section when it stops being true.
 - MK1's land pattern in `PSV.pretty` is adapted, not the datasheet drawing: the ring pad and its stencil sit at r=0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm. Infineon's own figure leaves 0.18 mm, under JLC's 0.2 mm floor before drill tolerance. Check the acoustic seal on the first assembled board.
 - Current pouch size is 500 mAh from leftover CAD volume.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
-- SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), 13 × 13 × 4.0 mm SMD can at (0, 36). JLC places it. The lid has a grille over the can. The 40 × 30 mm pouch sits at (0, 12) so it misses both U1 and the speaker.
+- SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), 13 × 13 × 4.0 mm SMD can at (0, 36). JLC places it. The lid has a grille over the can. The 40 × 30 mm pouch sits at (0, 10) so the lid fence misses both U1 and the speaker. Confirm SP1 in JLC's assembly preview before the order: this land's pad 1 is bottom-right, JLC's library 0° is EasyEDA `-BL` (pin 1 bottom-left).
 - SW1 is a **side-actuated** Panasonic EVQP7C01P (LCSC C388883, 3.5 × 2.9 × 1.35 mm, 2.2 N), not the top-actuated PTS645 it used to be. The record button is on the left wall, so a top plunger needed a case lever; this one is pressed straight through a 3 × 2.2 mm slot. Its actuator tip stops 0.9 mm short of the inner wall face, so the case still needs a moulded nub to span the gap.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
@@ -99,7 +99,7 @@ Close KiCad before running the generators. Lock files look like `~recorder.kicad
 | A clean placement rebuild | `generate_pcb.py` (KiCad 10 `python.exe`, not system Python) | This **wipes** copper. Re-pour planes and re-route after. Do not run it as a status check. |
 | Planes | `route_pcb.py --planes-only` (same KiCad interpreter) | Loads the existing board. Does not move parts. |
 | Signal traces | `recorder.kicad_pcb` (KiCad, `route_pcb.py`, or both) | `route_pcb.py` with no flag clears copper, hand-routes and locks the awkward parts, then drives freerouting and repairs until DRC is clean. `--finish-only` just drops stub vias, re-seats silk and refreshes `placement.json`. |
-| Envelope / case | `params.json`, `params.scad`, `case.scad` | `python hardware/cad/check_envelope.py` |
+| Envelope / case | `params.json`, `params.scad`, `case.scad` | `python hardware/cad/check_envelope.py`. That check models the lid battery fence, not just the pouch, and twins SP1 XY to `placement.json`. |
 | GPIO map | `hardware/kicad/pins.py`, `firmware/boards/custom.h`, and `pinmap.md` | `check_pins.py` is a consistency check. Change all three. |
 | MCU SKU | `params.json` `mcu` | Update schematic sources and regenerate sheets. |
 
