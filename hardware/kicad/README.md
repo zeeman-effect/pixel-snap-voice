@@ -24,7 +24,7 @@ python scripts/check_gates.py
 
 Sheets: `mcu_usb`, `audio`, `power`, `io` (global labels join them). Pin map: [`pinmap.md`](pinmap.md).
 
-Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is still an invented land pattern, so that first condition is not met yet.
+Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is the KELIKING KLJ-01304T-08R07W land in `PSV.pretty`.
 
 ## Design rules
 
@@ -66,6 +66,7 @@ The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit o
 - Mic on the right long edge, away from U4 / U5
 - USB-C (**J2**) on the bottom short edge, offset +8 mm
 - Analog island (U2, U8, MK1, Y1) off **VDD33**
+- Analog footprint centres off the magnet circle; SP1 also by courtyard, because the 13 mm can holds a magnet (`check_placement.py`)
 - PA LC away from the magnet circle (comment layer)
 - MINI-1U module (15.4 × 15.4 mm). No PCB-antenna keepout. IPEX unpopulated
 - 4× M1.6 holes. No fiducials on this first pass.

@@ -40,6 +40,16 @@ import tempfile
 import numpy as np
 import pcbnew
 
+try:
+    import wx
+except ImportError:
+    wx = None
+else:
+    # KiCad 10's Windows build still trips PCB_VIA::GetWidth() without a
+    # layer inside DSN export. That is a wx assert dialog, not a real DRC
+    # failure. Mute it so a headless route can finish.
+    wx.DisableAsserts()
+
 from generate_pcb import apply_project_policy, tuck_reference_text
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -96,6 +106,11 @@ HOLE_TO_HOLE = 0.25
 EDGE_CLEAR = 0.35
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
+
+
+def via_width(via):
+    """KiCad 10 vias are per-layer; the no-arg GetWidth() asserts."""
+    return via.GetFrontWidth()
 HOLE_R = 2.1
 DEFAULT_WIDTH = 0.15
 USB_WIDTH = 0.20
@@ -254,7 +269,9 @@ def add_via(board, net, x, y, protect=False):
         PROTECTED.add(("via", round(x, 3), round(y, 3)))
     via = pcbnew.PCB_VIA(board)
     via.SetPosition(vec(x, y))
-    via.SetWidth(pcbnew.FromMM(VIA_SIZE))
+    via.SetFrontWidth(pcbnew.FromMM(VIA_SIZE))
+    via.SetWidth(pcbnew.F_Cu, pcbnew.FromMM(VIA_SIZE))
+    via.SetWidth(pcbnew.B_Cu, pcbnew.FromMM(VIA_SIZE))
     via.SetDrill(pcbnew.FromMM(VIA_DRILL))
     via.SetViaType(pcbnew.VIATYPE_THROUGH)
     via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
@@ -288,6 +305,46 @@ def tie_u2_ep(board):
             if pad.GetNumber() == "21" and pad.GetNetCode() != agnd.GetNetCode():
                 pad.SetNet(agnd)
                 print("  tied U2 pad 21 to AGND")
+            return
+
+
+def tie_mk1_ring(board):
+    """Connect MK1's ring pad to the AGND pour.
+
+    Pad 5 is the 0.32 mm ring around the 0.8 mm sound port. The AGND pour
+    keeps ZONE_CLEARANCE off that hole and never reaches the ring. Pads 3
+    and 4 are already in the pour; a short stub is the electrical path.
+    Freerouting leaves MK1-4 to MK1-5 open.
+    """
+    mk1 = board.FindFootprintByReference("MK1")
+    if mk1 is None:
+        return
+    pads = {pad.GetNumber(): pad for pad in mk1.Pads()}
+    if "4" not in pads or "5" not in pads:
+        return
+    agnd = net_of(board, "/Audio/AGND")
+    x0, y0 = pad_xy(pads["5"])
+    x1, y1 = pad_xy(pads["4"])
+    add_track(board, agnd, x0, y0, x1, y1, pcbnew.F_Cu, DEFAULT_WIDTH, protect=True)
+
+
+def tie_u1_edge_gnd(board, obstacles):
+    """Via out U1 pad 63 before USB and fanout can box it.
+
+    That castellation sits on the module's north-west corner. The locked USB
+    pair and the I2S fanout vias later occupy every 2 mm seat around it, and
+    DRC then reports an F.Cu GND sliver. A locked stub now keeps the pad on
+    the plane.
+    """
+    fp = board.FindFootprintByReference("U1")
+    if fp is None:
+        return
+    gnd = net_of(board, "GND")
+    for pad in fp.Pads():
+        if pad.GetNumber() == "63":
+            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_INHERITED)
+            x, y = pad_xy(pad)
+            stitch_one(board, obstacles, gnd, x, y, protect=True)
             return
 
 
@@ -418,7 +475,7 @@ class Obstacles:
         for item in board.GetTracks():
             if isinstance(item, pcbnew.PCB_VIA):
                 x, y = mm(item.GetPosition())
-                self.vias.append((x, y, pcbnew.ToMM(item.GetWidth()) / 2.0,
+                self.vias.append((x, y, pcbnew.ToMM(via_width(item)) / 2.0,
                                   pcbnew.ToMM(item.GetDrill()) / 2.0,
                                   item.GetNetCode()))
                 continue
@@ -927,7 +984,7 @@ def stitch_pads_to_planes(board, obstacles, half_w, half_h):
     return placed
 
 
-def stitch_one(board, obstacles, net, x, y, layer=pcbnew.F_Cu):
+def stitch_one(board, obstacles, net, x, y, layer=pcbnew.F_Cu, protect=False):
     """Drop a via next to (x, y) and run a stub to it.
 
     The stub itself is clearance-checked, not just the via seat. Checking only
@@ -943,10 +1000,11 @@ def stitch_one(board, obstacles, net, x, y, layer=pcbnew.F_Cu):
         stub = math.hypot(dx, dy) > 0.01
         if stub and not obstacles.track_fits(x, y, vx, vy, DEFAULT_WIDTH, code, layer):
             continue
-        add_via(board, net, vx, vy)
+        add_via(board, net, vx, vy, protect=protect)
         obstacles.add_via(vx, vy, code)
         if stub:
-            add_track(board, net, x, y, vx, vy, layer, DEFAULT_WIDTH)
+            add_track(board, net, x, y, vx, vy, layer, DEFAULT_WIDTH,
+                      protect=protect)
             obstacles.add_track(x, y, vx, vy, DEFAULT_WIDTH, code, layer)
         return True
     return False
@@ -967,6 +1025,40 @@ def stitch_grid(board, obstacles, half_w, half_h, pitch=6.0):
                 placed += 1
             y += pitch
         x += pitch
+    return placed
+
+
+def stitch_orphan_gnd_pads(board, obstacles):
+    """Via out any F.Cu GND pad sitting in a pour sliver that cannot hold a via.
+
+    Island removal keeps a fragment that still touches a pad. U1's module-edge
+    GND castellations do that: the pour around the pad is smaller than a
+    0.6 mm barrel, so via_in_zone cannot land, and DRC reports GND_F to itself.
+    """
+    gnd = net_of(board, "GND")
+    zone = None
+    for item in board.Zones():
+        if item.GetZoneName() == "GND_F":
+            zone = item
+            break
+    if zone is None or not zone.HasFilledPolysForLayer(pcbnew.F_Cu):
+        return 0
+    polys = zone.GetFilledPolysList(pcbnew.F_Cu)
+    seats = [(vx, vy) for vx, vy, _r, _dr, vnet in obstacles.vias
+             if vnet == gnd.GetNetCode()]
+    placed = 0
+    for i in range(polys.OutlineCount()):
+        if any(polys.Contains(vec(vx, vy), i) for vx, vy in seats):
+            continue
+        for _fp, pad, name in copper_pads(board):
+            if name != "GND" or not pad.IsOnLayer(pcbnew.F_Cu):
+                continue
+            if not polys.Contains(pad.GetPosition(), i):
+                continue
+            x, y = pad_xy(pad)
+            if stitch_one(board, obstacles, gnd, x, y):
+                placed += 1
+            break
     return placed
 
 
@@ -1314,10 +1406,11 @@ def find_freerouting():
     env = os.environ.get("PSV_FREEROUTING")
     if env and os.path.isfile(env):
         return env
-    found = shutil.which("freerouting")
+    found = shutil.which("freerouting") or shutil.which("freerouting.exe")
     if found:
         return found
     for path in (
+        os.path.expanduser("~/.local/opt/freerouting/freerouting/freerouting.exe"),
         os.path.expanduser("~/.local/opt/freerouting/bin/freerouting"),
         "/opt/freerouting/bin/freerouting",
     ):
@@ -1361,6 +1454,29 @@ def normalise_widths(board):
     return fixed
 
 
+def find_kicad_cli():
+    env = os.environ.get("KICAD_CLI")
+    if env and os.path.isfile(env):
+        return env
+    found = shutil.which("kicad-cli") or shutil.which("kicad-cli.exe")
+    if found:
+        return found
+    sibling = os.path.join(os.path.dirname(sys.executable), "kicad-cli.exe")
+    candidates = (
+        sibling,
+        os.path.join(os.environ.get("LOCALAPPDATA", ""),
+                     "Programs", "KiCad", "10.0", "bin", "kicad-cli.exe"),
+        os.path.join(os.environ.get("PROGRAMFILES", r"C:\Program Files"),
+                     "KiCad", "10.0", "bin", "kicad-cli.exe"),
+        os.path.join(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"),
+                     "KiCad", "10.0", "bin", "kicad-cli.exe"),
+    )
+    for path in candidates:
+        if path and os.path.isfile(path):
+            return path
+    return None
+
+
 def drc_json(pcb_path):
     """Read the board's DRC state, warnings included.
 
@@ -1370,7 +1486,7 @@ def drc_json(pcb_path):
     error for four warnings looked like an improvement and was kept. The JLC
     pad hole-spacing rule in recorder.kicad_dru is one of those warnings.
     """
-    kicad = shutil.which("kicad-cli") or os.environ.get("KICAD_CLI")
+    kicad = find_kicad_cli()
     if not kicad:
         raise SystemExit("kicad-cli not found; cannot check the routed board")
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as fh:
@@ -1715,10 +1831,18 @@ def patch_title(routed):
 
 
 ROUTED_OPEN_ITEMS = [
-    "SP1 is still a placeholder 15 x 11 mm land pattern in PSV.pretty. It is "
-    "DRC clean and its two pads are routed, but the pad size and spacing are "
-    "invented. Replace with the vendor drawing once a real speaker part "
-    "number is picked, then re-run generate_pcb.py and route_pcb.py.",
+    "SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), a 13 x 13 x 4.0 mm "
+    "SMD can that JLCPCB can place. The land is the vendor/EasyEDA "
+    "BUZ-SMD_4P-L13.0-W13.0-P11.4-BL pattern: 2.0 x 2.5 mm pads, electrical "
+    "pair on 11.4 mm centres toward the analog island, dummy pair toward the "
+    "top edge with no pin numbers. Pad 1 is + / SPK_P at (+5.7, -4.35), "
+    "bottom-right in this file's 0°. EasyEDA -BL means pin 1 is bottom-left "
+    "in *their* library 0°, which is what JLC places C18186315 from. CPL "
+    "rotation is 0. A left-right mismatch only inverts polarity; 180° puts "
+    "the coil on the dummy pads and the speaker is open. Confirm against "
+    "JLC's assembly preview before the order. The lid has a grille over this "
+    "part; check polarity, volume (NS4150 on VBAT into 8 ohm, 1 W max) and "
+    "the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing "
     "the top-actuated PTS645. The record button is on the left wall, so a top "
     "plunger would have needed a case lever; this one is pressed straight "
@@ -1746,13 +1870,11 @@ ROUTED_OPEN_ITEMS = [
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
-    "kicad-cli pcb drc --schematic-parity still reports 27 notes, and all of "
+    "kicad-cli pcb drc --schematic-parity still reports 26 notes, and all of "
     "them are expected: 22 are module pads with no schematic pin (spare "
-    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), 4 are the "
-    "H1-H4 mounting holes, which are mechanical and have no symbol, and 1 is "
-    "SP1's Description field, which says more on the board than in the "
-    "schematic. Copper DRC, unconnected count and footprint/library parity "
-    "are all zero.",
+    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair) and 4 are the "
+    "H1-H4 mounting holes, which are mechanical and have no symbol. Copper "
+    "DRC, unconnected count and footprint/library parity are all zero.",
 ]
 
 
@@ -1860,6 +1982,16 @@ def save(board):
     apply_project_policy(PROJECT)
 
 
+def fix_via_widths(board):
+    """Give every via a per-layer width. KiCad 10 asserts on the no-arg getter."""
+    width = pcbnew.FromMM(VIA_SIZE)
+    for item in board.GetTracks():
+        if isinstance(item, pcbnew.PCB_VIA):
+            item.SetFrontWidth(width)
+            item.SetWidth(pcbnew.F_Cu, width)
+            item.SetWidth(pcbnew.B_Cu, width)
+
+
 def stage_planes(dsn_path):
     """Wipe copper, lay the two inner planes, hand-route USB, write a DSN."""
     board, half_w, half_h = load()
@@ -1869,12 +2001,15 @@ def stage_planes(dsn_path):
     print("adding inner planes")
     add_inner_planes(board, half_w, half_h)
     obstacles = Obstacles(board, half_w, half_h)
+    tie_u1_edge_gnd(board, obstacles)
     print("hand-routing the USB-C D+/D- escape")
     usb_escape(board, obstacles)
     usb_pair_to_mcu(board, obstacles)
     stubs, vias = fanout_fine_pitch(board, obstacles)
     print(f"fine-pitch fanout: {stubs} stubs, {vias} vias")
+    tie_mk1_ring(board)
     print(f"protected {relock(board)} hand-routed items from the autorouter")
+    fix_via_widths(board)
     fill_zones(board)
     save(board)
     if not pcbnew.ExportSpecctraDSN(board, dsn_path):
@@ -1913,6 +2048,18 @@ def stage_pour(board, half_w, half_h, passes=8):
     print(f"  island vias:     {stitch_islands(board, obstacles, half_w, half_h)}")
     print(f"  GND grid vias:   {stitch_grid(board, obstacles, half_w, half_h)}")
     fill_zones(board)
+    gnd = net_of(board, "GND")
+    orphans = 0
+    for zone in board.Zones():
+        if zone.GetNetname() == "GND":
+            orphans += int(via_in_zone(board, obstacles, gnd, zone))
+    if orphans:
+        print(f"  orphan GND vias: {orphans} zones")
+        fill_zones(board)
+    pad_orphans = stitch_orphan_gnd_pads(board, obstacles)
+    if pad_orphans:
+        print(f"  orphan GND pads: {pad_orphans}")
+        fill_zones(board)
     save(board)
 
     best = None

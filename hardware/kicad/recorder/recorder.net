@@ -1,9 +1,9 @@
 (export
 	(version "E")
 	(design
-		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-09-12T15:49:22")
-		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
+		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
+		(date "2026-09-13T10:19:12")
+		(tool "Eeschema 10.0.5")
 		(sheet
 			(number "1")
 			(name "/")
@@ -516,16 +516,19 @@
 							(num "SH")
 						)
 						(pin
+							(num "A1")
+						)
+						(pin
+							(num "A12")
+						)
+						(pin
 							(num "B1")
 						)
 						(pin
 							(num "B12")
 						)
 						(pin
-							(num "A1")
-						)
-						(pin
-							(num "A12")
+							(num "A4")
 						)
 						(pin
 							(num "A9")
@@ -535,9 +538,6 @@
 						)
 						(pin
 							(num "B9")
-						)
-						(pin
-							(num "A4")
 						)
 						(pin
 							(num "A5")
@@ -891,10 +891,46 @@
 							(num "3")
 						)
 						(pin
-							(num "55")
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "56")
+						)
+						(pin
+							(num "58")
+						)
+						(pin
+							(num "59")
+						)
+						(pin
+							(num "60")
+						)
+						(pin
+							(num "61")
+						)
+						(pin
+							(num "62")
+						)
+						(pin
+							(num "63")
+						)
+						(pin
+							(num "64")
 						)
 						(pin
 							(num "65")
+						)
+						(pin
+							(num "57")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
 						)
 						(pin
 							(num "46")
@@ -924,43 +960,7 @@
 							(num "54")
 						)
 						(pin
-							(num "56")
-						)
-						(pin
-							(num "57")
-						)
-						(pin
-							(num "58")
-						)
-						(pin
-							(num "59")
-						)
-						(pin
-							(num "60")
-						)
-						(pin
-							(num "61")
-						)
-						(pin
-							(num "62")
-						)
-						(pin
-							(num "63")
-						)
-						(pin
-							(num "64")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "42")
-						)
-						(pin
-							(num "43")
+							(num "55")
 						)
 						(pin
 							(num "39")
@@ -1963,12 +1963,12 @@
 		)
 		(comp
 			(ref "SP1")
-			(value "1511")
-			(footprint "PSV:Speaker_15x11mm")
+			(value "KLJ-01304T-08R07W")
+			(footprint "PSV:Speaker_KLJ-01304T")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "PSV:Speaker_15x11mm")
+					(name "Footprint") "PSV:Speaker_KLJ-01304T")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -4979,8 +4979,48 @@
 	)
 	(libraries
 		(library
+			(logical "Battery_Management")
+			(uri "${KICAD10_SYMBOL_DIR}/Battery_Management.kicad_sym")
+		)
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Connector_Generic")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Oscillator")
+			(uri "${KICAD10_SYMBOL_DIR}/Oscillator.kicad_sym")
+		)
+		(library
 			(logical "PSV")
 			(uri "${KIPRJMOD}/PSV.kicad_sym")
+		)
+		(library
+			(logical "Power_Management")
+			(uri "${KICAD10_SYMBOL_DIR}/Power_Management.kicad_sym")
+		)
+		(library
+			(logical "Power_Protection")
+			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
+		)
+		(library
+			(logical "RF_Module")
+			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
+		)
+		(library
+			(logical "Regulator_Linear")
+			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
+		)
+		(library
+			(logical "Switch")
+			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
 		)
 	)
 	(nets

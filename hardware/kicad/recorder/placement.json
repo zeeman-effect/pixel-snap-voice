@@ -62,12 +62,12 @@
   },
   "footprint_substitutions": {},
   "open_items": [
-    "SP1 is still a placeholder 15 x 11 mm land pattern in PSV.pretty. It is DRC clean and its two pads are routed, but the pad size and spacing are invented. Replace with the vendor drawing once a real speaker part number is picked, then re-run generate_pcb.py and route_pcb.py.",
+    "SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), a 13 x 13 x 4.0 mm SMD can that JLCPCB can place. The land is the vendor/EasyEDA BUZ-SMD_4P-L13.0-W13.0-P11.4-BL pattern: 2.0 x 2.5 mm pads, electrical pair on 11.4 mm centres toward the analog island, dummy pair toward the top edge with no pin numbers. Pad 1 is + / SPK_P at (+5.7, -4.35), bottom-right in this file's 0°. EasyEDA -BL means pin 1 is bottom-left in JLC's library 0°. CPL rotation is 0. A left-right mismatch only inverts polarity; 180° puts the coil on the dummy pads and the speaker is open. Confirm against JLC's assembly preview before the order. The lid has a grille over this part; check polarity, volume (NS4150 on VBAT into 8 ohm, 1 W max) and the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing the top-actuated PTS645. The record button is on the left wall, so a top plunger would have needed a case lever; this one is pressed straight through the wall aperture. Its actuator tip sits 0.6 mm inside the board edge and 0.9 mm from the inner wall face, so the case still needs a short moulded nub to span that gap. Pin 1 carries BTN and pin 2 carries GND, the opposite of the old part: a push button's terminals are interchangeable, and pin 2 is the pad row nearest the board edge, where the F.Cu GND pour reaches it without a trace. Check the press feel on the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would need traces narrower than any quick-turn fab will run. The pair is 0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm differential by first-order microstrip. Re-check if v2 ever needs high-speed USB, which would mean a thicker top prepreg.",
     "MK1's land pattern is a locally adapted copy in PSV.pretty, not the drawing in the Infineon datasheet. The ring pad and its stencil aperture were moved out to 0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm; the datasheet's own figure would leave 0.18 mm, which no fab will drill reliably. The datasheet also assumes solder-mask-defined pads and this land is copper-defined, inherited from the KiCad library. Check the acoustic seal on the first assembled board: an open solder ring leaks and costs low-frequency response.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are published defaults. Caliper a real phone and a real magnet ring before cutting metal.",
-    "kicad-cli pcb drc --schematic-parity still reports 27 notes, and all of them are expected: 22 are module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair), 4 are the H1-H4 mounting holes, which are mechanical and have no symbol, and 1 is SP1's Description field, which says more on the board than in the schematic. Copper DRC, unconnected count and footprint/library parity are all zero."
+    "kicad-cli pcb drc --schematic-parity still reports 26 notes, and all of them are expected: 22 are module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair) and 4 are the H1-H4 mounting holes, which are mechanical and have no symbol. Copper DRC, unconnected count and footprint/library parity are all zero."
   ],
   "parts": [
     {
@@ -709,16 +709,16 @@
     },
     {
       "ref": "SP1",
-      "value": "1511",
+      "value": "KLJ-01304T-08R07W",
       "sheet": "Audio",
-      "x_mm": -4.0,
-      "y_mm": 32.0,
+      "x_mm": 0.0,
+      "y_mm": 36.0,
       "rot_deg": 0,
       "layer": "F.Cu",
-      "footprint": "PSV:Speaker_15x11mm",
-      "footprint_in_schematic": "PSV:Speaker_15x11mm",
+      "footprint": "PSV:Speaker_KLJ-01304T",
+      "footprint_in_schematic": "PSV:Speaker_KLJ-01304T",
       "substitution_reason": null,
-      "note": "1511 speaker, placeholder land pattern"
+      "note": "KELIKING 13 mm SMD speaker, LCSC C18186315"
     },
     {
       "ref": "SW1",
@@ -853,15 +853,15 @@
   ],
   "routing": {
     "router": "freerouting headless via Specctra DSN/SES, then plane stitching and pours from route_pcb.py",
-    "tracks": 700,
-    "vias": 186,
-    "track_length_mm": 1940.9,
+    "tracks": 720,
+    "vias": 187,
+    "track_length_mm": 1930.0,
     "zones": [
-      "VDD33_F_C14",
       "GND_F",
-      "VDD33_F_C8",
+      "VDD33_F_C14",
       "VDD33_F_C1C3",
       "AGND_F",
+      "VDD33_F_C8",
       "GND_B",
       "GND_In1",
       "VDD33_In2"

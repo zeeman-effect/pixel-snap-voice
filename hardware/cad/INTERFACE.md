@@ -23,10 +23,11 @@ The KiCad board origin matches. Edge.Cuts is the 64 × 86 mm PCB, not the 67 × 
 | PCB | 1.55–2.35 | 0.8 mm; **B.Cu** is the flat phone-facing side |
 | Tray / lid split | 2.35 | `tray_h` = adhesive + magnet + shunt + PCB = 2.35 mm. `lid_h` = 6.65 mm |
 | Tall parts | 2.35–5.55 | USB-C 3.2 mm, module 2.4 mm, SD on **F.Cu**. In the lid |
-| LiPo pocket | 2.35–7.35 | 5.0 mm pouch, shifted +Y off U1 and J2 |
-| Back shell | 7.80–9.00 | 1.2 mm PETG (`shell_back`), closed. First-print lid uses the 0.45 mm envelope slack here so the back is the outside face |
+| LiPo pocket | 2.35–7.35 | 5.0 mm pouch at (0, 10), +Y of U1/J2 and −Y of SP1 |
+| Speaker (SP1) | 2.35–6.35 | 4.0 mm KELIKING can on F.Cu. Sound faces the lid |
+| Back shell | 7.80–9.00 | 1.2 mm PETG (`shell_back`). `speaker_grille()` opens the skin over SP1 |
 
-Envelope budget is **9.0 mm**. USB stack is 6.75 mm. Battery stack is 8.55 mm.
+Envelope budget is **9.0 mm**. USB stack is 6.75 mm. Speaker stack is 7.55 mm. Battery stack is 8.55 mm.
 
 `case.scad` puts a 0.4 mm PETG floor under the magnet ring so it cannot fall through. That floor is a print trick. It does not change the stack numbers in `params.json`. Edit those if the stack changes. After the real ring arrives, shim, then tighten the pocket.
 
@@ -50,7 +51,8 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | Button (SW1) | −29.3 | +12.0 | side-actuated Panasonic EVQP7C01P, rot 270° so the actuator faces the left wall. Tip 0.6 mm inside the board edge; copper 1.46 mm off it. |
 | LED (D1) | −29.0 | +18.0 | side window in the lid wall, not through the back |
 | SD slot (J3) | see placement.json |  | no mouth in this pass |
-| Speaker (SP1) | +24.0 | +13.0 | omitted from the case so the back skin stays closed |
+| Speaker (SP1) | 0.0 | +36.0 | 4.0 mm KELIKING KLJ-01304T on F.Cu. Sound faces the lid; `speaker_grille()` opens the back skin |
+| LiPo pocket | 0.0 | +10.0 | 40 × 30 × 5 mm pouch. Lid `battery_fence()` outer is 43.6 × 33.6 mm around this. Was y=12; that put the +Y wall 0.7 mm from SP1. |
 | MCU module (U1) | +14.0 | −18.0 | 2.4 mm, next to USB; MINI-1U, IPEX unused |
 | Mounting holes | ±(32−3.5), ±(43−3.5) | M1.6 clearance |
 
@@ -77,7 +79,7 @@ Export KiCad STEP (`File → Export → STEP`) and import next to `case.scad` (O
 1. Print in PETG. Tray sits phone-face down. Lid sits mating-face down (the rabbet groove is on the bed).
 2. Magnet pocket is 0.3 mm loose on OD. Drop in the bought ring + steel shunt (shunt **behind** the ring, away from the phone). Shim with tape. Do not chase a tight magnet until the real ring is on the desk. Isolate the shunt from any later metal lid with tape.
 3. M1.6 screws. `hole_d` 1.7 mm and the boss bore are **clearance**, not a tap. Do not thread PETG. Nuts or heat-set inserts come later. Keep screw heads off the phone glass.
-4. Drop in a dummy PCB (or the first fab) and a 5 mm dummy pouch. The pouch pocket is 40 × 30 × 5 mm, shifted toward +Y so it misses U1 and J2. The 1.2 mm back stays closed.
+4. Drop in a dummy PCB (or the first fab) and a 5 mm dummy pouch. The pouch pocket is 40 × 30 × 5 mm at (0, 10), clear of U1, J2 and SP1. Confirm the lid grille sits over the speaker and the fence wall does not hit the can.
 5. Snap to the Pixel. Confirm:
    - camera bar not covered
    - USB-C cable overmold misses the phone
@@ -93,4 +95,4 @@ Pixel body and Pixelsnap center stay the published defaults until you caliper a 
 
 ## If 9 mm loses
 
-The case already dropped the 1511 speaker so the back skin stays closed. If the stuffed board still blows the stack, use the ES8311 3.5 mm jack and shrink the PA. That decision belongs at this height-stack check, not after fab.
+SP1 is a 4.0 mm SMD can. The speaker stack is 7.55 mm under a 9.0 mm envelope. If a stuffed board still blows the stack, use the ES8311 3.5 mm jack and drop the PA. That decision belongs at this height-stack check, not after fab.

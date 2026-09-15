@@ -1,0 +1,251 @@
+(footprint "Speaker_KLJ-01304T"
+	(version 20260206)
+	(generator "psv-hand-edit")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "KELIKING KLJ-01304T-08R07W (LCSC C18186315) 8 ohm 0.7 W SMD speaker. Body 13 x 13 x 4.0 mm. Four 2.0 x 2.5 mm lands: the electrical pair on 11.4 mm centres at y=-4.35 mm, dummy pair at y=+4.35 mm for reflow stability. Geometry from the LCSC/EasyEDA land BUZ-SMD_4P-L13.0-W13.0-P11.4-BL (0.254 mm units) and the vendor appearance drawing. Pad 1 is + / SPK_P on +X, pad 2 is - / SPK_N on -X, matching the datasheet LEAD(+) / LEAD(-) marks. Dummy pads have no pin number so they stay out of the netlist. Rotation 0 points the electrical pair toward -Y (the analog island) and the dummy pair toward the top short edge. Pad 1 sits at (+5.7, -4.35), bottom-right in this file's 0°. EasyEDA -BL means pin 1 is bottom-left in JLC's library 0°, which is what they place C18186315 from. CPL rotation is 0. Confirm the assembly preview: left-right only inverts polarity, 180° puts the coil on the dummy pads and the speaker is open. A + voltage on pad 1 moves the diaphragm toward the front (away from the PCB, into the lid grille). https://jlcpcb.com/partdetail/KELIKING-KLJ_01304T08R07W/C18186315")
+	(tags "speaker SMD KELIKING KLJ-01304T")
+	(property "Reference" "REF**"
+		(at 0 -8.2 0)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000001")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "Speaker_KLJ-01304T"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000002")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000003")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000004")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -6.5 -6.5)
+		(end 6.5 6.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000005")
+	)
+	(fp_circle
+		(center 0 0)
+		(end 4 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000006")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.2 0)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000007")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_line
+		(start 2.8 -6.25)
+		(end 3.8 -6.25)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000008")
+	)
+	(fp_line
+		(start 3.3 -6.75)
+		(end 3.3 -5.75)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000009")
+	)
+	(fp_line
+		(start 2.8 -6.25)
+		(end 3.8 -6.25)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000017")
+	)
+	(fp_line
+		(start 3.3 -6.75)
+		(end 3.3 -5.75)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000018")
+	)
+	(fp_line
+		(start -6.7 -6.7)
+		(end -4.2 -6.7)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000a")
+	)
+	(fp_line
+		(start -6.7 -6.7)
+		(end -6.7 -5.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000b")
+	)
+	(fp_line
+		(start 6.7 -6.7)
+		(end 4.2 -6.7)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000c")
+	)
+	(fp_line
+		(start 6.7 -6.7)
+		(end 6.7 -5.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000d")
+	)
+	(fp_line
+		(start -6.7 6.7)
+		(end -4.2 6.7)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000e")
+	)
+	(fp_line
+		(start -6.7 6.7)
+		(end -6.7 5.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-00000000000f")
+	)
+	(fp_line
+		(start 6.7 6.7)
+		(end 4.2 6.7)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000010")
+	)
+	(fp_line
+		(start 6.7 6.7)
+		(end 6.7 5.8)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000011")
+	)
+	(fp_rect
+		(start -6.95 -6.75)
+		(end 6.95 6.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "c2e1a3b5-0004-4000-8000-000000000012")
+	)
+	(pad "1" smd roundrect
+		(at 5.7 -4.35)
+		(size 2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000013")
+	)
+	(pad "2" smd roundrect
+		(at -5.7 -4.35)
+		(size 2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000014")
+	)
+	(pad "" smd roundrect
+		(at 5.7 4.35)
+		(size 2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000015")
+	)
+	(pad "" smd roundrect
+		(at -5.7 4.35)
+		(size 2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "c2e1a3b5-0004-4000-8000-000000000016")
+	)
+	(embedded_fonts no)
+)

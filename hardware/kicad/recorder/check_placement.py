@@ -9,9 +9,11 @@ Checks, in order:
   1. every footprint courtyard sits inside the board outline
   2. no two courtyards overlap
   3. nothing collides with a mounting hole keepout
-  4. the analog chain stays clear of the magnet ring
-  5. every pad that the netlist gives a net actually carries that net
-  6. placement.json still describes the board it claims to describe
+  4. the analog chain stays clear of the magnet ring (centres; SP1 also
+     by courtyard, because the can is 13 mm and holds a magnet)
+  5. SP1 XY matches the CAD speaker grille in params.json
+  6. every pad that the netlist gives a net actually carries that net
+  7. placement.json still describes the board it claims to describe
 
 This is a placement check, not a DRC. It says nothing about routing.
 """
@@ -22,6 +24,15 @@ import os
 import sys
 
 import pcbnew
+
+try:
+    import wx
+except ImportError:
+    wx = None
+else:
+    # KiCad 10's Windows build asserts in PCB_VIA::GetWidth() when no layer
+    # is given. That pops a modal dialog and stops a headless script.
+    wx.DisableAsserts()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PCB = os.path.join(HERE, "recorder.kicad_pcb")
@@ -35,6 +46,14 @@ HOLE_KEEPOUT_R = 2.1
 
 
 CRTYD_LAYERS = (pcbnew.F_CrtYd, pcbnew.B_CrtYd)
+
+
+def closest_r(box):
+    """Distance from the origin to the nearest point of an axis-aligned box."""
+    x0, y0, x1, y1 = box
+    qx = min(max(0.0, x0), x1)
+    qy = min(max(0.0, y0), y1)
+    return math.hypot(qx, qy)
 
 
 def courtyard_box(fp):
@@ -173,6 +192,27 @@ def main():
         print(f"  ring  {ref:6s} r={r:6.2f} mm  {mark}")
         if r <= ring_r:
             problems.append(f"RING       {ref:6s} centre r={r:.2f} <= {ring_r}")
+        if ref == "SP1":
+            body_r = closest_r(boxes[ref])
+            print(f"  ring  SP1    body closest r={body_r:6.2f} mm")
+            if body_r <= ring_r:
+                problems.append(
+                    f"RING       SP1    body r={body_r:.2f} <= {ring_r}"
+                )
+
+    sp1 = board.FindFootprintByReference("SP1")
+    if sp1 is None:
+        problems.append("MISSING    SP1")
+    else:
+        sx = round(pcbnew.ToMM(sp1.GetPosition().x), 3)
+        sy = round(pcbnew.ToMM(sp1.GetPosition().y), 3)
+        cx = params["connectors"]["speaker_x_mm"]
+        cy = params["connectors"]["speaker_y_mm"]
+        if abs(sx - cx) > 0.01 or abs(sy - cy) > 0.01:
+            problems.append(
+                f"CAD        SP1 board ({sx},{sy}) != params.json speaker "
+                f"({cx},{cy}) — lid grille would miss the can"
+            )
 
     unnetted = []
     for fp in fps:

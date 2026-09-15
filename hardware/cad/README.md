@@ -1,6 +1,6 @@
 # CAD envelope
 
-OpenSCAD and `params.json` must stay twins. `params.json` and `params.scad` share the same Pixel 10 + magnet-ring numbers. Change a number in both files. `check_envelope.py` fails if they drift or if the accessory hits a keepout.
+OpenSCAD and `params.json` must stay twins. `params.json` and `params.scad` share the same Pixel 10 + magnet-ring numbers. Change a number in both files. `check_envelope.py` fails if they drift, if the accessory hits a keepout, if the lid battery fence hits SP1 or U1, or if the speaker grille XY drifts from `placement.json` SP1.
 
 ```bash
 python hardware/cad/check_envelope.py
