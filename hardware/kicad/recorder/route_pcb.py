@@ -2273,6 +2273,10 @@ ROUTED_OPEN_ITEMS = [
     "interchangeable, and pin 2 is the pad row nearest the board edge, where "
     "the F.Cu GND pour reaches it without a trace. Check the press feel on "
     "the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
+    "SW_BOOT and SW_RST are XKB TS-1187A-C-J-B top-actuated SPST (LCSC "
+    "C318885) on the east edge, outside the ring OD. They strap GPIO0 and EN "
+    "to GND for download mode: hold Boot, tap Reset, release Boot. They are "
+    "not firmware buttons. Case holes come later.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB "
     "peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would "
     "need traces narrower than any quick-turn fab will run. The pair is "

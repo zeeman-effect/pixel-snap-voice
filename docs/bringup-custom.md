@@ -4,6 +4,17 @@ Do this on the first SMT board **after** `python scripts/check_gates.py` is gree
 
 Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. A green `check_gates.py` writes all three from `hardware/kicad/recorder/recorder.kicad_pcb`, so order from the files that run just produced. Do not power or order from an export that still fails DRC.
 
+## Flash
+
+USB-C is the first-flash path (ESP32-S3 USB-Serial/JTAG). After TinyUSB MSC takes the USB-C port, use the two top-actuated buttons:
+
+1. Hold **Boot** (SW_BOOT, GPIO0 to GND).
+2. Tap **Reset** (SW_RST, EN to GND), then release Reset.
+3. Release Boot.
+4. `idf.py -p COMx flash` over USB-C, or UART0 on J1 (3V3, U0RXD, U0TXD, GND).
+
+Do not wire GPIO0 as a firmware button. SW1 stays the record control.
+
 ## Order of tests
 
 1. **USB serial** — native USB-Serial/JTAG or UART0. Confirm the S3 enumerates and `idf.py monitor` shows `pixel-snap-voice on custom`.

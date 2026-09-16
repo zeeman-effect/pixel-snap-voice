@@ -23,10 +23,12 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | GPIO15 | SD_CLK | output | **J3** |
 | GPIO7 | SD_CMD | bidirectional | **J3** |
 | GPIO6 / 16 / 17 / 18 | SD_D0–D3 | bidirectional | **J3** 4-bit SDMMC |
+| GPIO0 | BOOT | strapping, pull-up | SW_BOOT to GND (download). Not a firmware button |
 | GPIO1 | BTN | input, pull-up | SW1 to GND |
 | GPIO2 | LED | output | D1 |
 | GPIO9 | CHG_STAT | input | U3 STAT (D2 charge LED on this net) |
 | GPIO43 / GPIO44 | UART_TX / UART_RX | UART0 | **J1** 1×4 (3V3, U0RXD, U0TXD, GND) |
+| EN | EN | module enable | R1 10k / C2 plus **SW_RST** to GND |
 
 ## Other
 

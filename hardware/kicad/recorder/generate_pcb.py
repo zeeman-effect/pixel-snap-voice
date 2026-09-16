@@ -187,7 +187,8 @@ def apply_project_policy(project_path=PROJECT):
 #                  charge current lives on this short edge, as far from the
 #                  microphone as the board allows.
 #   y -30 .. -8    MCU, microSD, UART header. Digital only.
-#   y  -8 .. +8    Magnet ring interior. Left deliberately empty.
+#   y  -8 .. +8    Magnet ring interior. Empty except SW_BOOT / SW_RST on
+#                  the east edge, outside r=28, for prototype download.
 #   y  +8 .. +43   Analog island: mic, codec, analog LDO, oscillator, class-D
 #                  amp, speaker, battery leads.
 # The magnet ring is an annulus from r = 22 to r = 28 about the origin. Every
@@ -229,6 +230,11 @@ PLACEMENT = {
     "C2": (24.5, -18.0, 90, "EN delay cap"),
     "R1": (24.5, -14.5, 90, "EN pull-up"),
     "Rboot": (24.5, -11.0, 90, "IO0 boot pull-up"),
+    # Rotated 90 so pad 1 (BOOT / EN) is the west pair, toward the pull-ups,
+    # and pad 2 (GND) is the east pair, where the F.Cu pour can reach it.
+    # Measured on the land: 270 put pad 1 on the east edge instead.
+    "SW_BOOT": (28.5, 3.2, 90, "prototype Boot: GPIO0 to GND, XKB TS-1187A"),
+    "SW_RST": (28.5, -5.0, 90, "prototype Reset: EN to GND, XKB TS-1187A"),
     # --- UART header (kept off the USB edge) ---
     "J1": (1.5, -30.0, 0, "1x04 UART0 header, programming only"),
     # --- microSD ---

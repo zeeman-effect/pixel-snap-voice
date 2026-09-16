@@ -45,7 +45,7 @@ When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Stora
 | Charge | BQ24074RGTR, USB500 ~500 mA (EN1/EN2, ISET 1.8 kΩ) | Power-path: **VSYS** = OUT (loads), **VBAT** = pouch only. Charge LED on STAT. No fuel gauge |
 | 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | U4 VIN from **VSYS**. Keep the regulator and any later switching node away from the mic |
 | Battery | Single-cell LiPo pouch on JST-PH BT1 | Size from leftover volume. Buy a protected 1S pouch; this board has no pack protector |
-| Controls | 1 tactile: short = record, double = play last, long = sleep | 1 LED: record / play / charge / error |
+| Controls | 1 user tactile (SW1): short = record, double = play last, long = sleep. Two prototype flash buttons (SW_BOOT, SW_RST) | 1 LED: record / play / charge / error |
 | RF | MINI-1U IPEX, no cable in v1 | A PCB antenna would sit next to a steel shunt and later an aluminum shell. Wi-Fi off in firmware. |
 
 ### Audio format

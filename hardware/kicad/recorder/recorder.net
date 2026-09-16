@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
-		(date "2026-09-16T10:13:00")
+		(date "2026-09-16T10:58:17")
 		(tool "Eeschema 10.0.5")
 		(sheet
 			(number "1")
@@ -769,6 +769,106 @@
 				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
 			)
 			(tstamps "68a2c7ea-c289-53f5-b2d5-1395f18b1967")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW_BOOT")
+			(value "boot")
+			(footprint "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Switch")
+				(part "SW_Push")
+				(description "Push button switch, generic, two pins")
+			)
+			(property
+				(name "Sheetname")
+				(value "MCU_USB")
+			)
+			(property
+				(name "Sheetfile")
+				(value "mcu_usb.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "switch normally-open pushbutton push-button")
+			)
+			(sheetpath
+				(names "/MCU_USB/")
+				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
+			)
+			(tstamps "28fad209-c663-5606-8ae3-f0fdcd2a1af8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW_RST")
+			(value "reset")
+			(footprint "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Switch")
+				(part "SW_Push")
+				(description "Push button switch, generic, two pins")
+			)
+			(property
+				(name "Sheetname")
+				(value "MCU_USB")
+			)
+			(property
+				(name "Sheetfile")
+				(value "mcu_usb.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "switch normally-open pushbutton push-button")
+			)
+			(sheetpath
+				(names "/MCU_USB/")
+				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
+			)
+			(tstamps "56c81ae6-1e69-50d3-82f4-623cb2600da1")
 			(units
 				(unit
 					(name "A")
@@ -5622,6 +5722,12 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "SW_BOOT")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
 				(ref "U1")
 				(pin "4")
 				(pinfunction "IO0_4")
@@ -5640,6 +5746,12 @@
 			(node
 				(ref "R1")
 				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW_RST")
+				(pin "1")
+				(pinfunction "1_1")
 				(pintype "passive")
 			)
 			(node
@@ -6099,6 +6211,18 @@
 			)
 			(node
 				(ref "SW1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW_BOOT")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW_RST")
 				(pin "2")
 				(pinfunction "2_2")
 				(pintype "passive")

@@ -69,6 +69,7 @@
   "open_items": [
     "SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), a 13 x 13 x 4.0 mm SMD can that JLCPCB can place. The land is the vendor/EasyEDA BUZ-SMD_4P-L13.0-W13.0-P11.4-BL pattern: 2.0 x 2.5 mm pads, electrical pair on 11.4 mm centres toward the analog island, dummy pair toward the top edge with no pin numbers. Pad 1 is + / SPK_P at (+5.7, -4.35), bottom-right in this file's 0\u00b0. EasyEDA -BL means pin 1 is bottom-left in *their* library 0\u00b0, which is what JLC places C18186315 from. CPL rotation is 0. A left-right mismatch only inverts polarity; 180\u00b0 puts the coil on the dummy pads and the speaker is open. Confirm against JLC's assembly preview before the order. The lid has a grille over this part; check polarity, volume (NS4150 on VSYS into 8 ohm, 1 W max) and the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing the top-actuated PTS645. The record button is on the left wall, so a top plunger would have needed a case lever; this one is pressed straight through the wall aperture. Its actuator tip sits 0.6 mm inside the board edge and 0.9 mm from the inner wall face, so the case still needs a short moulded nub to span that gap. Pin 1 carries BTN and pin 2 carries GND, the opposite of the old part: a push button's terminals are interchangeable, and pin 2 is the pad row nearest the board edge, where the F.Cu GND pour reaches it without a trace. Check the press feel on the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
+    "SW_BOOT and SW_RST are XKB TS-1187A-C-J-B top-actuated SPST (LCSC C318885) on the east edge, outside the ring OD. They strap GPIO0 and EN to GND for download mode: hold Boot, tap Reset, release Boot. They are not firmware buttons. Case holes come later.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would need traces narrower than any quick-turn fab will run. The pair is 0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm differential by first-order microstrip. Re-check if v2 ever needs high-speed USB, which would mean a thicker top prepreg.",
     "MK1's land pattern is a locally adapted copy in PSV.pretty, not the drawing in the Infineon datasheet. The ring pad and its stencil aperture were moved out to 0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm; the datasheet's own figure would leave 0.18 mm, which no fab will drill reliably. The datasheet also assumes solder-mask-defined pads and this land is copper-defined, inherited from the KiCad library. Check the acoustic seal on the first assembled board: an open solder ring leaks and costs low-frequency response.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are published defaults. Caliper a real phone and a real magnet ring before cutting metal.",
@@ -86,7 +87,7 @@
       "layer": "F.Cu",
       "footprint": "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm",
       "footprint_in_schematic": "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal",
-      "substitution_reason": "7.8 mm solder-wire land stands in for JST-PH so the routed VBAT/GND pads do not move. Hand-solder the S2B-PH-K-S onto those holes.",
+      "substitution_reason": null,
       "note": "JST-PH S2B-PH-K-S 1S pouch, cable faces the y=+43 edge"
     },
     {
@@ -792,6 +793,32 @@
       "note": "record button, side actuator faces the left wall, params button_y_mm = 12"
     },
     {
+      "ref": "SW_BOOT",
+      "value": "boot",
+      "sheet": "MCU_USB",
+      "x_mm": 28.5,
+      "y_mm": 3.2,
+      "rot_deg": 90,
+      "layer": "F.Cu",
+      "footprint": "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
+      "footprint_in_schematic": "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
+      "substitution_reason": null,
+      "note": "prototype Boot: GPIO0 to GND, XKB TS-1187A"
+    },
+    {
+      "ref": "SW_RST",
+      "value": "reset",
+      "sheet": "MCU_USB",
+      "x_mm": 28.5,
+      "y_mm": -5.0,
+      "rot_deg": 90,
+      "layer": "F.Cu",
+      "footprint": "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
+      "footprint_in_schematic": "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
+      "substitution_reason": null,
+      "note": "prototype Reset: EN to GND, XKB TS-1187A"
+    },
+    {
       "ref": "U1",
       "value": "ESP32-S3-MINI-1U-N8",
       "sheet": "MCU_USB",
@@ -911,9 +938,9 @@
   ],
   "routing": {
     "router": "freerouting headless via Specctra DSN/SES, then plane stitching and pours from route_pcb.py",
-    "tracks": 741,
-    "vias": 208,
-    "track_length_mm": 2115.1,
+    "tracks": 752,
+    "vias": 212,
+    "track_length_mm": 2170.5,
     "zones": [
       "GND_F",
       "VDD33_F_C14",

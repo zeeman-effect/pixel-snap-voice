@@ -64,8 +64,10 @@ NETS_REQUIRED = {
     "VSYS": ["U3.10", "U4.1", "U8.1", "U6.6"],
     "VDD33": ["U5.1", "U1.3"],
     "3V3A": ["U8.5", "U2.11"],
-    "GND": ["U1.1", "J2.A1", "BT1.2"],
+    "GND": ["U1.1", "J2.A1", "BT1.2", "SW_BOOT.2", "SW_RST.2"],
     "BTN": ["U1.5", "SW1.1"],
+    "BOOT": ["U1.4", "Rboot.2", "SW_BOOT.1"],
+    "EN": ["U1.45", "R1.2", "C2.1", "SW_RST.1"],
     "LED": ["U1.6", "D1.1"],
     "CHG_STAT": ["U1.13", "U3.9"],
     "SD_CLK": ["U1.19", "J3.5"],
@@ -495,7 +497,7 @@ def build() -> None:
     vsys_blk, vsys_pins, _ = load_lib(HERE / "PSV.kicad_sym", "VSYS")
 
     mcu = Sch("Recorder — MCU / USB")
-    for b in (mcu_blk, usb_blk, esd_blk, device_r, device_c, conn4, gnd_blk, vdd33_blk, vbus_blk):
+    for b in (mcu_blk, usb_blk, esd_blk, device_r, device_c, conn4, sw_blk, gnd_blk, vdd33_blk, vbus_blk):
         mcu.add_lib(b)
     ux, uy = 95.25, 114.30
     mcu.add(inst(mcu_id, "U1", "ESP32-S3-MINI-1U-N8", ux, uy, mcu_pins, "PSV:ESP32-S3-MINI-1U"))
@@ -572,6 +574,15 @@ def build() -> None:
     stub(mcu, 45, 152.4, c_pins, "2", "GND", "cen-gnd", rot=90)
     stub(mcu, 45, 119.38, r_pins, "1", "VDD33", "rboot-v", rot=90)
     stub(mcu, 45, 119.38, r_pins, "2", "BOOT", "rboot-b", False, rot=90)
+    # Prototype download buttons. Same local BOOT / EN nets as the pull-ups.
+    # Hold Boot, tap Reset, release Boot. Not firmware GPIOs.
+    mcu.add(inst("Switch:SW_Push", "SW_BOOT", "boot", 70, 119.38, sw_pins, "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A"))
+    stub(mcu, 70, 119.38, sw_pins, "1", "BOOT", "swboot-b", False)
+    stub(mcu, 70, 119.38, sw_pins, "2", "GND", "swboot-g")
+    mcu.add(inst("Switch:SW_Push", "SW_RST", "reset", 70, 135.4, sw_pins, "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A"))
+    stub(mcu, 70, 135.4, sw_pins, "1", "EN", "swrst-en", False)
+    stub(mcu, 70, 135.4, sw_pins, "2", "GND", "swrst-g")
+    mcu.add(text("Hold Boot, tap Reset, release Boot to enter download mode.", 52, 108, "boot-note"))
     stub(mcu, 95.25, 55, c_pins, "1", "VDD33", "c1-v")
     stub(mcu, 95.25, 55, c_pins, "2", "GND", "c1-g")
     stub(mcu, 110, 55, c_pins, "1", "VDD33", "c3-v")
