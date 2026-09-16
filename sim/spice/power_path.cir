@@ -1,19 +1,41 @@
-* USB 5 V -> PTC -> charger -> LiPo -> 3.3 V LDO (ngspice)
+* USB 5 V -> PTC -> BQ24074 power-path -> 3.3 V LDO (ngspice)
 * First-spin power path. Not a substitute for measuring Korvo / SMT current.
+* Two runs: USB with BT1 open, and pouch-only through the BATFET.
 
 .title pixel-snap-voice power path
+
 Vusb n_vbus 0 DC 5
-Rptc n_vbus n_chg 0.3
-* MCP73831-class: USB present, cell at 3.8 V mid-charge
-Vbat n_bat 0 DC 3.8
-Rchg n_chg n_bat 0.5
-* MCU+codec record load ~160 mA from 3.3 V after LDO
-Rldo n_bat n_3v3 0.4
+Rptc n_vbus n_in 0.3
+* USB path IN->OUT. Open (1e9) for pouch-only.
+Rusb n_in n_sys 0.4
+Vbat n_cell 0 DC 3.8
+* Pack plug. 1e9 = BT1 unplugged; 0.05 = pouch on the connector.
+Rpack n_cell n_bat 1e9
+Rbleed n_bat 0 1e6
+* BATFET BAT->OUT. Open when USB is up (power-path isolates the pouch).
+Rbatfet n_bat n_sys 1e9
+* Ideal 3.3 V LDO from VSYS. Dropout 0.25 V, so USB and a 3.8 V cell both regulate.
+Bldo n_3v3 0 V = { min(3.3, v(n_sys) - 0.25) }
 Iload n_3v3 0 DC 0.16
 
 .control
+* USB, BT1 open: pouch unplugged, BATFET off, USB path on.
+alter Vusb=5
+alter Vbat=3.8
+alter Rpack=1e9
+alter Rusb=0.4
+alter Rbatfet=1e9
 tran 10u 2m
-print v(n_vbus) v(n_chg) v(n_bat) v(n_3v3)
-echo power_path: ok if n_3v3 stays near 3.3-3.7 V with Vbat=3.8
+print v(n_vbus) v(n_in) v(n_sys) v(n_bat) v(n_3v3)
+echo usb_open_bt1: ok if n_sys ~4.5 V, n_bat ~0, n_3v3 ~3.3 V
+
+* Pouch only: USB down, pack plugged, BATFET on, USB path open.
+alter Vusb=0
+alter Rpack=0.05
+alter Rusb=1e9
+alter Rbatfet=0.15
+tran 10u 2m
+print v(n_vbus) v(n_in) v(n_sys) v(n_bat) v(n_3v3)
+echo pouch_only: ok if n_sys ~3.65 V, n_3v3 ~3.3 V
 .endc
 .end

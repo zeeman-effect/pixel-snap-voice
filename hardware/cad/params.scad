@@ -50,3 +50,7 @@ speaker_x = 0.0;
 speaker_y = 36.0;
 speaker_od = 13.0;
 speaker_h = 4.0;
+
+jst_x = -23.5;
+jst_y = 34.0;
+jst_h = 6.0;

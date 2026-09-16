@@ -65,7 +65,11 @@ def load_placement() -> dict | None:
 def parse_scad() -> dict[str, float]:
     text = PARAMS_SCAD.read_text(encoding="utf-8")
     out: dict[str, float] = {}
-    for m in re.finditer(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([0-9]+(?:\.[0-9]+)?)\s*;", text, re.M):
+    for m in re.finditer(
+        r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?[0-9]+(?:\.[0-9]+)?)\s*;",
+        text,
+        re.M,
+    ):
         out[m.group(1)] = float(m.group(2))
     return out
 
@@ -90,6 +94,9 @@ def scad_matches(p: dict, scad: dict[str, float], errors: list[str]) -> None:
         "speaker_x": p["connectors"]["speaker_x_mm"],
         "speaker_y": p["connectors"]["speaker_y_mm"],
         "speaker_od": p["connectors"]["speaker_od_mm"],
+        "jst_x": p["connectors"]["jst_x_mm"],
+        "jst_y": p["connectors"]["jst_y_mm"],
+        "jst_h": p["connectors"]["jst_height_mm"],
         "batt_w": p["battery"]["pocket_width_mm"],
         "batt_h": p["battery"]["pocket_height_mm"],
         "batt_t": p["battery"]["max_thickness_mm"],
@@ -103,6 +110,13 @@ def scad_matches(p: dict, scad: dict[str, float], errors: list[str]) -> None:
             continue
         if abs(scad[k] - v) > 1e-6:
             errors.append(f"params.scad {k}={scad[k]} != params.json {v}")
+
+
+def jst_rect(con: dict) -> Rect:
+    """S2B-PH-K housing at 0°, origin on pad 1. KiCad fab, not courtyard."""
+    x = con["jst_x_mm"]
+    y = con["jst_y_mm"]
+    return Rect(x - 1.95, y - 1.35, x + 3.95, y + 6.25)
 
 
 def speaker_rect(con: dict) -> Rect:
@@ -246,6 +260,32 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
     if spk.expanded(SPEAKER_BODY_TOL_MM).closest_r() < mag["od_mm"] / 2:
         errors.append("speaker body intersects the magnet ring")
 
+    jst = jst_rect(con)
+    if not pcb_rect.contains_rect(jst):
+        errors.append("JST-PH housing extends past the PCB outline")
+    if jst.expanded(0.4).overlaps(spk.expanded(SPEAKER_BODY_TOL_MM)):
+        errors.append("JST-PH housing overlaps the speaker")
+    if jst.expanded(0.4).overlaps(fence):
+        errors.append(
+            "JST-PH housing overlaps the battery fence "
+            f"(JST y={jst.y0:.1f}…{jst.y1:.1f}, fence y={fence.y0:.1f}…{fence.y1:.1f})"
+        )
+    # Lid cavity above the PCB is 5.45 mm. The side-entry PH is 6.0 mm, so
+    # case.scad cuts a window through shell_back and the housing does not
+    # have to clear the 1.2 mm skin.
+    jst_stack = (
+        mag["adhesive_mm"]
+        + mag["thickness_mm"]
+        + mag["shunt_thickness_mm"]
+        + pcb["thickness_mm"]
+        + con["jst_height_mm"]
+    )
+    if jst_stack > limit + 1e-6:
+        errors.append(
+            f"JST-PH height stack {jst_stack:.2f} mm exceeds {limit} mm envelope "
+            "(lid window already omits shell_back)"
+        )
+
     if pcb["width_mm"] + 2 * acc["wall_mm"] > acc["width_mm"] + 1e-6:
         errors.append("PCB does not fit inside accessory walls in X")
     if pcb["height_mm"] + 2 * acc["wall_mm"] > acc["height_mm"] + 1e-6:
@@ -261,6 +301,16 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
                 errors.append(
                     f"CAD speaker ({con['speaker_x_mm']}, {con['speaker_y_mm']}) "
                     f"!= placement.json SP1 ({sx}, {sy}) — lid grille would miss the can"
+                )
+        bt1 = part_xy(placement, "BT1")
+        if bt1 is None:
+            errors.append("placement.json has no BT1; lid JST window has nothing to twin")
+        else:
+            bx, by = bt1
+            if abs(bx - con["jst_x_mm"]) > 0.01 or abs(by - con["jst_y_mm"]) > 0.01:
+                errors.append(
+                    f"CAD JST ({con['jst_x_mm']}, {con['jst_y_mm']}) "
+                    f"!= placement.json BT1 ({bx}, {by}) — lid window would miss the housing"
                 )
         u1 = part_xy(placement, "U1")
         if u1 is None:
@@ -335,6 +385,8 @@ def fit_report(p: dict) -> str:
         f"  battery stack: {batt_stack:.2f} mm",
         f"  speaker stack: {mag['adhesive_mm'] + mag['thickness_mm'] + mag['shunt_thickness_mm'] + pcb['thickness_mm'] + con['speaker_height_mm'] + acc['shell_back_mm']:.2f} mm "
         f"(SP1 {con['speaker_od_mm']:.1f} mm at {con['speaker_x_mm']:.1f}, {con['speaker_y_mm']:.1f})",
+        f"  JST-PH: {con['jst_height_mm']:.1f} mm housing at ({con['jst_x_mm']:.1f}, {con['jst_y_mm']:.1f}), "
+        f"stack {mag['adhesive_mm'] + mag['thickness_mm'] + mag['shunt_thickness_mm'] + pcb['thickness_mm'] + con['jst_height_mm']:.2f} mm through the lid window",
         f"  battery fence: {fence.x1 - fence.x0:.1f} x {fence.y1 - fence.y0:.1f} mm at "
         f"({bat['offset_x_mm']:.1f}, {bat['offset_y_mm']:.1f}), +Y face y={fence.y1:.1f}, "
         f"{fence_gap:.1f} mm of air to SP1 body",
@@ -381,6 +433,14 @@ def self_test() -> list[str]:
         err = check(p, mismatch)
         if not any("grille" in e or "SP1" in e for e in err):
             failures.append(f"SP1 XY drift should fail, got {err}")
+
+        jst_drift = copy.deepcopy(placement)
+        for row in jst_drift.get("parts", []):
+            if row.get("ref") == "BT1":
+                row["x_mm"] = 0.0
+        err = check(p, jst_drift)
+        if not any("JST" in e or "BT1" in e for e in err):
+            failures.append(f"BT1 XY drift should fail, got {err}")
 
         south = copy.deepcopy(p)
         south["battery"]["offset_y_mm"] = -5.0

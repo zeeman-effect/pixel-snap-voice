@@ -33,6 +33,8 @@ Envelope budget is **9.0 mm**. USB stack is 6.75 mm. Speaker stack is 7.55 mm. B
 
 The tray also leaves a 0.5 mm PETG floor on the phone face under MK1. A 3 mm collector under the B.Cu NPTH at (30.00, 9.32) and a 3 mm channel in +X take that hole out the right wall, where it joins `mic_port()`. MK1 is on F.Cu. A port that faces the glass muffles recordings. If you move MK1, move the duct and the wall hole with it.
 
+SW_BOOT / SW_RST are 5.1 × 5.1 × 5.0 mm top-actuated parts on F.Cu. Lid cavity above the PCB is 5.45 mm, so the actuators sit 1.65 mm under the outer skin. **Lid-off only** this spin: a flush hole in 1.2 mm PETG does not reach them.
+
 ## XY locations (magnet-centered)
 
 Edge features are the wall or board edge (PCB is 64 × 86 mm, so the long edges are ±32 mm and the short edges are ±43 mm). Footprint centers are inset.
@@ -52,6 +54,7 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | LED (D1) | −29.0 | +18.0 | side window in the lid wall, not through the back |
 | SD slot (J3) | see placement.json |  | no mouth in this pass |
 | Speaker (SP1) | 0.0 | +36.0 | 4.0 mm KELIKING KLJ-01304T on F.Cu. Sound faces the lid; `speaker_grille()` opens the back skin |
+| JST-PH (BT1) | −23.5 | +34.0 | S2B-PH-K-S, 6.0 mm tall. Pad 1 (VBAT) at this XY; cable toward y=+43. `jst_window()` cuts shell_back over the housing |
 | LiPo pocket | 0.0 | +10.0 | 40 × 30 × 5 mm pouch. Lid `battery_fence()` outer is 43.6 × 33.6 mm around this. Was y=12; that put the +Y wall 0.7 mm from SP1. |
 | MCU module (U1) | +14.0 | −18.0 | 2.4 mm, next to USB; MINI-1U, IPEX unused |
 | Mounting holes | ±(32−3.5), ±(43−3.5) | M1.6 clearance |
@@ -68,7 +71,7 @@ These are the recorder project names. Do not keep the old generated-board map.
 | U8 | analog LDO (codec / mic) |
 | VDD33 | MCU 3.3 V rail |
 | U1 | ESP32-S3-MINI-1U |
-| BT1 | 500 mAh pouch |
+| BT1 | JST-PH S2B-PH-K-S (pad 1 at −23.5, 34) |
 
 Export KiCad STEP (`File → Export → STEP`) and import next to `case.scad` (OpenSCAD cannot import STEP; use the STL from `case.scad` plus the KiCad 3D view, or Fusion/Onshape for a boolean). `check_envelope.py` is the automated gate; a 3D collision pass is visual.
 

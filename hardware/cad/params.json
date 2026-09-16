@@ -57,7 +57,11 @@
     "speaker_x_mm": 0.0,
     "speaker_y_mm": 36.0,
     "speaker_od_mm": 13.0,
-    "speaker_height_mm": 4.0
+    "speaker_height_mm": 4.0,
+    "jst_x_mm": -23.5,
+    "jst_y_mm": 34.0,
+    "jst_height_mm": 6.0,
+    "jst_note": "S2B-PH-K-S side-entry at BT1 pad 1. Housing 5.9 x 7.6 x 6.0 mm, cable toward y=+43. Lid cavity is 5.45 mm, so case.scad cuts a window through shell_back over the housing. Twin to placement.json BT1."
   },
   "battery": {
     "max_thickness_mm": 5.0,

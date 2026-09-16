@@ -2984,6 +2984,169 @@
 			)
 		)
 	)
+(symbol "Switch:SW_Push"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "SW"
+			(at 1.27 2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SW_Push"
+			(at 0 -1.524 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 5.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 5.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Push button switch, generic, two pins"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "switch normally-open pushbutton push-button"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "SW_Push_0_1"
+			(circle
+				(center -2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 1.27) (xy 0 3.048)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 1.27) (xy -2.54 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	)
 (symbol "power:GND"
 		(power global)
 		(pin_numbers
@@ -3847,6 +4010,94 @@
 		(at 56.43 119.38 0)
 		(effects (font (size 1.27 1.27)) (justify left bottom))
 		(uuid "1371992e-7185-5f17-8717-23a3a2913cfd")
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 70.00 119.38 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "28fad209-c663-5606-8ae3-f0fdcd2a1af8")
+		(property "Reference" "SW_BOOT" (at 70.00 111.38 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Value" "boot" (at 70.00 113.88 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A" (at 70.00 119.38 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(property "Datasheet" "~" (at 70.00 119.38 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(pin "1" (uuid "a154f942-4443-5c0d-a56b-f0c09f19998b"))
+		(pin "2" (uuid "38823b30-af88-5908-a16e-f095397f564f"))
+	)
+	(wire
+		(pts (xy 64.92 119.38) (xy 57.30 119.38))
+		(stroke (width 0) (type default))
+		(uuid "ad21bcf1-6754-5f54-90b3-3b37fb873467")
+	)
+	(label "BOOT"
+		(at 57.30 119.38 180)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "a20f57c1-a140-5ee2-b582-3e03225bd97a")
+	)
+	(wire
+		(pts (xy 75.08 119.38) (xy 82.70 119.38))
+		(stroke (width 0) (type default))
+		(uuid "88131368-88a0-577f-a926-f9f88163cb3e")
+	)
+	(global_label "GND"
+		(shape input)
+		(at 82.70 119.38 0)
+		(effects (font (size 1.27 1.27)) (justify left))
+		(uuid "1bd44fcc-940a-58d9-93d0-0f300c9587ad")
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 70.00 135.40 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "56c81ae6-1e69-50d3-82f4-623cb2600da1")
+		(property "Reference" "SW_RST" (at 70.00 127.40 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Value" "reset" (at 70.00 129.90 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A" (at 70.00 135.40 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(property "Datasheet" "~" (at 70.00 135.40 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(pin "1" (uuid "dd08c54b-8eb2-586e-9aa4-363ae4a6236a"))
+		(pin "2" (uuid "0d0bb8f0-5847-58ed-9ef2-2c6d840df75b"))
+	)
+	(wire
+		(pts (xy 64.92 135.40) (xy 57.30 135.40))
+		(stroke (width 0) (type default))
+		(uuid "2d93e782-0813-53b8-8707-201b9ceb7d21")
+	)
+	(label "EN"
+		(at 57.30 135.40 180)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "3617c288-292e-5c14-9304-90a495a75ff7")
+	)
+	(wire
+		(pts (xy 75.08 135.40) (xy 82.70 135.40))
+		(stroke (width 0) (type default))
+		(uuid "e474055b-7740-5206-81c9-58e8f3ab57e6")
+	)
+	(global_label "GND"
+		(shape input)
+		(at 82.70 135.40 0)
+		(effects (font (size 1.27 1.27)) (justify left))
+		(uuid "9e503f68-c938-5065-8687-e6527281198b")
+	)
+	(text "Hold Boot, tap Reset, release Boot to enter download mode."
+		(exclude_from_sim no)
+		(at 52.00 108.00 0)
+		(effects (font (size 2.0 2.0)) (justify left bottom))
+		(uuid "c11120d3-c477-5d11-9d7b-4e9df27e1e79")
 	)
 	(wire
 		(pts (xy 95.25 51.19) (xy 95.25 43.57))

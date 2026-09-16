@@ -1,12 +1,12 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-09-13T10:19:23 **
+** Created on 2026-09-16T18:09:19 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 26 Footprint errors **
+** Found 27 Footprint errors **
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(9.2500 mm, -41.6450 mm): Pad A8 [unconnected-(J2-SBU1-PadA8)] of J2 on F.Cu
@@ -64,6 +64,9 @@
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(21.0000 mm, -23.1000 mm): Pad 44 [unconnected-(U1-IO46-Pad44)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(23.2500 mm, -40.9375 mm): Pad 8 [unconnected-(U3-~{PGOOD}-Pad8)] of U3 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(-4.8625 mm, -38.5500 mm): Pad 4 [unconnected-(U4-NC-Pad4)] of U4 on F.Cu

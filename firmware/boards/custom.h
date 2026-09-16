@@ -8,6 +8,7 @@
  * Analog MEMS into ES8311 ADC. NS4150 on ES8311 AOUT.
  *
  * Strapping pins GPIO0 / GPIO45 / GPIO46 are left alone.
+ * SW_BOOT / SW_RST are hardware download buttons, not firmware GPIOs.
  */
 
 #define PSV_BOARD_NAME "custom"

@@ -2,8 +2,6 @@
 
 Keep this file in sync with the project. When the goal or the current solution changes, update the matching sections here.
 
-**How to respond:** Be brief. Prefer plain language over extra jargon. Write so a non-specialist can follow the point, without watering down the technical facts. Short sentences, define terms on first use, then keep going.
-
 ## What this project is
 
 A one-off slim voice-note recorder that snaps to the back of a Google Pixel 10 with Pixelsnap / Qi2 magnets (the same kind of ring used by MagSafe-style accessories). It records raw WAV files, charges and copies files over USB-C, and leaves transcription to a computer. This repo is hardware, firmware, simulation, and (later) a local transcription helper.
@@ -53,7 +51,7 @@ These skills do not replace this project's generators. Product sheets still come
 
 ## Current solution
 
-**Architecture:** ESP32-S3-MINI-1U MCU (IPEX, no cable in v1), Everest ES8311 codec as I2S master (12.288 MHz oscillator into MCLK; the S3 is slave), analog MEMS microphone, NS4150B into a KELIKING KLJ-01304T-08R07W SMD speaker (JLCPCB C18186315), microSD, USB-C as a 5 V sink only. Analog codec power is a separate low-noise regulator from the MCU supply. Chassis is 3D-print first, then CNC 6061 aluminum. Not steel, which would steal hold from the magnet ring. The module SKU is the no-PCB-antenna MINI-1U because v1 has no radio and a steel shunt plus later aluminum shell sit next to the MCU. Full electrical and mechanical notes: `docs/architecture.md`. Why this MCU/codec pair: `docs/audio-platform.md`. U1 numbers live in `hardware/cad/params.json` under `mcu`. The product KiCad project is `hardware/kicad/recorder/` (schematic + PCB).
+**Architecture:** ESP32-S3-MINI-1U MCU (IPEX, no cable in v1), Everest ES8311 codec as I2S master (12.288 MHz oscillator into MCLK; the S3 is slave), analog MEMS microphone, NS4150B into a KELIKING KLJ-01304T-08R07W SMD speaker (JLCPCB C18186315), microSD, USB-C as a 5 V sink only. U3 is a BQ24074 power-path charger: **VSYS** (OUT) feeds the loads, **VBAT** is the pouch on JST-PH BT1 only. Analog codec power is a separate low-noise regulator from the MCU supply. Chassis is 3D-print first, then CNC 6061 aluminum. Not steel, which would steal hold from the magnet ring. The module SKU is the no-PCB-antenna MINI-1U because v1 has no radio and a steel shunt plus later aluminum shell sit next to the MCU. Full electrical and mechanical notes: `docs/architecture.md`. Why this MCU/codec pair: `docs/audio-platform.md`. U1 numbers live in `hardware/cad/params.json` under `mcu`. The product KiCad project is `hardware/kicad/recorder/` (schematic + PCB).
 
 Those are the current choices. Change them when the envelope, parts, or bring-up says they are wrong, and update the docs in the same pass.
 
@@ -69,7 +67,7 @@ Update this section when it stops being true.
 - Phase 0 ESP-IDF app is in `firmware/` (Korvo-2 / ESP-BOX / custom pin maps). CAD is in `hardware/cad` (`params.json` + `case.scad`, draft PETG).
 - Product KiCad is `hardware/kicad/recorder/` (open `recorder.kicad_pro`). Sheets come from `generate_recorder.py`. The board file is `recorder.kicad_pcb`. Footprint XY is `hardware/kicad/recorder/placement.json`.
 - The PETG tray ducts MK1's B.Cu NPTH under the board to the right-wall mic port. MK1 is on F.Cu.
-- **The board is routed.** 720 tracks, 187 vias, ~1930 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
+- **The board is routed.** 752 tracks, 212 vias, ~2171 mm of copper, 8 zones. `kicad-cli pcb drc` reports zero violations at every severity and zero unconnected items, silkscreen included. Signals came from freerouting over Specctra DSN/SES; the USB-C escape, the D+/D− pair and the fine-pitch fanouts are hand-routed and locked so rip-up cannot cut them. Re-run the lot with `python hardware/kicad/recorder/route_pcb.py`.
 - **The DRC rules are JLCPCB's published capability**, not house numbers. Global floors live in `DESIGN_RULES` in `generate_pcb.py`. The two checks that depend on item type live in `recorder/recorder.kicad_dru`: pad hole-to-hole at **0.6 mm** (JLC's floor is 0.45 mm; 0.6 mm keeps the +0.13 mm plated-hole tolerance), and 0.5 mm minimum non-plated hole. The board holds 0.15 mm tracks, 0.6/0.3 vias, 0.62 mm minimum pad hole spacing and 0.3 mm hole-to-copper.
 - Silkscreen is 1.0 mm on a 0.15 mm stroke, JLC's standard font. It used to be 0.8 mm, which is only legal on their high-precision line and which their own capability table calls unidentifiable. Every designator still found a clear seat at the larger size.
 - USB D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch, **not** impedance controlled: the ESP32-S3 is full speed only. Do not order the controlled-impedance option. Reasoning in `hardware/kicad/README.md`.
@@ -78,6 +76,8 @@ Update this section when it stops being true.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
 - SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), 13 × 13 × 4.0 mm SMD can at (0, 36). JLC places it. The lid has a grille over the can. The 40 × 30 mm pouch sits at (0, 10) so the lid fence misses both U1 and the speaker. Confirm SP1 in JLC's assembly preview before the order: this land's pad 1 is bottom-right, JLC's library 0° is EasyEDA `-BL` (pin 1 bottom-left).
 - SW1 is a **side-actuated** Panasonic EVQP7C01P (LCSC C388883, 3.5 × 2.9 × 1.35 mm, 2.2 N), not the top-actuated PTS645 it used to be. The record button is on the left wall, so a top plunger needed a case lever; this one is pressed straight through a 3 × 2.2 mm slot. Its actuator tip stops 0.9 mm short of the inner wall face, so the case still needs a moulded nub to span the gap.
+- **SW_BOOT** and **SW_RST** are XKB TS-1187A-C-J-B (LCSC C318885) on the east edge. Hold Boot, tap Reset, release Boot to enter download mode after MSC owns USB-C. They are not firmware buttons. **Lid-off only** on this spin: the 5 mm actuators sit 1.65 mm under the outer skin, so a flush lid hole is not a button.
+- **U3** is a BQ24074RGTR (LCSC C54313) power-path charger in VQFN-16. USB-C is the only 5 V inlet. **VSYS** (OUT) stays up from USB with BT1 open; **VBAT** is the pouch on JST-PH BT1 (C173752, land `JST_PH_S2B-PH-K`). C21 is 10 µF on VBAT next to U3 so the BAT pin has local ceramic when the pouch is unplugged. Do not put 5 V on BT1 and do not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no pack protector.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
 
@@ -85,7 +85,7 @@ Update this section when it stops being true.
 
 `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` are **generated**, by `hardware/kicad/recorder/generate_jlc.py`. They were hand-typed and had drifted: C11, C12, C17 and C18 still carried pre-route coordinates. LCSC order codes come from the table in `docs/bom.md`; which parts the machine handles comes from each footprint's own `exclude_from_pos_files` / `exclude_from_bom` flag in the board.
 
-DRC parity leaves 26 notes and all of them are expected: 22 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair) and the 4 mounting holes, which are mechanical and have no symbol. MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
+DRC parity leaves 27 notes and all of them are expected: 23 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 PGOOD) and the 4 mounting holes, which are mechanical and have no symbol. MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
 
 ## How to change the hardware
 
@@ -94,6 +94,8 @@ Close KiCad before running the generators. Lock files look like `~recorder.kicad
 | If you need to change | Edit | Then |
 | --- | --- | --- |
 | Nets, parts, pins on the schematic | `generate_recorder.py`, `PSV.kicad_sym` | `python hardware/kicad/recorder/generate_recorder.py` then `python hardware/kicad/recorder/verify_schematic.py`. This overwrites sheets only. It does not write the PCB. |
+| Boot / Reset buttons | `generate_recorder.py` then `apply_boot_buttons.py` (KiCad 10 `python.exe`) | Places SW_BOOT / SW_RST on the live board and mazes the stubs. Does **not** wipe copper. Do not run `generate_pcb.py`. |
+| JST-PH BT1 / C21 BAT cap | `generate_recorder.py` then `apply_jst.py` (KiCad 10 `python.exe`) | Swaps the 7.8 mm solder-wire land for `JST_PH_S2B-PH-K`, places C21, mazes VBAT. Does **not** wipe copper. |
 | Footprint XY | `placement.json` and `recorder.kicad_pcb` together | Keep them twins. `check_placement.py` now compares them part by part and fails on drift. Also update `hardware/cad/params.json` / `case.scad` if a wall cut or pocket moves. |
 | An LCSC order code, or which parts JLC assembles | the LCSC column of `docs/bom.md`, or the footprint's `exclude_from_pos_files` / `exclude_from_bom` flag in the board | `python scripts/check_gates.py` rewrites `jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. Never hand-edit those two. |
 | A clean placement rebuild | `generate_pcb.py` (KiCad 10 `python.exe`, not system Python) | This **wipes** copper. Re-pour planes and re-route after. Do not run it as a status check. |

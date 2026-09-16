@@ -24,7 +24,7 @@ esp_err_t power_init(void)
 
 int power_charging(void)
 {
-    /* MCP73831 STAT is open-drain, low while charging. */
+    /* BQ24074 CHG is open-drain, low while charging. */
     if (PSV_CHG_STAT == GPIO_NUM_NC) {
         return 0;
     }
