@@ -81,7 +81,13 @@ LOCAL_FP = os.path.join(HERE, "PSV.pretty")
 # patterns KiCad 10 does not ship at all (ESP32-S3-MINI-1U and the
 # IM73A135 PG-LLGA-5-3 with a hole-clearance-legal ring pad) live in
 # PSV.pretty. Keep this table empty; fix the name instead.
-SUBSTITUTIONS = {}
+SUBSTITUTIONS = {
+    "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal": (
+        "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm",
+        "7.8 mm solder-wire land stands in for JST-PH so the routed VBAT/GND "
+        "pads do not move. Hand-solder the S2B-PH-K-S onto those holes.",
+    ),
+}
 
 # ---------------------------------------------------------------------------
 # Fab policy. pcbnew writes recorder.kicad_pro from BOARD defaults on save and
@@ -129,7 +135,7 @@ DESIGN_RULES = {
 NET_CLASSES = {
     "Default": {"clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1},
     "USB": {"clearance": 0.15, "track_width": 0.2, "diff_pair_width": 0.2, "diff_pair_gap": 0.2, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
-    # Charge and rail currents, up to the 500 mA the MCP73831 PROG resistor
+    # Charge and rail currents, up to the 500 mA the BQ24074 ISET resistor
     # sets. 0.3 mm of 1 oz outer copper carries that with room to spare.
     "POWER": {"clearance": 0.15, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
 }
@@ -140,6 +146,7 @@ NETCLASS_PATTERNS = [
     ("VBUS", "POWER"),
     ("VBUS_CHG", "POWER"),
     ("VBAT", "POWER"),
+    ("VSYS", "POWER"),
     ("/Power/3V3_RAW", "POWER"),
     ("3V3A", "POWER"),
 ]
@@ -198,19 +205,23 @@ PLACEMENT = {
     "R3": (15.5, -40.0, 90, "CC2 5.11k Rd, sink-only"),
     "F1": (17.5, -40.0, 90, "VBUS PTC"),
     "C4": (20.5, -40.0, 90, "VBUS_CHG bulk"),
-    # --- Battery charger ---
-    "U3": (24.0, -39.5, 0, "MCP73831 charger"),
-    "R4": (24.0, -36.0, 0, "charge current PROG resistor"),
+    # --- Battery charger (BQ24074 VQFN-16, same USB-edge island) ---
+    "U3": (24.0, -39.5, 180, "BQ24074, rotated so OUT/programming face C5 and the resistors"),
+    "C5": (21.0, -35.5, 90, "VSYS bulk at charger OUT"),
+    "R4": (19.0, -32.8, 0, "ISET ~500 mA, east of the VBUS climb to F1"),
+    "R8": (17.5, -31.0, 0, "ILIM USB current backup"),
+    "R9": (17.5, -28.5, 0, "TMR safety timer"),
+    "R10": (21.0, -31.0, 0, "TS 10k, no pack NTC"),
+    "R11": (21.0, -28.5, 0, "ITERM ~10 percent"),
     "Rstat": (28.0, -36.0, 0, "CHG_STAT pull-up"),
     "Rchg": (28.0, -33.0, 0, "charge LED series resistor"),
     "D2": (24.0, -33.0, 0, "charge status LED"),
     # --- Regulators (left of the USB block, still on the bottom edge) ---
-    "U4": (-6.0, -39.5, 0, "AP2112K-3.3, VBAT -> 3V3_RAW"),
-    "C5": (-10.5, -40.0, 90, "VBAT input cap"),
+    "U4": (-6.0, -39.5, 0, "AP2112K-3.3, VSYS -> 3V3_RAW"),
     "C7": (-2.5, -40.0, 90, "3V3_RAW output cap"),
     "U5": (-16.0, -39.5, 0, "AP22804 load switch, 3V3_RAW -> VDD33"),
     "C8": (-20.5, -40.0, 90, "VDD33 bulk"),
-    "C6": (-10.5, -36.0, 90, "VBAT decoupling"),
+    "C6": (-10.5, -36.0, 90, "VSYS decoupling at U4"),
     # --- MCU ---
     "U1": (14.0, -18.0, 0, "ESP32-S3-MINI-1U-N8, IPEX part, no PCB antenna"),
     "C1": (24.5, -25.0, 90, "VDD33 22uF bulk at the module"),
@@ -259,7 +270,7 @@ PLACEMENT = {
     "Ragnd": (26.0, 16.5, 0, "AGND to GND stitch"),
     "Y1": (16.0, 24.0, 0, "12.288 MHz oscillator into ES8311 MCLK"),
     # --- Analog island: analog supply ---
-    "U8": (26.0, 31.0, 0, "LP5907 low-noise LDO, VBAT -> 3V3A"),
+    "U8": (26.0, 31.0, 0, "LP5907 low-noise LDO, VSYS -> 3V3A"),
     "C9": (21.0, 31.0, 0, "3V3A output cap"),
     "R5": (22.0, 34.5, 0, "I2C SDA pull-up"),
     "R6": (27.0, 34.5, 0, "I2C SCL pull-up"),
@@ -268,18 +279,21 @@ PLACEMENT = {
     "C19": (12.0, 27.5, 0, "PA bypass"),
     "R7": (16.5, 27.5, 0, "PA input bias"),
     "SP1": (0.0, 36.0, 0, "KELIKING 13 mm SMD speaker, LCSC C18186315"),
-    # --- Battery leads ---
-    "BT1": (-23.5, 34.0, 0, "LiPo flying leads, 500 mAh pouch above on F.Cu"),
+    # --- Battery ---
+    # BT1 is a JST-PH for a 1S pouch. USB-C is the only 5 V inlet; the BQ24074
+    # power-path rail (VSYS) keeps the board alive with BT1 open.
+    "BT1": (-23.5, 34.0, 0, "JST-PH S2B-PH-K-S 1S pouch, cable faces the y=+43 edge"),
     "C20": (-16.0, 26.0, 0, "VBAT bulk at the cell"),
 }
 
 # JLCPCB's SMT line places surface-mount parts only, so a through-hole part
-# left in the pick-and-place file is a feeder the machine cannot fill. BT1's
-# SolderWire land already carries the flag; J1's stock header land does not,
-# because a 2.54 mm header is normally machine-placed. This one is not: it is
-# the bring-up UART, soldered by hand and clipped off afterwards.
+# left in the pick-and-place file is a feeder the machine cannot fill. J1 is
+# the bring-up UART, soldered by hand and clipped off afterwards. BT1 is a THT
+# connector JLC can wave-solder; it still does not belong in the
+# pick-and-place file.
 NO_PICK_AND_PLACE = {
     "J1": "2.54 mm UART header, hand-soldered at bring-up",
+    "BT1": "JST-PH through-hole, wave or hand",
 }
 
 MOUNTING_HOLES = [
@@ -491,10 +505,7 @@ def main():
         if rot:
             fp.SetOrientationDegrees(rot)
         fp.SetPath(pcbnew.KIID_PATH())
-        # The schematic decides what is on the BOM, not the land pattern. The
-        # stock SolderWire land BT1 uses is flagged out of the BOM because it
-        # is just two wire pads, which would have silently dropped the battery
-        # itself from the parts list.
+        # The schematic decides what is on the BOM, not the land pattern.
         fp.SetExcludedFromBOM(False)
         if ref in NO_PICK_AND_PLACE:
             fp.SetExcludedFromPosFiles(True)

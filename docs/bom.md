@@ -13,18 +13,18 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | U2 | Audio codec | ES8311 | C962342 | QFN-20 3×3 | I2S master; 12.288 MHz oscillator into MCLK; analog island. No XI/XO | Extended |
 | Y1 | Codec oscillator | 12.288 MHz 4-pin | — | 3225 | Output to ES8311 MCLK; S3 is I2S slave. Not a crystal | verify stock |
 | U8 | Analog LDO | LP5907MFX-3.3 | — | SOT-23-5 | Dedicated 3.3 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33** | verify stock |
-| U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from VBAT | Basic |
+| U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from **VSYS** | Basic |
 | U5 | Load switch | AP22804AW5 | — | SOT-23-5 | Switches U4 out onto **VDD33**; cuts sleep current | verify stock |
 | MK1 | Analog MEMS | IM73A135 / ICS-40730 | — | 4 × 3 | ~73–74 dBA; **hand-place**; acoustic port on free long edge | hand |
 | MK1 alt | Digital MEMS | ICS-43434 | C5656610 | 3.5 × 2.65 | 65 dBA fallback if analog capsule misses SMT | Extended |
-| U6 | Class-D PA | NS4150B | C189961 | MSOP-8 | Analog-in from ES8311 AOUT (Korvo path). Alt: MAX98357A I2S | Extended |
+| U6 | Class-D PA | NS4150B | C189961 | MSOP-8 | Analog-in from ES8311 AOUT (Korvo path). VCC from **VSYS**. Alt: MAX98357A I2S | Extended |
 | SP1 | Speaker | KLJ-01304T-08R07W | C18186315 | 13 × 13 × 4.0 | KELIKING 8 Ω 0.7 W SMD can. JLC Extended, tape-and-reel. Sound faces the lid | Extended |
-| U3 | Li-ion charger | MCP73831T-2ACI/OT | C424093 | SOT-23-5 | ~500 mA (`RPROG` 2 kΩ); STAT LED | Extended |
+| U3 | Li-ion charger | BQ24074RGTR | C54313 | VQFN-16 3×3 | Power-path. USB 500 mA (EN1/EN2), ISET 1.8 kΩ ≈ 500 mA. OUT = **VSYS**; BAT = pouch only. JLC Extended | Extended |
 | J1 | UART 1×4 | pin header | — | 2.54 mm | 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND | hand |
 | J2 | USB-C receptacle | 16-pin mid-mount | C165948 | ~3.2 mm | 5.1 kΩ on CC1/CC2; short edge; overmold must miss the phone | Extended |
 | J3 | microSD socket | TF-01 / equivalent | C91145 | low-profile | 4-bit SDMMC on the custom PCB | Basic/Ext |
 | U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |
-| BT1 | LiPo pouch | 3.7 V **500 mAh** | — | 5.0 × 30 × 40 mm class | CAD leftover ~6000 mm³ (~600 mAh est.); 500 mAh is the current pick with margin | hand |
+| BT1 | 1S battery connector | S2B-PH-K-S | C173752 | JST-PH 2.0 mm THT | Side-entry. Plug a protected 1S pouch (PHR-2). Optional: USB-C runs the board with BT1 open | Extended |
 | SW1 | Record button | Panasonic EVQP7C01P | C388883 | 3.5 × 2.9 × 1.35 mm | **Side push**: the plunger fires sideways at the left wall, so nothing has to poke through the phone-facing face. SPST, 2.2 N, 0.2 mm travel, 100k cycles, reflow. Short = record, long = power. Two moulded bosses drop into NPTH holes and take the sideways load off the solder. Was listed here as "side-fire, C318885": that code is an XKB TS-1187A-C-J-B, a 5.1 × 5.1 × 5 mm **top-actuated** switch, so the line was wrong on both the part and the direction | Extended |
 | D1 | Status LED | 0603 red | C2286 | 0603 | Record / error (GPIO2) | Basic |
 | D2 | Charge LED | 0603 | C2286 | 0603 | On U3 STAT / **CHG_STAT** | Basic |
@@ -33,7 +33,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | MAG1 | Magnet ring | Qi2 / MagSafe accessory | — | OD 56 / ID 44 / 1.1 mm | Buy; do not machine. Pocket to the part you receive | — |
 | SH1 | Steel shunt | thin plate | — | ~0.3 mm | **Behind** MAG1, away from the phone. Not the outer chassis | — |
 
-Passives (decoupling, I2C pull-ups 4.7 kΩ, PROG, mic bias RC) follow the Espressif module hardware design guidelines plus the ES8311 and mic vendor notes. 0603 100 nF / 10 µF: C14663 / C15850 class (Basic).
+Passives (decoupling, I2C pull-ups 4.7 kΩ, charger ISET/ILIM/TMR/TS/ITERM, mic bias RC) follow the BQ24074 typical app plus the Espressif module and ES8311 notes. 0603 100 nF / 10 µF: C14663 / C15850 class (Basic).
 
 ## Mechanical
 
@@ -41,6 +41,7 @@ Passives (decoupling, I2C pull-ups 4.7 kΩ, PROG, mic bias RC) follow the Espres
 | --- | --- | --- |
 | Proto shell | PETG FDM (`hardware/cad/case.scad`) | Magnet pocket 0.3 mm loose, then shim |
 | Production shell | 6061-T6 CNC | **Not steel** |
+| LiPo pouch | 3.7 V **500 mAh**, 5.0 × 30 × 40 mm class | Plugs into BT1 (JST-PH). CAD leftover ~6000 mm³; 500 mAh is the current pick with margin. Buy a **protected** 1S pack |
 | Adhesive | 3M VHB or ring stock tape | Phone-facing per vendor |
 | Screws | M1.6 | Four bosses; or snap-fit on plastic |
 

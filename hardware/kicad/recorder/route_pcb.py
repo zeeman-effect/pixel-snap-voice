@@ -50,7 +50,7 @@ else:
     # failure. Mute it so a headless route can finish.
     wx.DisableAsserts()
 
-from generate_pcb import apply_project_policy, tuck_reference_text
+from generate_pcb import DESIGN_RULES, apply_project_policy, tuck_reference_text
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
@@ -101,7 +101,7 @@ STITCH_OFFSETS = (
 )
 
 CLEARANCE = 0.15
-HOLE_CLEARANCE = 0.25
+HOLE_CLEARANCE = 0.30
 HOLE_TO_HOLE = 0.25
 EDGE_CLEAR = 0.35
 VIA_SIZE = 0.60
@@ -119,7 +119,7 @@ ZONE_CLEARANCE = 0.20
 
 # Same list as NETCLASS_PATTERNS "POWER" in generate_pcb.py: the rails that
 # carry charge current rather than logic.
-POWER_NETS = {"VBUS", "VBUS_CHG", "VBAT", "/Power/3V3_RAW", "3V3A"}
+POWER_NETS = {"VBUS", "VBUS_CHG", "VBAT", "VSYS", "/Power/3V3_RAW", "3V3A"}
 
 
 def vec(x_mm, y_mm):
@@ -133,6 +133,15 @@ def mm(pt):
 def in_analog(x, y):
     x0, y0, x1, y1 = ANALOG
     return x0 <= x <= x1 and y0 <= y <= y1
+
+
+def in_charger_keep(x, y):
+    """Skip the GND stitch grid over the BQ24074 body.
+
+    H2 sits 3 mm east of U3, so a 6 mm grid via lands on the QFN or crowds
+    an ISET pad. The EP gets its own 0.6/0.3 via in fanout_charger.
+    """
+    return 16.0 <= x <= 27.0 and -42.0 <= y <= -27.0
 
 
 def ensure_closed():
@@ -459,9 +468,6 @@ class Obstacles:
         self.tracks = []    # (x0, y0, x1, y1, half_width, netcode, layer)
         self.vias = []      # (x, y, radius, drill_radius, netcode)
         for fp in board.GetFootprints():
-            if fp.GetReference().startswith("H"):
-                x, y = mm(fp.GetPosition())
-                self.holes.append((x, y, HOLE_R, -1))
             for pad in fp.Pads():
                 x, y = pad_xy(pad)
                 drill = pcbnew.ToMM(pad.GetDrillSizeX())
@@ -1019,6 +1025,9 @@ def stitch_grid(board, obstacles, half_w, half_h, pitch=6.0):
     while x < half_w - 3.0:
         y = -half_h + 3.0
         while y < half_h - 3.0:
+            if in_charger_keep(x, y):
+                y += pitch
+                continue
             if not in_analog(x, y) and obstacles.via_fits(x, y, code):
                 add_via(board, gnd, x, y)
                 obstacles.add_via(x, y, code)
@@ -1395,6 +1404,417 @@ def fanout_fine_pitch(board, obstacles):
                     obstacles.add_via(end[0], end[1], code)
                     vias += 1
     return stubs, vias
+
+
+# Pin-number escapes assume rot=0. Derive the way out from the pad vs the
+# body centre so a 180° rotation still leaves H2 alone.
+def u3_escape_vec(px, py, fx, fy):
+    dx, dy = px - fx, py - fy
+    if dx > 0.7 and abs(dx) >= abs(dy) - 0.05:
+        return (0.0, 1.0)
+    if abs(dx) >= abs(dy):
+        return (1.0 if dx > 0 else -1.0, 0.0)
+    return (0.0, 1.0 if dy > 0 else -1.0)
+
+U3_TIES = (("2", "3"), ("10", "11"))
+
+
+def _lock(track):
+    if track is not None:
+        track.SetLocked(True)
+    return track
+
+
+def fanout_charger(board, obstacles, protect=False):
+    """Walk the BQ24074 pads out so the pour repair can reach them.
+
+    Ties and the EP via first, then the short links to nearby passives.
+    Stubs are last, and only for pads the links did not already reach. H2
+    sits 3 mm east of U3, so the east row leaves south or north instead of
+    into the mounting hole. North stubs get no via: C5 leaves no 0.6 mm
+    barrel. The stock ThermalVias land used 0.2 mm EP drills; this board
+    holds 0.3 mm, so a single 0.6/0.3 via lands on the EP.
+    """
+    u3 = None
+    for fp in board.GetFootprints():
+        if fp.GetReference() == "U3":
+            u3 = fp
+            break
+    if u3 is None:
+        return 0, 0
+    pads = {}
+    for pad in u3.Pads():
+        num = pad.GetNumber()
+        if num:
+            pads.setdefault(num, pad)
+
+    stubs = vias = 0
+    for a_num, b_num in U3_TIES:
+        a, b = pads.get(a_num), pads.get(b_num)
+        if a is None or b is None:
+            continue
+        net = board.FindNet(a.GetNetname())
+        if net is None:
+            continue
+        ax, ay = pad_xy(a)
+        bx, by = pad_xy(b)
+        if obstacles.track_fits(ax, ay, bx, by, DEFAULT_WIDTH, net.GetNetCode(),
+                                pcbnew.F_Cu):
+            t = add_track(board, net, ax, ay, bx, by, pcbnew.F_Cu,
+                          DEFAULT_WIDTH, protect=protect)
+            if protect:
+                _lock(t)
+            obstacles.add_track(ax, ay, bx, by, DEFAULT_WIDTH,
+                                net.GetNetCode(), pcbnew.F_Cu)
+            stubs += 1
+
+    gnd = net_of(board, "GND")
+    cx, cy = mm(u3.GetPosition())
+    if not obstacles.has_via_near(cx, cy, gnd.GetNetCode(), 1.2):
+        if obstacles.via_fits(cx, cy, gnd.GetNetCode()):
+            via = add_via(board, gnd, cx, cy, protect=protect)
+            if protect:
+                _lock(via)
+            obstacles.add_via(cx, cy, gnd.GetNetCode())
+            vias += 1
+
+    linked = hand_route_charger(board, obstacles, protect)
+    if linked:
+        print(f"  charger links: {linked}")
+
+    fx, fy = mm(u3.GetPosition())
+    for num, pad in pads.items():
+        if not num or num in ("4", "5", "8", "17"):
+            continue
+        name = pad.GetNetname()
+        if not name or name in ("GND",) or name.startswith("unconnected"):
+            continue
+        if _already_escaped(board, pad):
+            continue
+        net = board.FindNet(name)
+        if net is None:
+            continue
+        px, py = pad_xy(pad)
+        ox, oy = u3_escape_vec(px, py, fx, fy)
+        x0, y0, x1, y1 = pad_rect(pad)
+        reach = (x1 - x0) / 2.0 if ox else (y1 - y0) / 2.0
+        end = (px + ox * (reach + 0.45), py + oy * (reach + 0.45))
+        code = net.GetNetCode()
+        if not obstacles.track_fits(px, py, end[0], end[1], DEFAULT_WIDTH,
+                                    code, pcbnew.F_Cu):
+            continue
+        t = add_track(board, net, px, py, end[0], end[1], pcbnew.F_Cu,
+                      DEFAULT_WIDTH, protect=protect)
+        if protect:
+            _lock(t)
+        obstacles.add_track(px, py, end[0], end[1], DEFAULT_WIDTH, code,
+                            pcbnew.F_Cu)
+        stubs += 1
+        if ox > 0 or oy < 0:
+            continue
+        if obstacles.via_fits(end[0], end[1], code):
+            via = add_via(board, net, end[0], end[1], protect=protect)
+            if protect:
+                _lock(via)
+            obstacles.add_via(end[0], end[1], code)
+            vias += 1
+
+    print(f"  charger island: {stubs} stubs, {vias} vias")
+    return stubs, vias
+
+
+def pad_of(board, ref, number):
+    for fp in board.GetFootprints():
+        if fp.GetReference() != ref:
+            continue
+        for pad in fp.Pads():
+            if pad.GetNumber() == number:
+                return pad
+    return None
+
+
+def _poly(board, obstacles, net, pts, width, protect, layer=None):
+    if layer is None:
+        layer = pcbnew.F_Cu
+    code = net.GetNetCode()
+    if not all(
+        obstacles.track_fits(a[0], a[1], b[0], b[1], width, code, layer)
+        for a, b in zip(pts, pts[1:])
+    ):
+        return False
+    for a, b in zip(pts, pts[1:]):
+        t = add_track(board, net, a[0], a[1], b[0], b[1], layer, width,
+                      protect=protect)
+        if protect:
+            _lock(t)
+        obstacles.add_track(a[0], a[1], b[0], b[1], width, code, layer)
+    return True
+
+
+# Rails through the charger island. VBUS climbs x=17.5 to y=-34.3, C5 sits
+# at x=21, H2 at x=28.5, D2 at y=-33. Keep ISET east of the VBUS climb.
+CHARGER_RAIL_X = (
+    15.70, 16.00, 16.675, 18.175, 19.50, 20.175, 21.55, 21.85, 23.25,
+    24.25, 24.75, 25.60, 26.30, 30.40,
+)
+CHARGER_RAIL_Y = (
+    -41.75, -41.30, -40.50, -38.56, -37.55, -37.20, -36.85, -34.00,
+    -33.70, -32.80, -32.10, -31.00, -28.50, -27.50,
+)
+
+
+def _try_widths(board, obstacles, net, pts, width, protect, layer=None):
+    widths = (width,) if width == DEFAULT_WIDTH else (width, DEFAULT_WIDTH)
+    return any(
+        _poly(board, obstacles, net, pts, w, protect, layer) for w in widths
+    )
+
+
+def _candidate_paths(start, end):
+    ax, ay = start
+    bx, by = end
+    yield [start, end]
+    yield [start, (bx, ay), end]
+    yield [start, (ax, by), end]
+    for y in CHARGER_RAIL_Y:
+        yield [start, (ax, y), (bx, y), end]
+    for x in CHARGER_RAIL_X:
+        yield [start, (x, ay), (x, by), end]
+    for x in CHARGER_RAIL_X:
+        for y in CHARGER_RAIL_Y:
+            yield [start, (ax, y), (x, y), (x, by), end]
+            yield [start, (x, ay), (x, y), (bx, y), end]
+
+
+def route_points(board, obstacles, net, start, end, width, protect):
+    """F.Cu polyline search, then a same-net B.Cu hop with two vias."""
+    for pts in _candidate_paths(start, end):
+        if _try_widths(board, obstacles, net, pts, width, protect):
+            return True
+    code = net.GetNetCode()
+    if obstacles.via_fits(start[0], start[1], code) and obstacles.via_fits(
+        end[0], end[1], code
+    ):
+        for pts in _candidate_paths(start, end):
+            if not _try_widths(
+                board, obstacles, net, pts, width, protect, pcbnew.B_Cu
+            ):
+                continue
+            for x, y in (start, end):
+                via = add_via(board, net, x, y, protect=protect)
+                if protect:
+                    _lock(via)
+                obstacles.add_via(x, y, code)
+            return True
+    return False
+
+
+def _place_via(board, obstacles, net, x, y, protect):
+    if not obstacles.via_fits(x, y, net.GetNetCode()):
+        return False
+    via = add_via(board, net, x, y, protect=protect)
+    if protect:
+        _lock(via)
+    obstacles.add_via(x, y, net.GetNetCode())
+    return True
+
+
+def _via_seat(obstacles, net, x, y, radius=1.6, step=0.2):
+    """Preferred XY, then a nearby ring. Keeps hop_bcu from dying on one clash."""
+    code = net.GetNetCode()
+    if obstacles.has_via_near(x, y, code, 0.35) or obstacles.via_fits(x, y, code):
+        return (x, y)
+    n = int(radius / step)
+    for k in range(1, n + 1):
+        for i in range(-k, k + 1):
+            for j in range(-k, k + 1):
+                if abs(i) != k and abs(j) != k:
+                    continue
+                sx, sy = x + i * step, y + j * step
+                if obstacles.via_fits(sx, sy, code):
+                    return (sx, sy)
+    return None
+
+
+def hop_bcu(board, obstacles, net, start, end, via_a, via_b, protect):
+    """F.Cu to a via, B.Cu hop, F.Cu out. Used when the north F.Cu strip is full."""
+    code = net.GetNetCode()
+    via_a = _via_seat(obstacles, net, *via_a)
+    via_b = _via_seat(obstacles, net, *via_b)
+    if via_a is None or via_b is None:
+        print(f"    hop {net.GetNetname()}: no via seat")
+        return False
+    if not obstacles.has_via_near(via_a[0], via_a[1], code, 0.35):
+        if not _place_via(board, obstacles, net, via_a[0], via_a[1], protect):
+            print(f"    hop {net.GetNetname()}: via A {via_a} failed")
+            return False
+    if not obstacles.has_via_near(via_b[0], via_b[1], code, 0.35):
+        if not _place_via(board, obstacles, net, via_b[0], via_b[1], protect):
+            print(f"    hop {net.GetNetname()}: via B {via_b} failed")
+            return False
+
+    def short(a, b):
+        ax, ay = a
+        bx, by = b
+        dx, dy = bx - ax, by - ay
+        length = math.hypot(dx, dy) or 1.0
+        mid = (ax + dx / length * 0.55, ay + dy / length * 0.55)
+        for pts in (
+            [a, b],
+            [a, mid, b],
+            [a, (ax, by), b],
+            [a, (bx, ay), b],
+            [a, (ax, mid[1]), (bx, mid[1]), b],
+        ):
+            if _try_widths(board, obstacles, net, pts, DEFAULT_WIDTH, protect):
+                return True
+        return False
+
+    if not short(start, via_a):
+        print(f"    hop {net.GetNetname()}: F.Cu {start} -> {via_a} failed")
+        return False
+    if not short(via_b, end):
+        print(f"    hop {net.GetNetname()}: F.Cu {via_b} -> {end} failed")
+        return False
+    ax, ay = via_a
+    bx, by = via_b
+    for pts in (
+        [via_a, (ax, by), via_b],
+        [via_a, (bx, ay), via_b],
+        [via_a, via_b],
+        [via_a, (ax, -32.0), (bx, -32.0), via_b],
+        [via_a, (15.7, ay), (15.7, by), via_b],
+        [via_a, (ax, -42.2), (15.7, -42.2), (15.7, by), via_b],
+    ):
+        if _try_widths(board, obstacles, net, pts, DEFAULT_WIDTH, protect,
+                       pcbnew.B_Cu):
+            return True
+    print(f"    hop {net.GetNetname()}: B.Cu {via_a} -> {via_b} failed")
+    return False
+
+
+def hand_route_charger(board, obstacles, protect=False):
+    """Short links from the BQ24074 to its nearby passives.
+
+    U3 is rotated 180 so OUT and the programming pins face C5 and the
+    resistor column. H2 still blocks the east (BAT) side. ISET stays east
+    of the VBUS climb at x=17.5. Programming pins that cannot share the
+    F.Cu north strip hop on B.Cu. VSYS drops onto the existing B.Cu trunk.
+    VBAT follows the right-edge B.Cu channel outside the mounting-hole
+    keepout, then west under the battery pads.
+    """
+    def xy(ref, num):
+        pad = pad_of(board, ref, num)
+        return None if pad is None else (pad, pad_xy(pad))
+
+    linked = 0
+
+    def link_pads(src, dst):
+        nonlocal linked
+        if src is None or dst is None:
+            return False
+        pad, start = src
+        _dpad, end = dst
+        net = board.FindNet(pad.GetNetname())
+        if net is None:
+            return False
+        width = POWER_WIDTH if pad.GetNetname() in POWER_NETS else DEFAULT_WIDTH
+        if route_points(board, obstacles, net, start, end, width, protect):
+            linked += 1
+            return True
+        return False
+
+    # Programming pins first, before ISET occupies the north F.Cu strip.
+    u3_14, r9_1 = xy("U3", "14"), xy("R9", "1")
+    if u3_14 and r9_1:
+        net = board.FindNet(u3_14[0].GetNetname())
+        if net is not None and hop_bcu(
+            board, obstacles, net, u3_14[1], r9_1[1],
+            (23.2, -36.6), (15.7, -28.5), protect,
+        ):
+            linked += 1
+        else:
+            link_pads(u3_14, r9_1)
+
+    u3_15, r11_1 = xy("U3", "15"), xy("R11", "1")
+    if u3_15 and r11_1:
+        net = board.FindNet(u3_15[0].GetNetname())
+        if net is not None and hop_bcu(
+            board, obstacles, net, u3_15[1], r11_1[1],
+            (24.6, -35.6), (19.4, -27.5), protect,
+        ):
+            linked += 1
+        else:
+            link_pads(u3_15, r11_1)
+
+    u3_12, r8_1 = xy("U3", "12"), xy("R8", "1")
+    if u3_12 and r8_1:
+        net = board.FindNet(u3_12[0].GetNetname())
+        if net is not None and hop_bcu(
+            board, obstacles, net, u3_12[1], r8_1[1],
+            (22.0, -35.2), (15.7, -31.0), protect,
+        ):
+            linked += 1
+        else:
+            link_pads(u3_12, r8_1)
+
+    link_pads(xy("U3", "1"), xy("R10", "1"))
+
+    u3_16, r4_1 = xy("U3", "16"), xy("R4", "1")
+    if u3_16 and r4_1:
+        net = board.FindNet(u3_16[0].GetNetname())
+        path = [u3_16[1], (u3_16[1][0], -37.50), (r4_1[1][0], -37.50), r4_1[1]]
+        if net is not None and _try_widths(
+            board, obstacles, net, path, DEFAULT_WIDTH, protect
+        ):
+            linked += 1
+        else:
+            link_pads(u3_16, r4_1)
+
+    link_pads(xy("U3", "13"), xy("C4", "1"))
+    link_pads(xy("U3", "6"), xy("C4", "1"))
+    link_pads(xy("U3", "7"), xy("C4", "1"))
+    link_pads(xy("U3", "10"), xy("C5", "1"))
+    link_pads(xy("U3", "9"), xy("D2", "2"))
+    link_pads(xy("U3", "2"), xy("U3", "3"))
+
+    vsys = net_of(board, "VSYS")
+    for x, y in ((19.50, -38.56), (20.00, -38.56), (18.80, -38.56),
+                 (21.00, -38.56)):
+        if _place_via(board, obstacles, vsys, x, y, protect):
+            c5 = xy("C5", "1")
+            if c5 is not None:
+                route_points(board, obstacles, vsys, c5[1], (x, y),
+                             POWER_WIDTH, protect)
+            u3_10 = xy("U3", "10")
+            if u3_10 is not None:
+                route_points(board, obstacles, vsys, u3_10[1], (x, y),
+                             POWER_WIDTH, protect)
+            linked += 1
+            break
+
+    vbat = net_of(board, "VBAT")
+    u3_2 = xy("U3", "2")
+    bt1 = xy("BT1", "1")
+    via_bat = (26.20, -41.00)
+    if u3_2 is not None and (
+        obstacles.has_via_near(via_bat[0], via_bat[1], vbat.GetNetCode(), 0.4)
+        or _place_via(board, obstacles, vbat, *via_bat, protect)
+    ):
+        route_points(board, obstacles, vbat, u3_2[1], via_bat, POWER_WIDTH,
+                     protect)
+        edge = [
+            via_bat, (26.20, -42.40), (31.10, -42.40), (31.10, 32.00),
+            (-23.50, 32.00), (-23.50, 34.00),
+        ]
+        if bt1 is not None:
+            edge[-1] = bt1[1]
+        if _try_widths(board, obstacles, vbat, edge, POWER_WIDTH, protect,
+                       pcbnew.B_Cu) or _try_widths(
+            board, obstacles, vbat, edge, DEFAULT_WIDTH, protect, pcbnew.B_Cu
+        ):
+            linked += 1
+    return linked
 
 
 # ---------------------------------------------------------------------------
@@ -1841,7 +2261,7 @@ ROUTED_OPEN_ITEMS = [
     "rotation is 0. A left-right mismatch only inverts polarity; 180° puts "
     "the coil on the dummy pads and the speaker is open. Confirm against "
     "JLC's assembly preview before the order. The lid has a grille over this "
-    "part; check polarity, volume (NS4150 on VBAT into 8 ohm, 1 W max) and "
+    "part; check polarity, volume (NS4150 on VSYS into 8 ohm, 1 W max) and "
     "the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing "
     "the top-actuated PTS645. The record button is on the left wall, so a top "
@@ -1870,11 +2290,17 @@ ROUTED_OPEN_ITEMS = [
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
-    "kicad-cli pcb drc --schematic-parity still reports 26 notes, and all of "
-    "them are expected: 22 are module pads with no schematic pin (spare "
-    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair) and 4 are the "
-    "H1-H4 mounting holes, which are mechanical and have no symbol. Copper "
-    "DRC, unconnected count and footprint/library parity are all zero.",
+    "USB-C is the only 5 V inlet. U3 is a BQ24074 power-path charger: OUT "
+    "(VSYS) stays up from USB with BT1 open, and BAT is the pouch only. Do "
+    "not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no "
+    "pack protector. Playback now runs the NS4150 from VSYS (~4.4 V on USB, "
+    "cell voltage on pouch), still under the speaker's 1 W ceiling.",
+    "kicad-cli pcb drc --schematic-parity still reports 28 notes, and all of "
+    "them are expected: 23 are module pads with no schematic pin (spare "
+    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 "
+    "PGOOD), 4 are the H1-H4 mounting holes, which are mechanical and have "
+    "no symbol, and 1 is BT1's solder-wire land standing in for JST-PH. "
+    "Copper DRC, unconnected count and footprint/library parity are all zero.",
 ]
 
 
@@ -1976,7 +2402,24 @@ def load(half=False):
     return board, half_w, half_h
 
 
+def apply_board_rules(board):
+    """Stamp JLCPCB floors onto the loaded board, not only .kicad_pro.
+
+    HEAD's board file still carries 0.25 mm hole clearance. fill_zones uses
+    the board object, so a restore-and-pour would otherwise redraw every
+    NPTH keepout at 0.25 and fail the 0.3 mm rule in recorder.kicad_pro.
+    """
+    ds = board.GetDesignSettings()
+    ds.m_HoleClearance = pcbnew.FromMM(DESIGN_RULES["min_hole_clearance"])
+    ds.m_HoleToHoleMin = pcbnew.FromMM(DESIGN_RULES["min_hole_to_hole"])
+    ds.m_MinClearance = pcbnew.FromMM(0.15)
+    ds.m_CopperEdgeClearance = pcbnew.FromMM(
+        DESIGN_RULES["min_copper_edge_clearance"]
+    )
+
+
 def save(board):
+    apply_board_rules(board)
     board.BuildConnectivity()
     pcbnew.SaveBoard(PCB, board)
     apply_project_policy(PROJECT)
@@ -2007,6 +2450,7 @@ def stage_planes(dsn_path):
     usb_pair_to_mcu(board, obstacles)
     stubs, vias = fanout_fine_pitch(board, obstacles)
     print(f"fine-pitch fanout: {stubs} stubs, {vias} vias")
+    fanout_charger(board, obstacles, protect=True)
     tie_mk1_ring(board)
     print(f"protected {relock(board)} hand-routed items from the autorouter")
     fix_via_widths(board)
@@ -2060,6 +2504,8 @@ def stage_pour(board, half_w, half_h, passes=8):
     if pad_orphans:
         print(f"  orphan GND pads: {pad_orphans}")
         fill_zones(board)
+    obstacles = Obstacles(board, half_w, half_h)
+    fanout_charger(board, obstacles, protect=False)
     save(board)
 
     best = None
@@ -2125,6 +2571,44 @@ def stage_pour(board, half_w, half_h, passes=8):
               f"{best[0][1]} open)")
         with open(PCB, "wb") as fh:
             fh.write(best[1])
+        board = pcbnew.LoadBoard(PCB)
+        board.BuildListOfNets()
+    return board
+
+
+def stage_repair(board, half_w, half_h, passes=8):
+    """Close new opens on an already-routed board.
+
+    Keeps the stored zone outlines. Rebuilding them with add_outer_pours
+    uses ZONE_CLEARANCE 0.20 and fails the 0.30 mm hole rule on every NPTH.
+    Hand-link U3, refill at 0.3 mm hole clearance, maze leftovers. Do not
+    rip up: TMR rip-up was cutting I2S and VBUS to free a 3 mm gap.
+    """
+    del passes
+    print("repairing island without rebuilding planes")
+    apply_board_rules(board)
+    obstacles = Obstacles(board, half_w, half_h)
+    fanout_charger(board, obstacles, protect=True)
+    apply_board_rules(board)
+    fill_zones(board)
+    save(board)
+
+    data = drc_json(PCB)
+    open_items = len(data.get("unconnected_items", []))
+    violations = len(data.get("violations", []))
+    print(f"  after hand route: {open_items} open connections, "
+          f"{violations} DRC violations")
+    if open_items:
+        board = pcbnew.LoadBoard(PCB)
+        board.BuildListOfNets()
+        apply_board_rules(board)
+        obstacles = Obstacles(board, half_w, half_h)
+        router = MazeRouter(board, obstacles, half_w, half_h)
+        healed, stuck = repair_unconnected(board, obstacles, router, data)
+        print(f"  maze healed {healed}, still open {len(stuck)}")
+        apply_board_rules(board)
+        fill_zones(board)
+        save(board)
         board = pcbnew.LoadBoard(PCB)
         board.BuildListOfNets()
     return board

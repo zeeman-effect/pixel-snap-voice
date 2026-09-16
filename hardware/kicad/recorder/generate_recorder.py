@@ -59,14 +59,15 @@ NETS_REQUIRED = {
     "I2S_DOUT": ["U1.15", "U2.9"],
     "PA_EN": ["U1.12", "U6.1"],
     "VBUS": ["J2.A4", "F1.1"],
-    "VBUS_CHG": ["F1.2", "U3.4"],
-    "VBAT": ["U3.3", "BT1.1", "U4.1"],
+    "VBUS_CHG": ["F1.2", "U3.13", "U3.6", "U3.7"],
+    "VBAT": ["U3.2", "BT1.1"],
+    "VSYS": ["U3.10", "U4.1", "U8.1", "U6.6"],
     "VDD33": ["U5.1", "U1.3"],
     "3V3A": ["U8.5", "U2.11"],
     "GND": ["U1.1", "J2.A1", "BT1.2"],
     "BTN": ["U1.5", "SW1.1"],
     "LED": ["U1.6", "D1.1"],
-    "CHG_STAT": ["U1.13", "U3.1"],
+    "CHG_STAT": ["U1.13", "U3.9"],
     "SD_CLK": ["U1.19", "J3.5"],
     "SD_CMD": ["U1.11", "J3.3"],
     "SD_D0": ["U1.10", "J3.7"],
@@ -188,8 +189,6 @@ def load_lib(lib_file: Path, name: str) -> tuple[str, dict[str, tuple[float, flo
     if ext:
         parent_name = ext.group(1).split(":")[-1]
         block = prefix_lib_ids(extract_symbol(lib_file, parent_name), prefix)
-    if name == "PWR_FLAG":
-        block = re.sub(r"\(power\s+global\)", "", block)
     return block, parse_pins(block), top_symbol_name(block)
 
 
@@ -459,7 +458,11 @@ def pwr_flag(
     y: float,
     pins: dict[str, tuple[float, float, float]],
 ) -> None:
-    sch.add(inst("power:PWR_FLAG", ref, "pwr", x, y, pins))
+    # Value must stay PWR_FLAG, matching the library. The pin name is empty, so
+    # KiCad does not turn that value into a net; the wired label (AGND, VBUS,
+    # …) still owns the connection. A dummy value like "pwr" plus the library's
+    # (power global) flag would merge every flag onto one net.
+    sch.add(inst("power:PWR_FLAG", ref, "PWR_FLAG", x, y, pins))
 
 
 def build() -> None:
@@ -474,7 +477,7 @@ def build() -> None:
     usb_blk, usb_pins, _ = load_lib(KICAD_SYM / "Connector.kicad_sym", "USB_C_Receptacle_USB2.0_16P")
     sd_blk, sd_pins, _ = load_lib(KICAD_SYM / "Connector.kicad_sym", "Micro_SD_Card")
     mcu_blk, mcu_pins, mcu_id = load_lib(KICAD_SYM / "RF_Module.kicad_sym", "ESP32-S3-MINI-1")
-    chg_blk, chg_pins, chg_id = load_lib(KICAD_SYM / "Battery_Management.kicad_sym", "MCP73831-2-OT")
+    chg_blk, chg_pins, chg_id = load_lib(HERE / "PSV.kicad_sym", "BQ24074RGT")
     ldo_blk, ldo_pins, ldo_id = load_lib(KICAD_SYM / "Regulator_Linear.kicad_sym", "AP2112K-3.3")
     ana_blk, ana_pins, ana_id = load_lib(KICAD_SYM / "Regulator_Linear.kicad_sym", "LP5907MFX-3.3")
     swi_blk, swi_pins, swi_id = load_lib(KICAD_SYM / "Power_Management.kicad_sym", "AP22804AW5")
@@ -489,6 +492,7 @@ def build() -> None:
     vdd33_blk, vdd33_pins, _ = load_lib(HERE / "PSV.kicad_sym", "VDD33")
     vbat_blk, vbat_pins, _ = load_lib(HERE / "PSV.kicad_sym", "VBAT")
     a3v3_blk, a3v3_pins, _ = load_lib(HERE / "PSV.kicad_sym", "3V3A")
+    vsys_blk, vsys_pins, _ = load_lib(HERE / "PSV.kicad_sym", "VSYS")
 
     mcu = Sch("Recorder — MCU / USB")
     for b in (mcu_blk, usb_blk, esd_blk, device_r, device_c, conn4, gnd_blk, vdd33_blk, vbus_blk):
@@ -634,7 +638,7 @@ def build() -> None:
     mcu.emit(HERE / "mcu_usb.kicad_sch", "2", uid("sch-mcu"))
 
     aud = Sch("Recorder — Audio")
-    for b in (es_blk, pa_blk, mic_blk, osc_blk, device_r, device_c, device_spk, gnd_blk, pflag_blk, a3v3_blk, vbat_blk):
+    for b in (es_blk, pa_blk, mic_blk, osc_blk, device_r, device_c, device_spk, gnd_blk, pflag_blk, a3v3_blk, vbat_blk, vsys_blk):
         aud.add_lib(b)
     aud.add(text("ES8311 is I2S master. 12.288 MHz oscillator drives MCLK. No XI/XO on this codec.", 20, 18, "aud-h"))
     ax, ay = 90, 90
@@ -716,7 +720,7 @@ def build() -> None:
     stub(aud, px, py, pa_pins, "2", "PA_BYP", "pa-byp", False)
     stub(aud, px, py, pa_pins, "3", "PA_INP", "pa-inp", False)
     stub(aud, px, py, pa_pins, "4", "PA_INN", "pa-inn", False)
-    stub(aud, px, py, pa_pins, "6", "VBAT", "pa-v")
+    stub(aud, px, py, pa_pins, "6", "VSYS", "pa-v")
     stub(aud, px, py, pa_pins, "7", "GND", "pa-g")
     stub(aud, px, py, pa_pins, "8", "SPK_P", "pa-p", False)
     stub(aud, px, py, pa_pins, "5", "SPK_N", "pa-n", False)
@@ -742,6 +746,7 @@ def build() -> None:
     place_rail(aud, "power:GND", "#PWR10", "GND", 30, 210, gnd_pins)
     place_rail(aud, "PSV:3V3A", "#PWR11", "3V3A", 30, 35, a3v3_pins)
     place_rail(aud, "PSV:VBAT", "#PWR12", "VBAT", 220, 35, vbat_pins)
+    place_rail(aud, "PSV:VSYS", "#PWR13", "VSYS", 250, 35, vsys_pins)
     pwr_flag(aud, "#FLG10", 105, 200, pflag_pins)
     stub(aud, 105, 200, pflag_pins, "1", "AGND", "flg-ag", False)
     aud.emit(HERE / "audio.kicad_sch", "3", uid("sch-aud"))
@@ -762,100 +767,127 @@ def build() -> None:
         vbus_blk,
         vdd33_blk,
         vbat_blk,
+        vsys_blk,
         a3v3_blk,
     ):
         pwr_s.add_lib(b)
-    pwr_s.add(text("VBUS -> PTC -> MCP73831 -> VBAT -> AP2112 -> AP22804 -> VDD33. Analog LP5907 from VBAT.", 20, 18, "pwr-h"))
+    pwr_s.add(text("USB-C 5V -> PTC -> BQ24074 IN. OUT is VSYS (loads). BAT is the pouch only.", 20, 12, "pwr-h"))
+    pwr_s.add(text("USB runs the board with BT1 open. Do not strap VSYS to VBAT.", 20, 18, "pwr-h2"))
     fx, fy = 50, 50
     cx, cy = 80, 70
-    u3x, u3y = 110, 50
-    c5x, c5y = 145, 70
-    btx, bty = 180, 52.54
+    u3x, u3y = 145, 95
+    c5x, c5y = 195, 80
+    btx, bty = 230, 92.54
+    # Same 3x3 VQFN land as the ThermalVias variant, but without the 0.2 mm
+    # EP drills. This board's hole floor is 0.3 mm (JLC preferred). A 0.6/0.3
+    # barrel on the exposed pad is added in route_pcb.py.
+    u3_fp = "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm"
     pwr_s.add(inst("Device:Fuse", "F1", "500mA PTC", fx, fy, fuse_pins, "Fuse:Fuse_0603_1608Metric"))
     pwr_s.add(inst("Device:C", "C4", "4.7uF", cx, cy, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    pwr_s.add(inst(chg_id, "U3", "MCP73831-2-OT", u3x, u3y, chg_pins, "Package_TO_SOT_SMD:SOT-23-5"))
+    pwr_s.add(inst(chg_id, "U3", "BQ24074RGTR", u3x, u3y, chg_pins, u3_fp))
     pwr_s.add(inst("Device:C", "C5", "4.7uF", c5x, c5y, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    pwr_s.add(inst("Device:Battery", "BT1", "LiPo 500mAh", btx, bty, bat_pins, "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm"))
+    pwr_s.add(inst("Device:Battery", "BT1", "JST-PH 1S", btx, bty, bat_pins, "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal"))
 
     vbus_rail = place_rail(pwr_s, "power:VBUS", "#PWR21", "VBUS", fx, 33.02, vbus_pins)
     pwr_flag(pwr_s, "#FLG02", fx, 33.02, pflag_pins)
     run(pwr_s, "vbus-f1", vbus_rail, pin_xy(fx, fy, fuse_pins, "1"))
 
     pwr_flag(pwr_s, "#FLG07", 70, 53.34, pflag_pins)
-    chg_in = stub(pwr_s, u3x, u3y, chg_pins, "4", "VBUS_CHG", "u3v")
+    stub(pwr_s, u3x, u3y, chg_pins, "13", "VBUS_CHG", "u3in")
+    stub(pwr_s, u3x, u3y, chg_pins, "7", "VBUS_CHG", "u3en1")
     flg_chg = stub(pwr_s, 70, 53.34, pflag_pins, "1", "VBUS_CHG", "flg-vchg")
     chg_bus = 60.96
     run(pwr_s, "vchg-f1", pin_xy(fx, fy, fuse_pins, "2"), (fx, chg_bus), flg_chg)
     run(pwr_s, "vchg-c4", flg_chg, (cx, chg_bus), pin_xy(cx, cy, c_pins, "1"))
-    run(pwr_s, "vchg-u3", (cx, chg_bus), (cx, chg_in[1]), chg_in)
     pwr_s.add(junction(flg_chg[0], flg_chg[1], "vchg-flg"))
     pwr_s.add(junction(cx, chg_bus, "vchg-c4tap"))
-
-    bat_plus = pin_xy(btx, bty, bat_pins, "1")
-    vbat_tap = (c5x, bat_plus[1])
-    run(pwr_s, "vbat-u3", pin_xy(u3x, u3y, chg_pins, "3"), vbat_tap, bat_plus)
-    run(pwr_s, "vbat-c5", vbat_tap, pin_xy(c5x, c5y, c_pins, "1"))
-    pwr_s.add(junction(vbat_tap[0], vbat_tap[1], "vbat-c5tap"))
-
     stub(pwr_s, cx, cy, c_pins, "2", "GND", "c4g")
-    stub(pwr_s, u3x, u3y, chg_pins, "2", "GND", "u3g")
-    stub(pwr_s, u3x, u3y, chg_pins, "1", "CHG_STAT", "u3s")
-    stub(pwr_s, u3x, u3y, chg_pins, "5", "PROG", "u3p", False)
+
+    stub(pwr_s, u3x, u3y, chg_pins, "10", "VSYS", "u3out")
+    stub(pwr_s, u3x, u3y, chg_pins, "2", "VBAT", "u3bat")
+    nc_pin(pwr_s, u3x, u3y, chg_pins, "8", "u3pgood")
+    stub(pwr_s, u3x, u3y, chg_pins, "17", "GND", "u3ep")
+    stub(pwr_s, u3x, u3y, chg_pins, "9", "CHG_STAT", "u3s")
+    stub(pwr_s, u3x, u3y, chg_pins, "4", "GND", "u3ce")
+    stub(pwr_s, u3x, u3y, chg_pins, "5", "GND", "u3en2")
+    stub(pwr_s, u3x, u3y, chg_pins, "16", "ISET", "u3iset", False)
+    stub(pwr_s, u3x, u3y, chg_pins, "12", "ILIM", "u3ilim", False)
+    stub(pwr_s, u3x, u3y, chg_pins, "14", "TMR", "u3tmr", False)
+    stub(pwr_s, u3x, u3y, chg_pins, "1", "TS", "u3ts", False)
+    stub(pwr_s, u3x, u3y, chg_pins, "15", "ITERM", "u3iterm", False)
+    stub(pwr_s, c5x, c5y, c_pins, "1", "VSYS", "c5v")
     stub(pwr_s, c5x, c5y, c_pins, "2", "GND", "c5g")
     stub(pwr_s, btx, bty, bat_pins, "1", "VBAT", "bt1p")
     stub(pwr_s, btx, bty, bat_pins, "2", "GND", "bt1n")
-    pwr_s.add(inst("Device:R", "R4", "2k", 85, 80, r_pins, "Resistor_SMD:R_0603_1608Metric"))
-    stub(pwr_s, 85, 80, r_pins, "1", "PROG", "r4p", False)
-    stub(pwr_s, 85, 80, r_pins, "2", "GND", "r4g")
 
-    pwr_s.add(inst("Device:LED", "D2", "chg", 145, 30, led_pins, "LED_SMD:LED_0603_1608Metric"))
-    pwr_s.add(inst("Device:R", "Rchg", "1k", 165, 30, r_pins, "Resistor_SMD:R_0603_1608Metric"))
-    stub(pwr_s, 165, 30, r_pins, "1", "VBUS_CHG", "rchgv")
-    stub(pwr_s, 165, 30, r_pins, "2", "CHG_LED", "rchgd", False)
-    stub(pwr_s, 145, 30, led_pins, "1", "CHG_LED", "d2a", False)
-    stub(pwr_s, 145, 30, led_pins, "2", "CHG_STAT", "d2k")
-    pwr_s.add(inst("Device:R", "Rstat", "10k", 190, 30, r_pins, "Resistor_SMD:R_0603_1608Metric"))
-    stub(pwr_s, 190, 30, r_pins, "1", "VDD33", "rstv")
-    stub(pwr_s, 190, 30, r_pins, "2", "CHG_STAT", "rsts")
+    # USB500: EN1 high (tied to IN), EN2 low. ISET 1.8k ~ 494 mA (KISET/R).
+    # ILIM 3.01k is the datasheet backup (~500 mA) if EN1/EN2 later select
+    # ILIM mode. TS is 10k to GND: no pack NTC. ITERM 3.01k ~ 10 percent.
+    pwr_s.add(inst("Device:R", "R4", "1.8k", 85, 115, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 85, 115, r_pins, "1", "ISET", "r4p", False)
+    stub(pwr_s, 85, 115, r_pins, "2", "GND", "r4g")
+    pwr_s.add(inst("Device:R", "R8", "3.01k", 85, 100, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 85, 100, r_pins, "1", "ILIM", "r8p", False)
+    stub(pwr_s, 85, 100, r_pins, "2", "GND", "r8g")
+    pwr_s.add(inst("Device:R", "R9", "49.9k", 85, 85, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 85, 85, r_pins, "1", "TMR", "r9p", False)
+    stub(pwr_s, 85, 85, r_pins, "2", "GND", "r9g")
+    pwr_s.add(inst("Device:R", "R10", "10k", 85, 70, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 85, 70, r_pins, "1", "TS", "r10p", False)
+    stub(pwr_s, 85, 70, r_pins, "2", "GND", "r10g")
+    pwr_s.add(inst("Device:R", "R11", "3.01k", 85, 55, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 85, 55, r_pins, "1", "ITERM", "r11p", False)
+    stub(pwr_s, 85, 55, r_pins, "2", "GND", "r11g")
 
-    pwr_s.add(inst(ldo_id, "U4", "AP2112K-3.3", 80, 130, ldo_pins, "Package_TO_SOT_SMD:SOT-23-5"))
-    stub(pwr_s, 80, 130, ldo_pins, "1", "VBAT", "u4in")
-    stub(pwr_s, 80, 130, ldo_pins, "2", "GND", "u4g")
-    stub(pwr_s, 80, 130, ldo_pins, "3", "VBAT", "u4en")
-    stub(pwr_s, 80, 130, ldo_pins, "5", "3V3_RAW", "u4out", False)
-    nc_pin(pwr_s, 80, 130, ldo_pins, "4", "u4nc")
-    pwr_s.add(inst("Device:C", "C6", "1uF", 50, 150, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    pwr_s.add(inst("Device:C", "C7", "2.2uF", 110, 150, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    stub(pwr_s, 50, 150, c_pins, "1", "VBAT", "c6v")
-    stub(pwr_s, 50, 150, c_pins, "2", "GND", "c6g")
-    stub(pwr_s, 110, 150, c_pins, "1", "3V3_RAW", "c7v", False)
-    stub(pwr_s, 110, 150, c_pins, "2", "GND", "c7g")
+    pwr_s.add(inst("Device:LED", "D2", "chg", 195, 30, led_pins, "LED_SMD:LED_0603_1608Metric"))
+    pwr_s.add(inst("Device:R", "Rchg", "1k", 215, 30, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 215, 30, r_pins, "1", "VBUS_CHG", "rchgv")
+    stub(pwr_s, 215, 30, r_pins, "2", "CHG_LED", "rchgd", False)
+    stub(pwr_s, 195, 30, led_pins, "1", "CHG_LED", "d2a", False)
+    stub(pwr_s, 195, 30, led_pins, "2", "CHG_STAT", "d2k")
+    pwr_s.add(inst("Device:R", "Rstat", "10k", 240, 30, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(pwr_s, 240, 30, r_pins, "1", "VDD33", "rstv")
+    stub(pwr_s, 240, 30, r_pins, "2", "CHG_STAT", "rsts")
 
-    pwr_s.add(inst(swi_id, "U5", "AP22804AW5", 150, 130, swi_pins, "Package_TO_SOT_SMD:SOT-23-5"))
-    stub(pwr_s, 150, 130, swi_pins, "5", "3V3_RAW", "u5in", False)
-    stub(pwr_s, 150, 130, swi_pins, "1", "VDD33", "u5out")
-    stub(pwr_s, 150, 130, swi_pins, "2", "GND", "u5g")
-    stub(pwr_s, 150, 130, swi_pins, "4", "3V3_RAW", "u5en", False)
-    nc_pin(pwr_s, 150, 130, swi_pins, "3", "u5flg")
-    pwr_s.add(inst("Device:C", "C8", "10uF", 185, 150, c_pins, "Capacitor_SMD:C_0805_2012Metric"))
-    stub(pwr_s, 185, 150, c_pins, "1", "VDD33", "c8v")
-    stub(pwr_s, 185, 150, c_pins, "2", "GND", "c8g")
+    pwr_s.add(inst(ldo_id, "U4", "AP2112K-3.3", 80, 150, ldo_pins, "Package_TO_SOT_SMD:SOT-23-5"))
+    stub(pwr_s, 80, 150, ldo_pins, "1", "VSYS", "u4in")
+    stub(pwr_s, 80, 150, ldo_pins, "2", "GND", "u4g")
+    stub(pwr_s, 80, 150, ldo_pins, "3", "VSYS", "u4en")
+    stub(pwr_s, 80, 150, ldo_pins, "5", "3V3_RAW", "u4out", False)
+    nc_pin(pwr_s, 80, 150, ldo_pins, "4", "u4nc")
+    pwr_s.add(inst("Device:C", "C6", "1uF", 50, 170, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
+    pwr_s.add(inst("Device:C", "C7", "2.2uF", 110, 170, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
+    stub(pwr_s, 50, 170, c_pins, "1", "VSYS", "c6v")
+    stub(pwr_s, 50, 170, c_pins, "2", "GND", "c6g")
+    stub(pwr_s, 110, 170, c_pins, "1", "3V3_RAW", "c7v", False)
+    stub(pwr_s, 110, 170, c_pins, "2", "GND", "c7g")
 
-    pwr_s.add(inst(ana_id, "U8", "LP5907MFX-3.3", 80, 190, ana_pins, "Package_TO_SOT_SMD:SOT-23-5"))
-    stub(pwr_s, 80, 190, ana_pins, "1", "VBAT", "u8in")
-    stub(pwr_s, 80, 190, ana_pins, "2", "GND", "u8g")
-    stub(pwr_s, 80, 190, ana_pins, "3", "VDD33", "u8en")
-    stub(pwr_s, 80, 190, ana_pins, "5", "3V3A", "u8out")
-    nc_pin(pwr_s, 80, 190, ana_pins, "4", "u8nc")
-    pwr_s.add(inst("Device:C", "C9", "1uF", 120, 190, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
-    stub(pwr_s, 120, 190, c_pins, "1", "3V3A", "c9v")
-    stub(pwr_s, 120, 190, c_pins, "2", "GND", "c9g")
+    pwr_s.add(inst(swi_id, "U5", "AP22804AW5", 150, 150, swi_pins, "Package_TO_SOT_SMD:SOT-23-5"))
+    stub(pwr_s, 150, 150, swi_pins, "5", "3V3_RAW", "u5in", False)
+    stub(pwr_s, 150, 150, swi_pins, "1", "VDD33", "u5out")
+    stub(pwr_s, 150, 150, swi_pins, "2", "GND", "u5g")
+    stub(pwr_s, 150, 150, swi_pins, "4", "3V3_RAW", "u5en", False)
+    nc_pin(pwr_s, 150, 150, swi_pins, "3", "u5flg")
+    pwr_s.add(inst("Device:C", "C8", "10uF", 185, 170, c_pins, "Capacitor_SMD:C_0805_2012Metric"))
+    stub(pwr_s, 185, 170, c_pins, "1", "VDD33", "c8v")
+    stub(pwr_s, 185, 170, c_pins, "2", "GND", "c8g")
 
-    place_rail(pwr_s, "power:GND", "#PWR20", "GND", 30, 220, gnd_pins)
-    place_rail(pwr_s, "PSV:VBAT", "#PWR22", "VBAT", 200, 35, vbat_pins)
-    place_rail(pwr_s, "PSV:VDD33", "#PWR23", "VDD33", 220, 110, vdd33_pins)
-    place_rail(pwr_s, "PSV:3V3A", "#PWR24", "3V3A", 150, 190, a3v3_pins)
-    pwr_flag(pwr_s, "#FLG06", 30, 220, pflag_pins)
+    pwr_s.add(inst(ana_id, "U8", "LP5907MFX-3.3", 80, 205, ana_pins, "Package_TO_SOT_SMD:SOT-23-5"))
+    stub(pwr_s, 80, 205, ana_pins, "1", "VSYS", "u8in")
+    stub(pwr_s, 80, 205, ana_pins, "2", "GND", "u8g")
+    stub(pwr_s, 80, 205, ana_pins, "3", "VDD33", "u8en")
+    stub(pwr_s, 80, 205, ana_pins, "5", "3V3A", "u8out")
+    nc_pin(pwr_s, 80, 205, ana_pins, "4", "u8nc")
+    pwr_s.add(inst("Device:C", "C9", "1uF", 120, 205, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
+    stub(pwr_s, 120, 205, c_pins, "1", "3V3A", "c9v")
+    stub(pwr_s, 120, 205, c_pins, "2", "GND", "c9g")
+
+    place_rail(pwr_s, "power:GND", "#PWR20", "GND", 30, 230, gnd_pins)
+    place_rail(pwr_s, "PSV:VBAT", "#PWR22", "VBAT", 230, 35, vbat_pins)
+    place_rail(pwr_s, "PSV:VSYS", "#PWR25", "VSYS", 200, 35, vsys_pins)
+    place_rail(pwr_s, "PSV:VDD33", "#PWR23", "VDD33", 250, 130, vdd33_pins)
+    place_rail(pwr_s, "PSV:3V3A", "#PWR24", "3V3A", 150, 205, a3v3_pins)
+    pwr_flag(pwr_s, "#FLG06", 30, 230, pflag_pins)
     pwr_s.emit(HERE / "power.kicad_sch", "4", uid("sch-pwr"))
 
     io = Sch("Recorder — IO")

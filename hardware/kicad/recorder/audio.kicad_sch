@@ -916,7 +916,7 @@
 		)
 	)
 (symbol "power:PWR_FLAG"
-		
+		(power global)
 		(pin_numbers
 			(hide yes)
 		)
@@ -1066,6 +1066,26 @@
 		(symbol "VBAT_1_1"
 			(pin power_in line (at 0 0 90) (length 0) (hide yes)
 				(name "VBAT" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27)))))
+		)
+	)
+(symbol "PSV:VSYS"
+		(power)
+		(pin_numbers (hide yes))
+		(pin_names (offset 0) (hide yes))
+		(in_bom no)
+		(on_board yes)
+		(property "Reference" "#PWR" (at 0 -3.81 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(property "Value" "VSYS" (at 0 3.556 0)
+			(effects (font (size 1.27 1.27))))
+		(symbol "VSYS_0_1"
+			(polyline (pts (xy 0 1.27) (xy 0 0))
+				(stroke (width 0) (type default))
+				(fill (type none))))
+		(symbol "VSYS_1_1"
+			(pin power_in line (at 0 0 90) (length 0) (hide yes)
+				(name "VSYS" (effects (font (size 1.27 1.27))))
 				(number "1" (effects (font (size 1.27 1.27)))))
 		)
 	)
@@ -1959,11 +1979,11 @@
 		(stroke (width 0) (type default))
 		(uuid "69b14652-78fc-558d-be60-66abc4f8c704")
 	)
-	(global_label "VBAT"
+	(global_label "VSYS"
 		(shape input)
 		(at 200.00 72.22 90)
 		(effects (font (size 1.27 1.27)) (justify left))
-		(uuid "4bdbb9a6-2408-5d39-b30b-717e0406c945")
+		(uuid "28784446-ebab-5cde-a561-1356032357f2")
 	)
 	(wire
 		(pts (xy 200.00 100.16) (xy 200.00 107.78))
@@ -2331,6 +2351,36 @@
 		(uuid "b7894f6e-e24b-5292-9247-adb4be4a912c")
 	)
 	(symbol
+		(lib_id "PSV:VSYS")
+		(at 250.00 35.00 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9619f5c4-aece-5b13-bcb2-7aefa86d5c35")
+		(property "Reference" "#PWR13" (at 250.00 27.00 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Value" "VSYS" (at 250.00 29.50 0)
+			(effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 250.00 35.00 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(property "Datasheet" "~" (at 250.00 35.00 0)
+			(effects (font (size 1.27 1.27)) hide))
+		(pin "1" (uuid "027064da-686c-5dc1-b9de-b5239ed5c589"))
+	)
+	(wire
+		(pts (xy 250.00 35.00) (xy 250.00 42.62))
+		(stroke (width 0) (type default))
+		(uuid "4e01d2a7-bf8b-56c4-abcd-fe2dd3983bc3")
+	)
+	(global_label "VSYS"
+		(shape input)
+		(at 250.00 42.62 270)
+		(effects (font (size 1.27 1.27)) (justify right))
+		(uuid "0ce67c72-cda6-5727-84a7-73056e242b37")
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 105.00 200.00 0)
 		(unit 1)
@@ -2341,7 +2391,7 @@
 		(uuid "603dbbbe-976f-5a6e-9c87-52d1d32db221")
 		(property "Reference" "#FLG10" (at 105.00 192.00 0)
 			(effects (font (size 1.27 1.27))))
-		(property "Value" "pwr" (at 105.00 194.50 0)
+		(property "Value" "PWR_FLAG" (at 105.00 194.50 0)
 			(effects (font (size 1.27 1.27))))
 		(property "Footprint" "" (at 105.00 200.00 0)
 			(effects (font (size 1.27 1.27)) hide))

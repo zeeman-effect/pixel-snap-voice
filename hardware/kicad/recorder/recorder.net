@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
-		(date "2026-09-13T10:19:12")
+		(date "2026-09-16T10:13:00")
 		(tool "Eeschema 10.0.5")
 		(sheet
 			(number "1")
@@ -2248,12 +2248,12 @@
 		)
 		(comp
 			(ref "BT1")
-			(value "LiPo 500mAh")
-			(footprint "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm")
+			(value "JST-PH 1S")
+			(footprint "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm")
+					(name "Footprint") "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -2730,7 +2730,7 @@
 		)
 		(comp
 			(ref "R4")
-			(value "2k")
+			(value "1.8k")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(datasheet "~")
 			(fields
@@ -2768,6 +2768,222 @@
 				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
 			)
 			(tstamps "6c1ea0d0-a715-5739-9abb-64fa8897a189")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R8")
+			(value "3.01k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Power/")
+				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
+			)
+			(tstamps "4cddb32a-14c5-5fd8-8281-cbc4c9e2e03f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R9")
+			(value "49.9k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Power/")
+				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
+			)
+			(tstamps "4e0416c5-2363-5d14-b069-81130f186806")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R10")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Power/")
+				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
+			)
+			(tstamps "b1fcffe3-63b3-527f-88d4-c5b69811a28a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R11")
+			(value "3.01k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Power/")
+				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
+			)
+			(tstamps "eed7def5-8d4d-534f-a174-da8a9bbf1f01")
 			(units
 				(unit
 					(name "A")
@@ -2892,12 +3108,12 @@
 		)
 		(comp
 			(ref "U3")
-			(value "MCP73831-2-OT")
-			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(value "BQ24074RGTR")
+			(footprint "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+					(name "Footprint") "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -2905,9 +3121,9 @@
 				)
 			)
 			(libsource
-				(lib "Battery_Management")
-				(part "MCP73831-2-OT")
-				(description "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+				(lib "PSV")
+				(part "BQ24074RGT")
+				(description "USB-friendly Li-ion charger and power-path, VQFN-16. Pin numbers match the RGT datasheet, not the KiCad Battery_Management symbol (which swaps IN/EN1/PGOOD/VSS).")
 			)
 			(property
 				(name "Sheetname")
@@ -2919,11 +3135,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "battery charger lithium")
+				(value "USB charger BQ24074 power-path")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "SOT?23*")
+				(value "VQFN*1EP*3x3mm*P0.5mm*")
 			)
 			(sheetpath
 				(names "/Power/")
@@ -2935,10 +3151,40 @@
 					(name "A")
 					(pins
 						(pin
-							(num "5")
+							(num "15")
 						)
 						(pin
 							(num "4")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
 						)
 						(pin
 							(num "2")
@@ -2948,6 +3194,12 @@
 						)
 						(pin
 							(num "1")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
 						)
 					)
 				)
@@ -3650,54 +3902,6 @@
 	(variants)
 	(libparts
 		(libpart
-			(lib "Battery_Management")
-			(part "MCP73831-2-OT")
-			(description "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
-			(docs "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
-			(footprints
-				(fp "SOT?23*")
-			)
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "MCP73831-2-OT")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
-				(field
-					(name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
-				(field
-					(name "Description") "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "STAT")
-					(type "tri_state")
-				)
-				(pin
-					(num "2")
-					(name "V_{SS}")
-					(type "power_in")
-				)
-				(pin
-					(num "3")
-					(name "V_{BAT}")
-					(type "power_out")
-				)
-				(pin
-					(num "4")
-					(name "V_{DD}")
-					(type "power_in")
-				)
-				(pin
-					(num "5")
-					(name "PROG")
-					(type "input")
-				)
-			)
-		)
-		(libpart
 			(lib "Connector")
 			(part "Micro_SD_Card")
 			(description "Micro SD Card Socket")
@@ -4166,6 +4370,114 @@
 				(pin
 					(num "4")
 					(name "Vdd")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "PSV")
+			(part "BQ24074RGT")
+			(description "USB-friendly Li-ion charger and power-path, VQFN-16. Pin numbers match the RGT datasheet, not the KiCad Battery_Management symbol (which swaps IN/EN1/PGOOD/VSS).")
+			(docs "http://www.ti.com/lit/ds/symlink/bq24074.pdf")
+			(footprints
+				(fp "VQFN*1EP*3x3mm*P0.5mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "BQ24074RGT")
+				(field
+					(name "Footprint") "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm")
+				(field
+					(name "Datasheet") "http://www.ti.com/lit/ds/symlink/bq24074.pdf")
+				(field
+					(name "Description") "USB-friendly Li-ion charger and power-path, VQFN-16. Pin numbers match the RGT datasheet, not the KiCad Battery_Management symbol (which swaps IN/EN1/PGOOD/VSS).")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "TS")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "BAT")
+					(type "power_out")
+				)
+				(pin
+					(num "3")
+					(name "BAT")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "~{CE}")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "EN2")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "IN")
+					(type "power_in")
+				)
+				(pin
+					(num "7")
+					(name "EN1")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "~{PGOOD}")
+					(type "open_collector")
+				)
+				(pin
+					(num "9")
+					(name "~{CHG}")
+					(type "open_collector")
+				)
+				(pin
+					(num "10")
+					(name "OUT")
+					(type "power_out")
+				)
+				(pin
+					(num "11")
+					(name "OUT")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "ILIM")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "IN")
+					(type "power_in")
+				)
+				(pin
+					(num "14")
+					(name "TMR")
+					(type "input")
+				)
+				(pin
+					(num "15")
+					(name "ITERM")
+					(type "input")
+				)
+				(pin
+					(num "16")
+					(name "ISET")
+					(type "passive")
+				)
+				(pin
+					(num "17")
+					(name "VSS")
 					(type "power_in")
 				)
 			)
@@ -4979,10 +5291,6 @@
 	)
 	(libraries
 		(library
-			(logical "Battery_Management")
-			(uri "${KICAD10_SYMBOL_DIR}/Battery_Management.kicad_sym")
-		)
-		(library
 			(logical "Connector")
 			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
 		)
@@ -5421,7 +5729,23 @@
 		)
 		(net
 			(code "21")
-			(name "/Power/PROG")
+			(name "/Power/ILIM")
+			(class "Default")
+			(node
+				(ref "R8")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "12")
+				(pinfunction "ILIM_12")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "/Power/ISET")
 			(class "Default")
 			(node
 				(ref "R4")
@@ -5430,13 +5754,61 @@
 			)
 			(node
 				(ref "U3")
-				(pin "5")
-				(pinfunction "PROG_5")
+				(pin "16")
+				(pinfunction "ISET_16")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "23")
+			(name "/Power/ITERM")
+			(class "Default")
+			(node
+				(ref "R11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "15")
+				(pinfunction "ITERM_15")
 				(pintype "input")
 			)
 		)
 		(net
-			(code "22")
+			(code "24")
+			(name "/Power/TMR")
+			(class "Default")
+			(node
+				(ref "R9")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "14")
+				(pinfunction "TMR_14")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "25")
+			(name "/Power/TS")
+			(class "Default")
+			(node
+				(ref "R10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "1")
+				(pinfunction "TS_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "26")
 			(name "3V3A")
 			(class "POWER,Default")
 			(node
@@ -5481,7 +5853,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "27")
 			(name "BTN")
 			(class "Default")
 			(node
@@ -5498,7 +5870,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "28")
 			(name "CC1")
 			(class "Default")
 			(node
@@ -5514,7 +5886,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "29")
 			(name "CC2")
 			(class "Default")
 			(node
@@ -5530,7 +5902,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "30")
 			(name "CHG_STAT")
 			(class "Default")
 			(node
@@ -5552,13 +5924,13 @@
 			)
 			(node
 				(ref "U3")
-				(pin "1")
-				(pinfunction "STAT_1")
-				(pintype "tri_state")
+				(pin "9")
+				(pinfunction "~{CHG}_9")
+				(pintype "open_collector")
 			)
 		)
 		(net
-			(code "27")
+			(code "31")
 			(name "GND")
 			(class "Default")
 			(node
@@ -5676,6 +6048,16 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "R2")
 				(pin "2")
 				(pintype "passive")
@@ -5692,6 +6074,16 @@
 			)
 			(node
 				(ref "R7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -5863,9 +6255,21 @@
 			)
 			(node
 				(ref "U3")
-				(pin "2")
-				(pinfunction "V_{SS}_2")
+				(pin "17")
+				(pinfunction "VSS_17")
 				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "~{CE}_4")
+				(pintype "input")
+			)
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "EN2_5")
+				(pintype "input")
 			)
 			(node
 				(ref "U4")
@@ -5905,7 +6309,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "32")
 			(name "I2C_SCL")
 			(class "Default")
 			(node
@@ -5927,7 +6331,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "33")
 			(name "I2C_SDA")
 			(class "Default")
 			(node
@@ -5949,7 +6353,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "34")
 			(name "I2S_BCLK")
 			(class "Default")
 			(node
@@ -5966,7 +6370,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "35")
 			(name "I2S_DIN")
 			(class "Default")
 			(node
@@ -5983,7 +6387,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "36")
 			(name "I2S_DOUT")
 			(class "Default")
 			(node
@@ -6000,7 +6404,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "37")
 			(name "I2S_MCLK")
 			(class "Default")
 			(node
@@ -6023,7 +6427,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "38")
 			(name "I2S_WS")
 			(class "Default")
 			(node
@@ -6040,7 +6444,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "39")
 			(name "LED")
 			(class "Default")
 			(node
@@ -6057,7 +6461,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "40")
 			(name "MIC_P")
 			(class "Default")
 			(node
@@ -6073,7 +6477,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "41")
 			(name "PA_EN")
 			(class "Default")
 			(node
@@ -6090,7 +6494,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "42")
 			(name "SD_CLK")
 			(class "Default")
 			(node
@@ -6107,7 +6511,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "43")
 			(name "SD_CMD")
 			(class "Default")
 			(node
@@ -6129,7 +6533,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "44")
 			(name "SD_D0")
 			(class "Default")
 			(node
@@ -6151,7 +6555,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "45")
 			(name "SD_D1")
 			(class "Default")
 			(node
@@ -6173,7 +6577,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "46")
 			(name "SD_D2")
 			(class "Default")
 			(node
@@ -6195,7 +6599,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "47")
 			(name "SD_D3")
 			(class "Default")
 			(node
@@ -6217,7 +6621,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "48")
 			(name "USB_DM")
 			(class "USB,Default")
 			(node
@@ -6252,7 +6656,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "49")
 			(name "USB_DP")
 			(class "USB,Default")
 			(node
@@ -6287,7 +6691,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "50")
 			(name "VBAT")
 			(class "POWER,Default")
 			(node
@@ -6302,48 +6706,20 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "C5")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C6")
-				(pin "1")
-				(pintype "passive")
+				(ref "U3")
+				(pin "2")
+				(pinfunction "BAT_2")
+				(pintype "power_out")
 			)
 			(node
 				(ref "U3")
 				(pin "3")
-				(pinfunction "V_{BAT}_3")
-				(pintype "power_out")
-			)
-			(node
-				(ref "U4")
-				(pin "1")
-				(pinfunction "VIN_1")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U4")
-				(pin "3")
-				(pinfunction "EN_3")
-				(pintype "input")
-			)
-			(node
-				(ref "U6")
-				(pin "6")
-				(pinfunction "VCC_6")
-				(pintype "power_in")
-			)
-			(node
-				(ref "U8")
-				(pin "1")
-				(pinfunction "IN_1")
-				(pintype "power_in")
+				(pinfunction "BAT_3")
+				(pintype "passive")
 			)
 		)
 		(net
-			(code "47")
+			(code "51")
 			(name "VBUS")
 			(class "POWER,Default")
 			(node
@@ -6383,7 +6759,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "52")
 			(name "VBUS_CHG")
 			(class "POWER,Default")
 			(node
@@ -6403,13 +6779,25 @@
 			)
 			(node
 				(ref "U3")
-				(pin "4")
-				(pinfunction "V_{DD}_4")
+				(pin "13")
+				(pinfunction "IN_13")
 				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "IN_6")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "7")
+				(pinfunction "EN1_7")
+				(pintype "input")
 			)
 		)
 		(net
-			(code "49")
+			(code "53")
 			(name "VDD33")
 			(class "Default")
 			(node
@@ -6532,7 +6920,58 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "54")
+			(name "VSYS")
+			(class "POWER,Default")
+			(node
+				(ref "C5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "10")
+				(pinfunction "OUT_10")
+				(pintype "power_out")
+			)
+			(node
+				(ref "U3")
+				(pin "11")
+				(pinfunction "OUT_11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "1")
+				(pinfunction "VIN_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U4")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U6")
+				(pin "6")
+				(pinfunction "VCC_6")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U8")
+				(pin "1")
+				(pinfunction "IN_1")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "55")
 			(name "unconnected-(J2-SBU1-PadA8)")
 			(class "Default")
 			(node
@@ -6543,7 +6982,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "56")
 			(name "unconnected-(J2-SBU2-PadB8)")
 			(class "Default")
 			(node
@@ -6554,7 +6993,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "57")
 			(name "unconnected-(U1-IO3-Pad7)")
 			(class "Default")
 			(node
@@ -6565,7 +7004,7 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "58")
 			(name "unconnected-(U1-IO21-Pad25)")
 			(class "Default")
 			(node
@@ -6576,7 +7015,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "59")
 			(name "unconnected-(U1-IO26-Pad26)")
 			(class "Default")
 			(node
@@ -6587,7 +7026,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "60")
 			(name "unconnected-(U1-IO33-Pad28)")
 			(class "Default")
 			(node
@@ -6598,7 +7037,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "61")
 			(name "unconnected-(U1-IO34-Pad29)")
 			(class "Default")
 			(node
@@ -6609,7 +7048,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "62")
 			(name "unconnected-(U1-IO35-Pad31)")
 			(class "Default")
 			(node
@@ -6620,7 +7059,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "63")
 			(name "unconnected-(U1-IO36-Pad32)")
 			(class "Default")
 			(node
@@ -6631,7 +7070,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "64")
 			(name "unconnected-(U1-IO37-Pad33)")
 			(class "Default")
 			(node
@@ -6642,7 +7081,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "65")
 			(name "unconnected-(U1-IO38-Pad34)")
 			(class "Default")
 			(node
@@ -6653,7 +7092,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "66")
 			(name "unconnected-(U1-IO39-Pad35)")
 			(class "Default")
 			(node
@@ -6664,7 +7103,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "67")
 			(name "unconnected-(U1-IO40-Pad36)")
 			(class "Default")
 			(node
@@ -6675,7 +7114,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "68")
 			(name "unconnected-(U1-IO41-Pad37)")
 			(class "Default")
 			(node
@@ -6686,7 +7125,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "69")
 			(name "unconnected-(U1-IO42-Pad38)")
 			(class "Default")
 			(node
@@ -6697,7 +7136,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "70")
 			(name "unconnected-(U1-IO45-Pad41)")
 			(class "Default")
 			(node
@@ -6708,7 +7147,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "71")
 			(name "unconnected-(U1-IO46-Pad44)")
 			(class "Default")
 			(node
@@ -6719,7 +7158,7 @@
 			)
 		)
 		(net
-			(code "67")
+			(code "72")
 			(name "unconnected-(U1-IO47-Pad27)")
 			(class "Default")
 			(node
@@ -6730,7 +7169,7 @@
 			)
 		)
 		(net
-			(code "68")
+			(code "73")
 			(name "unconnected-(U1-IO48-Pad30)")
 			(class "Default")
 			(node
@@ -6741,7 +7180,18 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "74")
+			(name "unconnected-(U3-~{PGOOD}-Pad8)")
+			(class "Default")
+			(node
+				(ref "U3")
+				(pin "8")
+				(pinfunction "~{PGOOD}_8")
+				(pintype "open_collector+no_connect")
+			)
+		)
+		(net
+			(code "75")
 			(name "unconnected-(U4-NC-Pad4)")
 			(class "Default")
 			(node
@@ -6752,7 +7202,7 @@
 			)
 		)
 		(net
-			(code "70")
+			(code "76")
 			(name "unconnected-(U5-~{FLG}-Pad3)")
 			(class "Default")
 			(node
@@ -6763,7 +7213,7 @@
 			)
 		)
 		(net
-			(code "71")
+			(code "77")
 			(name "unconnected-(U8-NC-Pad4)")
 			(class "Default")
 			(node

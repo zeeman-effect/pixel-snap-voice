@@ -340,6 +340,10 @@
         "netclass": "POWER"
       },
       {
+        "pattern": "VSYS",
+        "netclass": "POWER"
+      },
+      {
         "pattern": "/Power/3V3_RAW",
         "netclass": "POWER"
       },
@@ -364,39 +368,15 @@
     "bus_aliases": {},
     "legacy_lib_dir": "",
     "legacy_lib_list": [],
-    "meta": {
-      "version": 1
-    },
     "top_level_sheets": [
       {
         "filename": "recorder.kicad_sch",
-        "name": "Root",
-        "uuid": "a1b0c3d4-e5f6-4789-a012-3456789abcde"
+        "name": "recorder",
+        "uuid": "00000000-0000-0000-0000-000000000000"
       }
     ]
   },
-  "sheets": [
-    [
-      "a1b0c3d4-e5f6-4789-a012-3456789abcde",
-      "Root"
-    ],
-    [
-      "929253d0-985e-56cb-9e31-f332173d06c5",
-      "MCU_USB"
-    ],
-    [
-      "0b6c38b0-0cbe-58b5-b72c-4d988e150443",
-      "Audio"
-    ],
-    [
-      "73db245d-da1b-518f-a383-e5b6a515033d",
-      "Power"
-    ],
-    [
-      "f8046852-c22d-5889-a4d2-9d2888850dd3",
-      "IO"
-    ]
-  ],
+  "sheets": [],
   "text_variables": {},
   "tuning_profiles": {
     "meta": {

@@ -34,6 +34,7 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | --- | --- |
 | CC1 / CC2 | R2 / R3 5.11 kΩ to GND (UFP) on J2 |
 | **VDD33** | U4 AP2112 → U5 AP22804. MCU digital rail |
-| 3V3A | U8 LP5907 from VBAT; star return to AGND; no digital return through MK1 |
-| VBAT | LiPo; U3 MCP73831 500 mA |
+| 3V3A | U8 LP5907 from **VSYS**; star return to AGND; no digital return through MK1 |
+| VBAT | LiPo pouch on BT1; U3 BQ24074 BAT pin only. Do not strap to VSYS |
+| VSYS | U3 OUT. USB or cell, whichever is up. Feeds U4, U8, U6 |
 | RF | MINI-1U IPEX connector, no cable in v1 |

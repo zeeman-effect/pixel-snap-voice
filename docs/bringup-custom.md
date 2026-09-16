@@ -7,13 +7,13 @@ Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` an
 ## Order of tests
 
 1. **USB serial** — native USB-Serial/JTAG or UART0. Confirm the S3 enumerates and `idf.py monitor` shows `pixel-snap-voice on custom`.
-2. **Rails** — **VDD33** at U4/U5 (MCU) vs **3V3A** at U8 LP5907. They must not be shorted together. VBAT ~3.7–4.2 V with a pouch. VBUS ~5 V when plugged in (J2).
+2. **Rails** — **VDD33** at U4/U5 (MCU) vs **3V3A** at U8 LP5907. They must not be shorted together. **VSYS** at U3 OUT / U4 VIN (USB ~4.4 V or cell). **VBAT** ~3.7–4.2 V at BT1 with a pouch; it must not be strapped to VSYS. VBUS ~5 V when plugged in (J2).
 3. **I2C codec** — scan address 0x18. ES8311 ACK.
 4. **I2S** — codec is master. Y1 is the 12.288 MHz oscillator into ES8311 MCLK. Scope MCLK/BCLK/WS. Play a tone / loopback before trusting the mic.
 5. **Mic capture** — short press records `/recordings/YYYYMMDD-HHMMSS.wav` at 48 kHz. Copy off via SD reader if MSC is not up yet. Play on a desktop.
 6. **SD** — 4-bit SDMMC. `storage_sd_mount` log line.
-7. **Playback** — double-press plays last file through NS4150 / SP1 (KELIKING KLJ-01304T). Check the lid grille is over the can. NS4150B runs from VBAT; at 4.2 V into 8 Ω the PA can sit on the speaker's 1 W max. Firmware still advertises `pa_voltage = 5.0`, which keeps digital gain down. Confirm polarity (a left-right JLC mismatch only inverts phase; a 180° mismatch is silent) and that playback volume is comfortable, not a copper change.
-8. **Charger** — USB-C 5 V, MCP73831 STAT, ~500 mA. No brownout while recording or playing.
+7. **Playback** — double-press plays last file through NS4150 / SP1 (KELIKING KLJ-01304T). Check the lid grille is over the can. NS4150B runs from **VSYS**; at ~4.4 V on USB or 4.2 V on a full pouch into 8 Ω the PA can sit on the speaker's 1 W max. Firmware still advertises `pa_voltage = 5.0`, which keeps digital gain down. Confirm polarity (a left-right JLC mismatch only inverts phase; a 180° mismatch is silent) and that playback volume is comfortable, not a copper change.
+8. **Charger** — USB-C 5 V into BQ24074 IN. STAT / **CHG_STAT** low while charging, ~500 mA. Board runs from VSYS with BT1 open. No brownout while recording or playing.
 9. **TinyUSB MSC** — plug into a PC; recording stops; volume mounts; unplug returns to idle. Drop `set_time.txt` to set the RTC.
 10. **Sleep** — long press; current should drop (U5 off). Wake on the record button.
 
@@ -31,4 +31,4 @@ Measure record current (PA off) and playback current. Update [`docs/bom.md`](bom
 | Codec NACK | 3V3A (U8), I2C pull-ups, Y1 output on MCLK |
 | Hiss / no mic | Analog island, mic port not against glass, MK1 bias |
 | No MSC | TinyUSB config, SD still mounted by VFS, USB D+/D− swap |
-| Brownout on play | USB cable, PA supply from VBAT, decoupling |
+| Brownout on play | USB cable, PA supply from VSYS, decoupling |

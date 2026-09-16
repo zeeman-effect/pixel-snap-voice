@@ -1,0 +1,15 @@
+---
+description: Reply in plain language. Short sentences. Define jargon once.
+alwaysApply: true
+---
+
+# How to respond
+
+Be brief. Prefer plain language over extra jargon. Write so a non-specialist can follow the point, without watering down the technical facts. Short sentences, define terms on first use, then keep going.
+
+Lead with what happened or what to do. Part numbers, net names, and millimetres belong after that sentence, not instead of it. Do not dump a status list of nets, vias, and acronyms unless the user asked for that level of detail.
+
+```
+Bad: VBUS_CHG maze-closed after ripping the USB-edge CHG_STAT that boxed IN.
+Good: USB power now reaches the charger. A leftover charge-LED trace was blocking that path; it is gone.
+```

@@ -15,7 +15,11 @@ Pixel 10 (Pixelsnap / Qi2 magnets)
                                 |
                     USB-C 5 V sink + CC 5.1k
                                 |
-                         LiPo charger --> 3.3 V + analog LDO
+                         BQ24074 power-path
+                           |           |
+                         VSYS        VBAT (pouch)
+                           |
+                    3.3 V + analog LDO
 ```
 
 ES8311 is the **I2S master** (12.288 MHz oscillator into MCLK). The S3 is slave. Analog AVDD for the codec is a separate LDO (U8 LP5907) from the MCU 3.3 V rail (U4 AP2112 + U5 AP22804, net **VDD33**). A buck is preferred for battery life; this spin uses the LDO.
@@ -37,10 +41,10 @@ When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Stora
 | Mic | Analog MEMS: IM73A135 or ICS-40730 (~73–74 dBA) | Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
 | Playback | NS4150B into KELIKING KLJ-01304T-08R07W (13 mm SMD, LCSC C18186315) | 8 Ω 0.7 W can JLC can place. If 9 mm loses: 3.5 mm jack on ES8311 HP |
 | Storage | Low-profile microSD (FAT32) | Switch to eMMC only if CAD proves SD is too thick |
-| USB-C | 5 V sink only, 5.1 kΩ CC1/CC2 pulldowns, USB 2.0 | No USB-PD |
-| Charge | MCP73831 or BQ24074 class, 500 mA default | Charge LED only; no fuel gauge in v1 |
-| 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | Keep the regulator and any later switching node away from the mic |
-| Battery | Single-cell LiPo pouch, size from leftover volume | See battery-life estimate below |
+| USB-C | 5 V sink only, 5.1 kΩ CC1/CC2 pulldowns, USB 2.0 | No USB-PD. USB-C is the only 5 V inlet |
+| Charge | BQ24074RGTR, USB500 ~500 mA (EN1/EN2, ISET 1.8 kΩ) | Power-path: **VSYS** = OUT (loads), **VBAT** = pouch only. Charge LED on STAT. No fuel gauge |
+| 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | U4 VIN from **VSYS**. Keep the regulator and any later switching node away from the mic |
+| Battery | Single-cell LiPo pouch on JST-PH BT1 | Size from leftover volume. Buy a protected 1S pouch; this board has no pack protector |
 | Controls | 1 tactile: short = record, double = play last, long = sleep | 1 LED: record / play / charge / error |
 | RF | MINI-1U IPEX, no cable in v1 | A PCB antenna would sit next to a steel shunt and later an aluminum shell. Wi-Fi off in firmware. |
 
@@ -60,7 +64,8 @@ MCU-only 126 mA was optimistic. With codec and SD, PA off, the working number is
 ### USB-C
 
 - CC1 and CC2 each 5.1 kΩ to GND (UFP / sink)
-- VBUS to charger input through a PTC or ideal-diode as the reference design allows
+- VBUS to charger IN through a PTC. USB-C is the only 5 V inlet.
+- **BT1** is a JST-PH for a 1S pouch on VBAT. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT.
 - D+/D− to ESP32-S3 USB PHY (or USB-Serial/JTAG pins per module datasheet)
 - Do not implement PD sink for v1
 
