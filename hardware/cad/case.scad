@@ -259,6 +259,18 @@ module speaker_grille() {
     }
 }
 
+// S2B-PH-K is 6.0 mm tall. Lid cavity above the PCB is 5.45 mm, so the
+// housing peeks into shell_back. Origin is BT1 pad 1; body is the KiCad
+// fab box at 0° (cable toward y=+43).
+module jst_window() {
+    translate([
+        jst_x - 2.35,
+        jst_y - 1.75,
+        acc_t - shell_back - eps
+    ])
+        cube([6.7, 8.4, shell_back + 2 * eps]);
+}
+
 module lid() {
     difference() {
         union() {
@@ -276,6 +288,7 @@ module lid() {
         }
         lid_screws();
         speaker_grille();
+        jst_window();
     }
 }
 

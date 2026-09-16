@@ -76,8 +76,8 @@ Update this section when it stops being true.
 - Pixel body and Pixelsnap numbers are published defaults until someone calipers a phone.
 - SP1 is a KELIKING KLJ-01304T-08R07W (LCSC C18186315), 13 × 13 × 4.0 mm SMD can at (0, 36). JLC places it. The lid has a grille over the can. The 40 × 30 mm pouch sits at (0, 10) so the lid fence misses both U1 and the speaker. Confirm SP1 in JLC's assembly preview before the order: this land's pad 1 is bottom-right, JLC's library 0° is EasyEDA `-BL` (pin 1 bottom-left).
 - SW1 is a **side-actuated** Panasonic EVQP7C01P (LCSC C388883, 3.5 × 2.9 × 1.35 mm, 2.2 N), not the top-actuated PTS645 it used to be. The record button is on the left wall, so a top plunger needed a case lever; this one is pressed straight through a 3 × 2.2 mm slot. Its actuator tip stops 0.9 mm short of the inner wall face, so the case still needs a moulded nub to span the gap.
-- **SW_BOOT** and **SW_RST** are XKB TS-1187A-C-J-B (LCSC C318885) on the east edge. Hold Boot, tap Reset, release Boot to enter download mode after MSC owns USB-C. They are not firmware buttons. Case holes later.
-- **U3** is a BQ24074RGTR (LCSC C54313) power-path charger in VQFN-16. USB-C is the only 5 V inlet. **VSYS** (OUT) stays up from USB with BT1 open; **VBAT** is the pouch on JST-PH BT1 (C173752). Do not put 5 V on BT1 and do not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no pack protector.
+- **SW_BOOT** and **SW_RST** are XKB TS-1187A-C-J-B (LCSC C318885) on the east edge. Hold Boot, tap Reset, release Boot to enter download mode after MSC owns USB-C. They are not firmware buttons. **Lid-off only** on this spin: the 5 mm actuators sit 1.65 mm under the outer skin, so a flush lid hole is not a button.
+- **U3** is a BQ24074RGTR (LCSC C54313) power-path charger in VQFN-16. USB-C is the only 5 V inlet. **VSYS** (OUT) stays up from USB with BT1 open; **VBAT** is the pouch on JST-PH BT1 (C173752, land `JST_PH_S2B-PH-K`). C21 is 10 µF on VBAT next to U3 so the BAT pin has local ceramic when the pouch is unplugged. Do not put 5 V on BT1 and do not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no pack protector.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - KiStack KiCad skills are vendored in `.cursor/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
 
@@ -85,7 +85,7 @@ Update this section when it stops being true.
 
 `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` are **generated**, by `hardware/kicad/recorder/generate_jlc.py`. They were hand-typed and had drifted: C11, C12, C17 and C18 still carried pre-route coordinates. LCSC order codes come from the table in `docs/bom.md`; which parts the machine handles comes from each footprint's own `exclude_from_pos_files` / `exclude_from_bom` flag in the board.
 
-DRC parity leaves 28 notes and all of them are expected: 23 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 PGOOD), the 4 mounting holes, which are mechanical and have no symbol, and BT1's 7.8 mm solder-wire land standing in for JST-PH. MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
+DRC parity leaves 27 notes and all of them are expected: 23 module pads with no schematic pin (spare ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 PGOOD) and the 4 mounting holes, which are mechanical and have no symbol. MK1's acoustic seal and the unpublished Pixel / Pixelsnap calipers are still on `placement.json` `open_items`.
 
 ## How to change the hardware
 
@@ -95,6 +95,7 @@ Close KiCad before running the generators. Lock files look like `~recorder.kicad
 | --- | --- | --- |
 | Nets, parts, pins on the schematic | `generate_recorder.py`, `PSV.kicad_sym` | `python hardware/kicad/recorder/generate_recorder.py` then `python hardware/kicad/recorder/verify_schematic.py`. This overwrites sheets only. It does not write the PCB. |
 | Boot / Reset buttons | `generate_recorder.py` then `apply_boot_buttons.py` (KiCad 10 `python.exe`) | Places SW_BOOT / SW_RST on the live board and mazes the stubs. Does **not** wipe copper. Do not run `generate_pcb.py`. |
+| JST-PH BT1 / C21 BAT cap | `generate_recorder.py` then `apply_jst.py` (KiCad 10 `python.exe`) | Swaps the 7.8 mm solder-wire land for `JST_PH_S2B-PH-K`, places C21, mazes VBAT. Does **not** wipe copper. |
 | Footprint XY | `placement.json` and `recorder.kicad_pcb` together | Keep them twins. `check_placement.py` now compares them part by part and fails on drift. Also update `hardware/cad/params.json` / `case.scad` if a wall cut or pocket moves. |
 | An LCSC order code, or which parts JLC assembles | the LCSC column of `docs/bom.md`, or the footprint's `exclude_from_pos_files` / `exclude_from_bom` flag in the board | `python scripts/check_gates.py` rewrites `jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. Never hand-edit those two. |
 | A clean placement rebuild | `generate_pcb.py` (KiCad 10 `python.exe`, not system Python) | This **wipes** copper. Re-pour planes and re-route after. Do not run it as a status check. |

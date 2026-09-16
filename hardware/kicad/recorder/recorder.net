@@ -1,9 +1,9 @@
 (export
 	(version "E")
 	(design
-		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
-		(date "2026-09-16T10:58:17")
-		(tool "Eeschema 10.0.5")
+		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
+		(date "2026-09-16T17:54:32")
+		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
 		(sheet
 			(number "1")
 			(name "/")
@@ -516,19 +516,16 @@
 							(num "SH")
 						)
 						(pin
-							(num "A1")
-						)
-						(pin
-							(num "A12")
-						)
-						(pin
 							(num "B1")
 						)
 						(pin
 							(num "B12")
 						)
 						(pin
-							(num "A4")
+							(num "A1")
+						)
+						(pin
+							(num "A12")
 						)
 						(pin
 							(num "A9")
@@ -538,6 +535,9 @@
 						)
 						(pin
 							(num "B9")
+						)
+						(pin
+							(num "A4")
 						)
 						(pin
 							(num "A5")
@@ -991,46 +991,10 @@
 							(num "3")
 						)
 						(pin
-							(num "2")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "56")
-						)
-						(pin
-							(num "58")
-						)
-						(pin
-							(num "59")
-						)
-						(pin
-							(num "60")
-						)
-						(pin
-							(num "61")
-						)
-						(pin
-							(num "62")
-						)
-						(pin
-							(num "63")
-						)
-						(pin
-							(num "64")
+							(num "55")
 						)
 						(pin
 							(num "65")
-						)
-						(pin
-							(num "57")
-						)
-						(pin
-							(num "42")
-						)
-						(pin
-							(num "43")
 						)
 						(pin
 							(num "46")
@@ -1060,7 +1024,43 @@
 							(num "54")
 						)
 						(pin
-							(num "55")
+							(num "56")
+						)
+						(pin
+							(num "57")
+						)
+						(pin
+							(num "58")
+						)
+						(pin
+							(num "59")
+						)
+						(pin
+							(num "60")
+						)
+						(pin
+							(num "61")
+						)
+						(pin
+							(num "62")
+						)
+						(pin
+							(num "63")
+						)
+						(pin
+							(num "64")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
 						)
 						(pin
 							(num "39")
@@ -2706,6 +2706,60 @@
 				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
 			)
 			(tstamps "a6d7bf04-6970-575e-93ff-56697fa00ae3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C21")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Power/")
+				(tstamps "/bf0756f6-74a3-5453-a11e-835b4a8f9c65/")
+			)
+			(tstamps "0b78f1c3-94df-5f4d-ba56-f466fa6742de")
 			(units
 				(unit
 					(name "A")
@@ -5391,44 +5445,8 @@
 	)
 	(libraries
 		(library
-			(logical "Connector")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
-		)
-		(library
-			(logical "Connector_Generic")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
-		)
-		(library
-			(logical "Device")
-			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
-		)
-		(library
-			(logical "Oscillator")
-			(uri "${KICAD10_SYMBOL_DIR}/Oscillator.kicad_sym")
-		)
-		(library
 			(logical "PSV")
 			(uri "${KIPRJMOD}/PSV.kicad_sym")
-		)
-		(library
-			(logical "Power_Management")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Management.kicad_sym")
-		)
-		(library
-			(logical "Power_Protection")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
-		)
-		(library
-			(logical "RF_Module")
-			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
-		)
-		(library
-			(logical "Regulator_Linear")
-			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
-		)
-		(library
-			(logical "Switch")
-			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
 		)
 	)
 	(nets
@@ -6073,6 +6091,11 @@
 			)
 			(node
 				(ref "C20")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -6826,6 +6849,11 @@
 			)
 			(node
 				(ref "C20")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
 				(pin "1")
 				(pintype "passive")
 			)

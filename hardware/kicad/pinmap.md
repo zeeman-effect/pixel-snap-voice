@@ -23,7 +23,7 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | GPIO15 | SD_CLK | output | **J3** |
 | GPIO7 | SD_CMD | bidirectional | **J3** |
 | GPIO6 / 16 / 17 / 18 | SD_D0–D3 | bidirectional | **J3** 4-bit SDMMC |
-| GPIO0 | BOOT | strapping, pull-up | SW_BOOT to GND (download). Not a firmware button |
+| GPIO0 | BOOT | strapping, pull-up | SW_BOOT to GND (download, lid-off). Not a firmware button |
 | GPIO1 | BTN | input, pull-up | SW1 to GND |
 | GPIO2 | LED | output | D1 |
 | GPIO9 | CHG_STAT | input | U3 STAT (D2 charge LED on this net) |
@@ -37,6 +37,6 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | CC1 / CC2 | R2 / R3 5.11 kΩ to GND (UFP) on J2 |
 | **VDD33** | U4 AP2112 → U5 AP22804. MCU digital rail |
 | 3V3A | U8 LP5907 from **VSYS**; star return to AGND; no digital return through MK1 |
-| VBAT | LiPo pouch on BT1; U3 BQ24074 BAT pin only. Do not strap to VSYS |
+| VBAT | LiPo pouch on BT1; U3 BQ24074 BAT plus C21 at the QFN. Do not strap to VSYS |
 | VSYS | U3 OUT. USB or cell, whichever is up. Feeds U4, U8, U6 |
 | RF | MINI-1U IPEX connector, no cable in v1 |

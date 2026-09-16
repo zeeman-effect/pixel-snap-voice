@@ -28,6 +28,7 @@ else:
 from generate_pcb import (
     NO_PICK_AND_PLACE,
     PLACEMENT,
+    SUBSTITUTIONS,
     load_netlist,
     resolve_footprint,
     vec,
@@ -279,6 +280,9 @@ def sync_placement_parts(board):
     with open(PLACEMENT_JSON, encoding="utf-8") as fh:
         data = json.load(fh)
     data["parts"] = sorted(rows, key=lambda r: r["ref"])
+    data["footprint_substitutions"] = {
+        k: {"placed": v[0], "reason": v[1]} for k, v in SUBSTITUTIONS.items()
+    }
     with open(PLACEMENT_JSON, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
         fh.write("\n")

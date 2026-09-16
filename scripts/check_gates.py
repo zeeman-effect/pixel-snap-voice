@@ -84,9 +84,6 @@ EXPECTED_PARITY.update({
     ("net_conflict", "U4", "4"): "AP2112K-3.3 pin 4 is NC",
     ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
     ("net_conflict", "U8", "4"): "LP5907MFX-3.3 pin 4 is NC",
-    ("footprint_symbol_mismatch", "BT1", "Footprint"):
-        "7.8 mm solder-wire land stands in for JST-PH; swapping the footprint "
-        "would move the VBAT/GND pads and cut the routed battery net",
 })
 
 _PAD = re.compile(r"^Pad (\S+) \[.*\] of (\w+) on ")

@@ -60,7 +60,7 @@ NETS_REQUIRED = {
     "PA_EN": ["U1.12", "U6.1"],
     "VBUS": ["J2.A4", "F1.1"],
     "VBUS_CHG": ["F1.2", "U3.13", "U3.6", "U3.7"],
-    "VBAT": ["U3.2", "BT1.1"],
+    "VBAT": ["U3.2", "BT1.1", "C21.1"],
     "VSYS": ["U3.10", "U4.1", "U8.1", "U6.6"],
     "VDD33": ["U5.1", "U1.3"],
     "3V3A": ["U8.5", "U2.11"],
@@ -828,6 +828,13 @@ def build() -> None:
     stub(pwr_s, u3x, u3y, chg_pins, "15", "ITERM", "u3iterm", False)
     stub(pwr_s, c5x, c5y, c_pins, "1", "VSYS", "c5v")
     stub(pwr_s, c5x, c5y, c_pins, "2", "GND", "c5g")
+    # Local BAT ceramic. C20 is 10 µF at the pouch, ~70 mm of edge copper from
+    # U3 pins 2/3. USB-with-BT1-open has no cell to act as bulk, so this 10 µF
+    # sits next to the QFN. TI wants 4.7–47 µF from BAT to VSS.
+    c21x, c21y = 195, 110
+    pwr_s.add(inst("Device:C", "C21", "10uF", c21x, c21y, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
+    stub(pwr_s, c21x, c21y, c_pins, "1", "VBAT", "c21v")
+    stub(pwr_s, c21x, c21y, c_pins, "2", "GND", "c21g")
     stub(pwr_s, btx, bty, bat_pins, "1", "VBAT", "bt1p")
     stub(pwr_s, btx, bty, bat_pins, "2", "GND", "bt1n")
 

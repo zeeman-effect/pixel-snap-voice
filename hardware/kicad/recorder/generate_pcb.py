@@ -81,13 +81,7 @@ LOCAL_FP = os.path.join(HERE, "PSV.pretty")
 # patterns KiCad 10 does not ship at all (ESP32-S3-MINI-1U and the
 # IM73A135 PG-LLGA-5-3 with a hole-clearance-legal ring pad) live in
 # PSV.pretty. Keep this table empty; fix the name instead.
-SUBSTITUTIONS = {
-    "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal": (
-        "Connector_Wire:SolderWire-2sqmm_1x02_P7.8mm_D2mm_OD3.9mm",
-        "7.8 mm solder-wire land stands in for JST-PH so the routed VBAT/GND "
-        "pads do not move. Hand-solder the S2B-PH-K-S onto those holes.",
-    ),
-}
+SUBSTITUTIONS = {}
 
 # ---------------------------------------------------------------------------
 # Fab policy. pcbnew writes recorder.kicad_pro from BOARD defaults on save and
@@ -209,6 +203,12 @@ PLACEMENT = {
     # --- Battery charger (BQ24074 VQFN-16, same USB-edge island) ---
     "U3": (24.0, -39.5, 180, "BQ24074, rotated so OUT/programming face C5 and the resistors"),
     "C5": (21.0, -35.5, 90, "VSYS bulk at charger OUT"),
+    # 0603 10 µF on VBAT. The east aisle between U3 and H2 is inside the
+    # 2.1 mm hole keepout, x=26.2 sits on the CHG_STAT climb to U1, and
+    # y=-34 puts the designator into H2's silk and the board edge. This
+    # seat is north of Rstat, east of the C1 column, over the VBAT F.Cu
+    # that already runs the right edge.
+    "C21": (30.8, -26.5, 270, "VBAT ceramic at U3 BAT, TI 4.7-47uF"),
     "R4": (19.0, -32.8, 0, "ISET ~500 mA, east of the VBUS climb to F1"),
     "R8": (17.5, -31.0, 0, "ILIM USB current backup"),
     "R9": (17.5, -28.5, 0, "TMR safety timer"),
@@ -233,8 +233,8 @@ PLACEMENT = {
     # Rotated 90 so pad 1 (BOOT / EN) is the west pair, toward the pull-ups,
     # and pad 2 (GND) is the east pair, where the F.Cu pour can reach it.
     # Measured on the land: 270 put pad 1 on the east edge instead.
-    "SW_BOOT": (28.5, 3.2, 90, "prototype Boot: GPIO0 to GND, XKB TS-1187A"),
-    "SW_RST": (28.5, -5.0, 90, "prototype Reset: EN to GND, XKB TS-1187A"),
+    "SW_BOOT": (28.5, 3.2, 90, "prototype Boot: GPIO0 to GND, lid-off only"),
+    "SW_RST": (28.5, -5.0, 90, "prototype Reset: EN to GND, lid-off only"),
     # --- UART header (kept off the USB edge) ---
     "J1": (1.5, -30.0, 0, "1x04 UART0 header, programming only"),
     # --- microSD ---
@@ -288,8 +288,8 @@ PLACEMENT = {
     # --- Battery ---
     # BT1 is a JST-PH for a 1S pouch. USB-C is the only 5 V inlet; the BQ24074
     # power-path rail (VSYS) keeps the board alive with BT1 open.
-    "BT1": (-23.5, 34.0, 0, "JST-PH S2B-PH-K-S 1S pouch, cable faces the y=+43 edge"),
-    "C20": (-16.0, 26.0, 0, "VBAT bulk at the cell"),
+    "BT1": (-23.5, 34.0, 0, "JST-PH S2B-PH-K-S, pad 1 VBAT, cable faces the y=+43 edge"),
+    "C20": (-16.0, 26.0, 0, "VBAT bulk at the pouch"),
 }
 
 # JLCPCB's SMT line places surface-mount parts only, so a through-hole part

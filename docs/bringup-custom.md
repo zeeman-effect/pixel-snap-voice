@@ -6,14 +6,14 @@ Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` an
 
 ## Flash
 
-USB-C is the first-flash path (ESP32-S3 USB-Serial/JTAG). After TinyUSB MSC takes the USB-C port, use the two top-actuated buttons:
+USB-C is the first-flash path (ESP32-S3 USB-Serial/JTAG). After TinyUSB MSC takes the USB-C port, use the two top-actuated buttons **with the lid off**:
 
 1. Hold **Boot** (SW_BOOT, GPIO0 to GND).
 2. Tap **Reset** (SW_RST, EN to GND), then release Reset.
 3. Release Boot.
 4. `idf.py -p COMx flash` over USB-C, or UART0 on J1 (3V3, U0RXD, U0TXD, GND).
 
-Do not wire GPIO0 as a firmware button. SW1 stays the record control.
+The 5 mm actuators sit 1.65 mm under the outer skin. A hole in 1.2 mm PETG does not reach them. Do not wire GPIO0 as a firmware button. SW1 stays the record control.
 
 ## Order of tests
 

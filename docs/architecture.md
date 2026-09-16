@@ -45,7 +45,7 @@ When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Stora
 | Charge | BQ24074RGTR, USB500 ~500 mA (EN1/EN2, ISET 1.8 kΩ) | Power-path: **VSYS** = OUT (loads), **VBAT** = pouch only. Charge LED on STAT. No fuel gauge |
 | 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | U4 VIN from **VSYS**. Keep the regulator and any later switching node away from the mic |
 | Battery | Single-cell LiPo pouch on JST-PH BT1 | Size from leftover volume. Buy a protected 1S pouch; this board has no pack protector |
-| Controls | 1 user tactile (SW1): short = record, double = play last, long = sleep. Two prototype flash buttons (SW_BOOT, SW_RST) | 1 LED: record / play / charge / error |
+| Controls | 1 user tactile (SW1): short = record, double = play last, long = sleep. Two prototype flash buttons (SW_BOOT, SW_RST), lid-off only | 1 LED: record / play / charge / error |
 | RF | MINI-1U IPEX, no cable in v1 | A PCB antenna would sit next to a steel shunt and later an aluminum shell. Wi-Fi off in firmware. |
 
 ### Audio format
@@ -65,7 +65,7 @@ MCU-only 126 mA was optimistic. With codec and SD, PA off, the working number is
 
 - CC1 and CC2 each 5.1 kΩ to GND (UFP / sink)
 - VBUS to charger IN through a PTC. USB-C is the only 5 V inlet.
-- **BT1** is a JST-PH for a 1S pouch on VBAT. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT.
+- **BT1** is a JST-PH (`S2B-PH-K-S`, land `JST_PH_S2B-PH-K`) for a 1S pouch on VBAT. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT. C21 (10 µF) sits on VBAT next to U3 so BAT has local ceramic when BT1 is open.
 - D+/D− to ESP32-S3 USB PHY (or USB-Serial/JTAG pins per module datasheet)
 - Do not implement PD sink for v1
 

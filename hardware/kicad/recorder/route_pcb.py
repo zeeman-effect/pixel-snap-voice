@@ -2276,7 +2276,8 @@ ROUTED_OPEN_ITEMS = [
     "SW_BOOT and SW_RST are XKB TS-1187A-C-J-B top-actuated SPST (LCSC "
     "C318885) on the east edge, outside the ring OD. They strap GPIO0 and EN "
     "to GND for download mode: hold Boot, tap Reset, release Boot. They are "
-    "not firmware buttons. Case holes come later.",
+    "not firmware buttons. Lid-off only on this spin: the 5 mm actuators sit "
+    "1.65 mm under the outer skin, so a flush lid hole is not a button.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB "
     "peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would "
     "need traces narrower than any quick-turn fab will run. The pair is "
@@ -2299,12 +2300,12 @@ ROUTED_OPEN_ITEMS = [
     "not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no "
     "pack protector. Playback now runs the NS4150 from VSYS (~4.4 V on USB, "
     "cell voltage on pouch), still under the speaker's 1 W ceiling.",
-    "kicad-cli pcb drc --schematic-parity still reports 28 notes, and all of "
+    "kicad-cli pcb drc --schematic-parity still reports 27 notes, and all of "
     "them are expected: 23 are module pads with no schematic pin (spare "
     "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 "
-    "PGOOD), 4 are the H1-H4 mounting holes, which are mechanical and have "
-    "no symbol, and 1 is BT1's solder-wire land standing in for JST-PH. "
-    "Copper DRC, unconnected count and footprint/library parity are all zero.",
+    "PGOOD), and 4 are the H1-H4 mounting holes, which are mechanical and "
+    "have no symbol. Copper DRC, unconnected count and footprint/library "
+    "parity are all zero.",
 ]
 
 

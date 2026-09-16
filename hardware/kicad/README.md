@@ -65,7 +65,7 @@ The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit o
 - No tall parts on B.Cu (phone / shunt side)
 - Mic on the right long edge, away from U4 / U5
 - USB-C (**J2**) on the bottom short edge, offset +8 mm
-- JST-PH battery (**BT1**) on the top-left. USB-C is the only 5 V inlet
+- JST-PH battery (**BT1**) on the top-left, land `JST_PH_S2B-PH-K`. USB-C is the only 5 V inlet
 - Analog island (U2, U8, MK1, Y1) off **VDD33**
 - Analog footprint centres off the magnet circle; SP1 also by courtyard, because the 13 mm can holds a magnet (`check_placement.py`)
 - PA LC away from the magnet circle (comment layer)

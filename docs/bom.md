@@ -26,7 +26,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |
 | BT1 | 1S battery connector | S2B-PH-K-S | C173752 | JST-PH 2.0 mm THT | Side-entry. Plug a protected 1S pouch (PHR-2). Optional: USB-C runs the board with BT1 open | Extended |
 | SW1 | Record button | Panasonic EVQP7C01P | C388883 | 3.5 × 2.9 × 1.35 mm | **Side push**: the plunger fires sideways at the left wall, so nothing has to poke through the phone-facing face. SPST, 2.2 N, 0.2 mm travel, 100k cycles, reflow. Short = record, long = power. Two moulded bosses drop into NPTH holes and take the sideways load off the solder. Was listed here as "side-fire, C318885": that code is an XKB TS-1187A-C-J-B, a 5.1 × 5.1 × 5 mm **top-actuated** switch, so the line was wrong on both the part and the direction | Extended |
-| SW_BOOT / SW_RST | Boot / Reset | XKB TS-1187A-C-J-B | C318885 | 5.1 × 5.1 × 5 mm | Top-actuated SPST for prototype download. Hold Boot, tap Reset, release Boot. They strap GPIO0 and EN to GND; they are not firmware buttons. Case holes later | Extended |
+| SW_BOOT / SW_RST | Boot / Reset | XKB TS-1187A-C-J-B | C318885 | 5.1 × 5.1 × 5 mm | Top-actuated SPST for prototype download. Hold Boot, tap Reset, release Boot. They strap GPIO0 and EN to GND; they are not firmware buttons. **Lid-off only** this spin | Extended |
 | D1 | Status LED | 0603 red | C2286 | 0603 | Record / error (GPIO2) | Basic |
 | D2 | Charge LED | 0603 | C2286 | 0603 | On U3 STAT / **CHG_STAT** | Basic |
 | R2 / R3 | CC pulldowns | 5.11 kΩ 1% | C23186 | 0603 | USB-C UFP / sink on J2 | Basic |
@@ -34,7 +34,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | MAG1 | Magnet ring | Qi2 / MagSafe accessory | — | OD 56 / ID 44 / 1.1 mm | Buy; do not machine. Pocket to the part you receive | — |
 | SH1 | Steel shunt | thin plate | — | ~0.3 mm | **Behind** MAG1, away from the phone. Not the outer chassis | — |
 
-Passives (decoupling, I2C pull-ups 4.7 kΩ, charger ISET/ILIM/TMR/TS/ITERM, mic bias RC) follow the BQ24074 typical app plus the Espressif module and ES8311 notes. 0603 100 nF / 10 µF: C14663 / C15850 class (Basic).
+Passives (decoupling, I2C pull-ups 4.7 kΩ, charger ISET/ILIM/TMR/TS/ITERM, mic bias RC) follow the BQ24074 typical app plus the Espressif module and ES8311 notes. 0603 100 nF / 10 µF: C14663 / C15850 class (Basic). C21 is the 10 µF on VBAT next to U3; C20 is the 10 µF 0805 at the pouch.
 
 ## Mechanical
 

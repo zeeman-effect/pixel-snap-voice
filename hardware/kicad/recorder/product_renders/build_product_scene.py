@@ -125,13 +125,13 @@ FALLBACKS = [
     {
         "ref": "BT1",
         "kind": "jst",
-        "x": -19.6,
+        "x": -23.5,
         "y": 34.0,
         "rot": 0.0,
-        "sx": 12.0,
-        "sy": 6.0,
+        "sx": 5.9,
+        "sy": 7.6,
         "sz": 6.0,
-        "note": "JST-PH stand-in: SolderWire footprint has no STEP in this install",
+        "note": "JST PH S2B-PH-K-S; KiCad STEP if the 3D plugin is installed",
     },
 ]
 
