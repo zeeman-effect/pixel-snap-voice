@@ -56,7 +56,7 @@ def drc_counts(kicad: Path, extra: list[str]) -> dict:
     return json.loads(out.read_text(encoding="utf-8"))
 
 
-# kicad-cli pcb drc --schematic-parity reports these 28 notes and every one is
+# kicad-cli pcb drc --schematic-parity reports these 27 notes and every one is
 # expected. Counting them is not a check: a new extra footprint, or a pad that
 # quietly lost its net, lands in the same list and the old gate still plotted.
 # Each key is (violation type, reference, pad or field name). Add a key only
