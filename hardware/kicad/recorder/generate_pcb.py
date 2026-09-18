@@ -293,13 +293,11 @@ PLACEMENT = {
 }
 
 # JLCPCB's SMT line places surface-mount parts only, so a through-hole part
-# left in the pick-and-place file is a feeder the machine cannot fill. J1 is
-# the bring-up UART, soldered by hand and clipped off afterwards. BT1 is a THT
-# connector JLC can wave-solder; it still does not belong in the
-# pick-and-place file.
+# left in the pick-and-place file is a feeder the machine cannot fill. J1 and
+# BT1 stay in the BOM (JLC wave-solders them) and out of the CPL.
 NO_PICK_AND_PLACE = {
-    "J1": "2.54 mm UART header, hand-soldered at bring-up",
-    "BT1": "JST-PH through-hole, wave or hand",
+    "J1": "2.54 mm UART header, JLC wave-solders C124378",
+    "BT1": "JST-PH through-hole, JLC wave-solders C173752",
 }
 
 MOUNTING_HOLES = [

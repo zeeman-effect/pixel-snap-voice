@@ -22,9 +22,9 @@ Who owns which number:
     `exclude_from_bom`. That is a board edit and shows up in a diff, instead
     of a list of references hidden in a script.
   * LCSC order codes come from the LCSC column of `docs/bom.md`, which is
-    where a human picks parts. Refs with no number there are emitted blank,
-    exactly as the hand-written file had them, and listed on stdout so it is
-    obvious what still needs sourcing.
+    where a human picks parts. A board part with no number there is a failed
+    export: JLCPCB skips a blank LCSC cell, so a CSV that still writes is
+    worse than none.
 """
 
 import csv
@@ -147,6 +147,13 @@ def write_cpl(board, placed):
 def write_bom(board):
     parts = [fp for fp in board.GetFootprints() if not fp.IsExcludedFromBOM()]
     codes = lcsc_by_ref({fp.GetReference() for fp in parts})
+    unsourced = sorted((fp.GetReference() for fp in parts
+                        if fp.GetReference() not in codes), key=ref_key)
+    if unsourced:
+        raise SystemExit(
+            "docs/bom.md has no LCSC number for: " + ", ".join(unsourced)
+            + ". JLCPCB will not place a blank LCSC cell. Put the C-number "
+            "in the table and re-run.")
 
     groups = {}
     for fp in parts:
@@ -164,9 +171,7 @@ def write_bom(board):
         for (value, footprint, code), refs in rows:
             out.writerow([value, ",".join(refs), footprint, code])
 
-    unsourced = sorted((fp.GetReference() for fp in parts
-                        if fp.GetReference() not in codes), key=ref_key)
-    return len(parts), unsourced
+    return len(parts)
 
 
 def main():
@@ -174,11 +179,9 @@ def main():
     if board is None:
         raise SystemExit(f"could not load {PCB}")
     placed = write_cpl(board, read_pos())
-    lines, unsourced = write_bom(board)
+    lines = write_bom(board)
     print(f"jlcpcb_cpl.csv: {placed} placements")
     print(f"jlcpcb_bom.csv: {lines} parts")
-    if unsourced:
-        print("  no LCSC number in docs/bom.md yet: " + ", ".join(unsourced))
     return 0
 
 
