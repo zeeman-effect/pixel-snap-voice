@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write hardware/kicad/jlcpcb_bom.csv and jlcpcb_cpl.csv from the board.
+"""Write hardware/kicad/jlcpcb_bom.csv, jlcpcb_cpl.csv, and jlcpcb_extra.csv from the board.
 
 Both files used to be typed by hand. `docs/manufacturing.md` step 5 tells you
 to upload them beside the Gerbers, so a stale row is not documentation drift,
@@ -18,13 +18,17 @@ Who owns which number:
     the tool that already knows the convention.
   * Which parts appear at all comes from the board's own KiCad attributes.
     A part is in the pick-and-place file unless it is flagged
-    `exclude_from_pos_files`, and on the BOM unless it is flagged
+    `exclude_from_pos_files`, and on the assembly BOM unless it is flagged
     `exclude_from_bom`. That is a board edit and shows up in a diff, instead
     of a list of references hidden in a script.
+  * A part can still have an LCSC number in `docs/bom.md` after it is
+    flagged `exclude_from_bom`. Those rows go to `jlcpcb_extra.csv` so the
+    part can be added as extra components in the JLCPCB cart (shipped loose,
+    not soldered). J1 is that case: order the header, do not wave-solder it.
   * LCSC order codes come from the LCSC column of `docs/bom.md`, which is
-    where a human picks parts. A board part with no number there is a failed
-    export: JLCPCB skips a blank LCSC cell, so a CSV that still writes is
-    worse than none.
+    where a human picks parts. A board part on the assembly BOM with no
+    number there is a failed export: JLCPCB skips a blank LCSC cell, so a
+    CSV that still writes is worse than none.
 """
 
 import csv
@@ -50,6 +54,7 @@ POS = os.path.join(REPO, "hardware", "kicad", "fab", "recorder-pos.csv")
 BOM_DOC = os.path.join(REPO, "docs", "bom.md")
 BOM_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_bom.csv")
 CPL_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_cpl.csv")
+EXTRA_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_extra.csv")
 
 _LCSC = re.compile(r"^C\d{4,}$")
 _REF = re.compile(r"^([^\d]+)(\d*)$")
@@ -154,24 +159,41 @@ def write_bom(board):
             "docs/bom.md has no LCSC number for: " + ", ".join(unsourced)
             + ". JLCPCB will not place a blank LCSC cell. Put the C-number "
             "in the table and re-run.")
+    _write_jlc_csv(BOM_CSV, _grouped_rows(parts, codes))
+    return len(parts)
 
+
+def _grouped_rows(parts, codes):
     groups = {}
     for fp in parts:
         ref = fp.GetReference()
         key = (fp.GetValue(), fp.GetFPIDAsString().split(":")[-1],
                codes.get(ref, ""))
         groups.setdefault(key, []).append(ref)
-
-    rows = sorted(((key, sorted(refs, key=ref_key))
+    return sorted(((key, sorted(refs, key=ref_key))
                    for key, refs in groups.items()),
                   key=lambda item: ref_key(item[1][0]))
-    with open(BOM_CSV, "w", encoding="utf-8", newline="\n") as fh:
+
+
+def _write_jlc_csv(path, rows):
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         out = csv.writer(fh, lineterminator="\n", quoting=csv.QUOTE_ALL)
         out.writerow(["Comment", "Designator", "Footprint", "LCSC Part #"])
         for (value, footprint, code), refs in rows:
             out.writerow([value, ",".join(refs), footprint, code])
 
-    return len(parts)
+
+def write_extra(board):
+    """Parts flagged exclude_from_bom that still have an LCSC in docs/bom.md.
+
+    JLCPCB will not solder these. Add them under Extra Parts in the SMT
+    order so the bag still ships with the boards.
+    """
+    skipped = [fp for fp in board.GetFootprints() if fp.IsExcludedFromBOM()]
+    codes = lcsc_by_ref({fp.GetReference() for fp in skipped})
+    extra = [fp for fp in skipped if fp.GetReference() in codes]
+    _write_jlc_csv(EXTRA_CSV, _grouped_rows(extra, codes))
+    return len(extra)
 
 
 def main():
@@ -180,8 +202,10 @@ def main():
         raise SystemExit(f"could not load {PCB}")
     placed = write_cpl(board, read_pos())
     lines = write_bom(board)
+    extra = write_extra(board)
     print(f"jlcpcb_cpl.csv: {placed} placements")
     print(f"jlcpcb_bom.csv: {lines} parts")
+    print(f"jlcpcb_extra.csv: {extra} parts (order, do not assemble)")
     return 0
 
 

@@ -919,7 +919,7 @@
     },
     {
       "ref": "U8",
-      "value": "LP5907MFX-3.3",
+      "value": "LP5907MFX-2.8",
       "sheet": "Power",
       "x_mm": 26.0,
       "y_mm": 31.0,
@@ -928,7 +928,7 @@
       "footprint": "Package_TO_SOT_SMD:SOT-23-5",
       "footprint_in_schematic": "Package_TO_SOT_SMD:SOT-23-5",
       "substitution_reason": null,
-      "note": "LP5907 low-noise LDO, VSYS -> 3V3A"
+      "note": "LP5907-2.8 low-noise LDO, VSYS -> 2.8 V analog (net 3V3A)"
     },
     {
       "ref": "Y1",

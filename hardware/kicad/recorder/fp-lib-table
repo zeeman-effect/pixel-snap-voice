@@ -6,7 +6,6 @@
 	(lib (name "Connector_JST")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Connector_JST.pretty")(options "")(descr "KiCad 10 stock library"))
 	(lib (name "Connector_PinHeader_2.54mm")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Connector_PinHeader_2.54mm.pretty")(options "")(descr "KiCad 10 stock library"))
 	(lib (name "Connector_USB")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Connector_USB.pretty")(options "")(descr "KiCad 10 stock library"))
-	(lib (name "Connector_Wire")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Connector_Wire.pretty")(options "")(descr "KiCad 10 stock library"))
 	(lib (name "Fuse")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Fuse.pretty")(options "")(descr "KiCad 10 stock library"))
 	(lib (name "LED_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/LED_SMD.pretty")(options "")(descr "KiCad 10 stock library"))
 	(lib (name "Oscillator")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Oscillator.pretty")(options "")(descr "KiCad 10 stock library"))

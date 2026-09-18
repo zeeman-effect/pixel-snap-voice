@@ -321,8 +321,9 @@ def tie_mk1_ring(board):
     """Connect MK1's ring pad to the AGND pour.
 
     Pad 5 is the 0.32 mm ring around the 0.8 mm sound port. The AGND pour
-    keeps ZONE_CLEARANCE off that hole and never reaches the ring. Pads 3
-    and 4 are already in the pour; a short stub is the electrical path.
+    keeps ZONE_CLEARANCE off that hole and never reaches the ring. Pad 4
+    is GND and sits in the pour; pad 3 is OUT− and must stay off AGND.
+    A short stub from pad 4 is the electrical path to the ring.
     Freerouting leaves MK1-4 to MK1-5 open.
     """
     mk1 = board.FindFootprintByReference("MK1")
@@ -2300,10 +2301,10 @@ ROUTED_OPEN_ITEMS = [
     "not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no "
     "pack protector. Playback now runs the NS4150 from VSYS (~4.4 V on USB, "
     "cell voltage on pouch), still under the speaker's 1 W ceiling.",
-    "kicad-cli pcb drc --schematic-parity still reports 27 notes, and all of "
-    "them are expected: 23 are module pads with no schematic pin (spare "
+    "kicad-cli pcb drc --schematic-parity still reports 28 notes, and all of "
+    "them are expected: 24 are module pads with no schematic pin (spare "
     "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 "
-    "PGOOD), and 4 are the H1-H4 mounting holes, which are mechanical and "
+    "PGOOD, IM73A135 OUT- left open), and 4 are the H1-H4 mounting holes, "
     "have no symbol. Copper DRC, unconnected count and footprint/library "
     "parity are all zero.",
 ]

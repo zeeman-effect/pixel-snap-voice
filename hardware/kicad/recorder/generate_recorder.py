@@ -254,17 +254,19 @@ def inst(
     footprint: str = "",
     rot: float = 0,
     mirror: str = "",
+    in_bom: bool = True,
 ) -> str:
     pin_xml = "\n".join(
         f'\t\t(pin "{n}" (uuid "{uid(ref + "-p-" + n)}"))' for n in pins
     )
     mir = f"\t\t(mirror {mirror})\n" if mirror else ""
+    bom = "yes" if in_bom else "no"
     return f"""	(symbol
 		(lib_id "{lib_id}")
 		(at {x:.2f} {y:.2f} {rot:.0f})
 {mir}		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom {bom})
 		(on_board yes)
 		(dnp no)
 		(uuid "{uid("sym-" + ref)}")
@@ -481,6 +483,7 @@ def build() -> None:
     mcu_blk, mcu_pins, mcu_id = load_lib(KICAD_SYM / "RF_Module.kicad_sym", "ESP32-S3-MINI-1")
     chg_blk, chg_pins, chg_id = load_lib(HERE / "PSV.kicad_sym", "BQ24074RGT")
     ldo_blk, ldo_pins, ldo_id = load_lib(KICAD_SYM / "Regulator_Linear.kicad_sym", "AP2112K-3.3")
+    # Same SOT-23-5 pinout for every LP5907 voltage. Value on the instance is 2.8 V.
     ana_blk, ana_pins, ana_id = load_lib(KICAD_SYM / "Regulator_Linear.kicad_sym", "LP5907MFX-3.3")
     swi_blk, swi_pins, swi_id = load_lib(KICAD_SYM / "Power_Management.kicad_sym", "AP22804AW5")
     esd_blk, esd_pins, esd_id = load_lib(KICAD_SYM / "Power_Protection.kicad_sym", "USBLC6-2SC6")
@@ -636,12 +639,12 @@ def build() -> None:
     stub(mcu, 270, 140, r_pins, "1", "CC2", "r3-cc")
     stub(mcu, 270, 140, r_pins, "2", "GND", "r3-g")
 
-    mcu.add(inst("Connector_Generic:Conn_01x04", "J1", "UART0", 160, 175, conn4_pins, "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"))
+    mcu.add(inst("Connector_Generic:Conn_01x04", "J1", "UART0", 160, 175, conn4_pins, "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", in_bom=False))
     stub(mcu, 160, 175, conn4_pins, "1", "VDD33", "uart-v")
     stub(mcu, 160, 175, conn4_pins, "2", "UART_RX", "uart-rx", False)
     stub(mcu, 160, 175, conn4_pins, "3", "UART_TX", "uart-tx", False)
     stub(mcu, 160, 175, conn4_pins, "4", "GND", "uart-g")
-    mcu.add(text("J1: 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND", 25, 200, "uart-note"))
+    mcu.add(text("J1: 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. Order extra, do not assemble.", 25, 200, "uart-note"))
 
     place_rail(mcu, "power:GND", "#PWR01", "GND", 40, 180, gnd_pins)
     place_rail(mcu, "PSV:VDD33", "#PWR02", "VDD33", 40, 40, vdd33_pins)
@@ -651,7 +654,7 @@ def build() -> None:
     aud = Sch("Recorder — Audio")
     for b in (es_blk, pa_blk, mic_blk, osc_blk, device_r, device_c, device_spk, gnd_blk, pflag_blk, a3v3_blk, vbat_blk, vsys_blk):
         aud.add_lib(b)
-    aud.add(text("ES8311 is I2S master. 12.288 MHz oscillator drives MCLK. No XI/XO on this codec.", 20, 18, "aud-h"))
+    aud.add(text("ES8311 is I2S master. 12.288 MHz oscillator drives MCLK. No XI/XO on this codec. Analog rail is 2.8 V.", 20, 18, "aud-h"))
     ax, ay = 90, 90
     aud.add(inst(es_id, "U2", "ES8311", ax, ay, es_pins, "Package_DFN_QFN:QFN-20-1EP_3x3mm_P0.4mm_EP1.65x1.65mm"))
     stub(aud, ax, ay, es_pins, "1", "I2C_SCL", "es-scl")
@@ -711,9 +714,14 @@ def build() -> None:
     aud.add(inst(mic_id, "MK1", "IM73A135", 40, 175, mic_pins, "PSV:IM73A135_PG-LLGA-5-3"))
     stub(aud, 40, 175, mic_pins, "1", "MIC_OUT", "mk-out", False)
     stub(aud, 40, 175, mic_pins, "2", "3V3A", "mk-v")
-    stub(aud, 40, 175, mic_pins, "3", "AGND", "mk-g", False)
+    # Pin 3 is OUT−, a ~250 Ω amplifier output. Hard-grounding it shorts
+    # the capsule. Single-ended into ES8311: AC-couple OUT+ (C15) and leave
+    # OUT− open. Codec MIC_N via C16 to AGND is the single-ended trick on
+    # the codec side, not on the mic.
+    nc_pin(aud, 40, 175, mic_pins, "3", "mk-outn")
+    stub(aud, 40, 175, mic_pins, "4", "AGND", "mk-g4", False)
     stub(aud, 40, 175, mic_pins, "5", "AGND", "mk-g5", False)
-    stub(aud, 40, 175, mic_pins, "4", "AGND", "mk-sel", False)
+    aud.add(text("MK1 pin 3 is OUT−, left open. VDD abs max 3.0 V, so 3V3A is 2.8 V.", 20, 220, "mk-note"))
     aud.add(inst("Device:C", "C15", "1uF", 70, 175, c_pins, "Capacitor_SMD:C_0603_1608Metric"))
     stub(aud, 70, 175, c_pins, "1", "MIC_OUT", "c15p", False)
     stub(aud, 70, 175, c_pins, "2", "MIC_P", "c15s")
@@ -890,7 +898,7 @@ def build() -> None:
     stub(pwr_s, 185, 170, c_pins, "1", "VDD33", "c8v")
     stub(pwr_s, 185, 170, c_pins, "2", "GND", "c8g")
 
-    pwr_s.add(inst(ana_id, "U8", "LP5907MFX-3.3", 80, 205, ana_pins, "Package_TO_SOT_SMD:SOT-23-5"))
+    pwr_s.add(inst(ana_id, "U8", "LP5907MFX-2.8", 80, 205, ana_pins, "Package_TO_SOT_SMD:SOT-23-5"))
     stub(pwr_s, 80, 205, ana_pins, "1", "VSYS", "u8in")
     stub(pwr_s, 80, 205, ana_pins, "2", "GND", "u8g")
     stub(pwr_s, 80, 205, ana_pins, "3", "VDD33", "u8en")

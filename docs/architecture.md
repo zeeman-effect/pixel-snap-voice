@@ -19,10 +19,10 @@ Pixel 10 (Pixelsnap / Qi2 magnets)
                            |           |
                          VSYS        VBAT (pouch)
                            |
-                    3.3 V + analog LDO
+                    3.3 V digital + 2.8 V analog LDO
 ```
 
-ES8311 is the **I2S master** (12.288 MHz oscillator into MCLK). The S3 is slave. Analog AVDD for the codec is a separate LDO (U8 LP5907) from the MCU 3.3 V rail (U4 AP2112 + U5 AP22804, net **VDD33**). A buck is preferred for battery life; this spin uses the LDO.
+ES8311 is the **I2S master** (12.288 MHz oscillator into MCLK). The S3 is slave. Analog AVDD for the codec and the MEMS mic is a separate 2.8 V LDO (U8 LP5907-2.8, net **3V3A**) from the MCU 3.3 V rail (U4 AP2112 + U5 AP22804, net **VDD33**). The analog rail is 2.8 V because IM73A135 VDD abs max is 3.0 V; ES8311 AVDD is 1.7–3.6 V. A buck is preferred for battery life; this spin uses the LDO.
 
 When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Storage volume, charge. When idle: deep sleep, button wake.
 
@@ -38,7 +38,7 @@ When USB is plugged in: stop recording, expose `/recordings` as a USB Mass Stora
 | --- | --- | --- |
 | MCU | ESP32-S3-MINI-1U (≥8 MB flash) | Native USB. Same pins as MINI-1, 15.4 × 15.4 mm, no PCB antenna. **Not** the audio bottleneck. |
 | Codec | Everest ES8311, I2S master, 12.288 MHz oscillator → MCLK | PGA/ALC/ADC + DAC + HP. Dedicated analog LDO (U8). No XI/XO on this codec. |
-| Mic | Analog MEMS: IM73A135 or ICS-40730 (~73–74 dBA) | Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
+| Mic | Analog MEMS: IM73A135 (~73 dBA) | Pin 3 is OUT−, left open; C15 couples OUT+. VDD 2.8 V. Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
 | Playback | NS4150B into KELIKING KLJ-01304T-08R07W (13 mm SMD, LCSC C18186315) | 8 Ω 0.7 W can JLC can place. If 9 mm loses: 3.5 mm jack on ES8311 HP |
 | Storage | Low-profile microSD (FAT32) | Switch to eMMC only if CAD proves SD is too thick |
 | USB-C | 5 V sink only, 5.1 kΩ CC1/CC2 pulldowns, USB 2.0 | No USB-PD. USB-C is the only 5 V inlet |

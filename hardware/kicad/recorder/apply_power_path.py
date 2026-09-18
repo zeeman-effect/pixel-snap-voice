@@ -26,6 +26,7 @@ else:
     wx.DisableAsserts()
 
 from generate_pcb import (
+    NO_BOM,
     NO_PICK_AND_PLACE,
     PLACEMENT,
     SUBSTITUTIONS,
@@ -115,7 +116,7 @@ def place_one(board, ref, comp, pad_nets, nets):
     if rot:
         fp.SetOrientationDegrees(rot)
     fp.SetPath(pcbnew.KIID_PATH())
-    fp.SetExcludedFromBOM(False)
+    fp.SetExcludedFromBOM(ref in NO_BOM)
     fp.SetExcludedFromPosFiles(ref in NO_PICK_AND_PLACE)
     for pad in fp.Pads():
         name = pad_nets.get((ref, pad.GetNumber()))

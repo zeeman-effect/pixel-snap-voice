@@ -4,9 +4,9 @@ Quantities are for **one** device plus a few passives of margin. Prefer JLCPCB S
 
 LCSC numbers below were captured from the public catalog (Sep 2026). Re-check stock and Basic vs Extended before the SMT order.
 
-The LCSC column of the tables below is the only place order codes are typed. `hardware/kicad/recorder/generate_jlc.py` reads it, joins it to `recorder.kicad_pcb`, and writes `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv` during `python scripts/check_gates.py`. A board part with no number fails that script: JLCPCB will not machine-place an empty cell. Do not hand-edit those two CSVs — put the number here and re-run the gates.
+The LCSC column of the tables below is the only place order codes are typed. `hardware/kicad/recorder/generate_jlc.py` reads it, joins it to `recorder.kicad_pcb`, and writes `hardware/kicad/jlcpcb_bom.csv`, `jlcpcb_cpl.csv`, and `jlcpcb_extra.csv` during `python scripts/check_gates.py`. A board part on the assembly BOM with no number fails that script: JLCPCB will not machine-place an empty cell. Do not hand-edit those CSVs — put the number here and re-run the gates.
 
-J1 and BT1 are through-hole, so they stay out of the pick-and-place file. They still need an LCSC number: JLC wave-solders them from the BOM. Mounting holes are mechanical and stay off both files.
+BT1 is through-hole, so it stays out of the pick-and-place file. It still needs an LCSC number: JLC wave-solders it from the assembly BOM. J1 is also through-hole, but it is flagged `exclude_from_bom`: the vertical header will not fit under the lid and the tails poke toward the phone. Keep C124378 in this table so `jlcpcb_extra.csv` still lists it — add that row under Extra Parts in the JLCPCB cart (shipped loose, not soldered) and hand-solder a header at bring-up if you need UART0. Mounting holes are mechanical and stay off all three files.
 
 ## Electrical
 
@@ -14,16 +14,16 @@ J1 and BT1 are through-hole, so they stay out of the pick-and-place file. They s
 | --- | --- | --- | --- | --- | --- | --- |
 | U1 | MCU module | ESP32-S3-MINI-1U-N8 | C2980299 | 15.4 × 15.4 × 2.4 mm | Native USB; 8 MB flash; IPEX unpopulated | Extended |
 | U2 | Audio codec | ES8311 | C962342 | QFN-20 3×3 | I2S master; 12.288 MHz oscillator into MCLK; analog island. No XI/XO | Extended |
-| Y1 | Codec oscillator | KC3225Z12.2880C1KX00 | C1857159 | 3225 4-pin | Kyocera CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.71–3.63 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE is strapped to **3V3A**. Not a crystal | Extended |
-| U8 | Analog LDO | LP5907MFX-3.3/NOPB | C80670 | SOT-23-5 | Dedicated 3.3 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33**. TI part; JLC local stock was empty at capture, LCSC still listed it. Do not substitute a clone on the analog rail | Extended |
+| Y1 | Codec oscillator | KC3225Z12.2880C1KX00 | C1857159 | 3225 4-pin | Kyocera CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.71–3.63 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE is strapped to **3V3A** (2.8 V). Not a crystal | Extended |
+| U8 | Analog LDO | LP5907MFX-2.8/NOPB | C186700 | SOT-23-5 | Dedicated 2.8 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33**. IM73A135 VDD abs max is 3.0 V (typ 2.75 V); ES8311 AVDD is 1.7–3.6 V so 2.8 V is legal on both. Same SOT-23-5 pinout as the 3.3 V SKU. TI part, JLC Extended | Extended |
 | U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from **VSYS** | Basic |
 | U5 | Load switch | AP22804AW5-7 | C3001659 | SOT-25 | Switches U4 out onto **VDD33**; cuts sleep current | Extended |
-| MK1 | Analog MEMS | IM73A135V01XTSA1 | C3171831 | LLGA-5 4×3 | ~73 dBA. JLC Extended SMT (they flag assembly as High). Acoustic port on the free long edge | Extended |
+| MK1 | Analog MEMS | IM73A135V01XTSA1 | C3171831 | LLGA-5 4×3 | ~73 dBA. Infineon: 1=OUT+ 2=VDD 3=OUT− 4=GND 5=GND. Single-ended: C15 couples OUT+; OUT− is open; codec MIC_N via C16 to AGND. VDD is 2.8 V (**3V3A**). JLC Extended SMT (they flag assembly as High). Acoustic port on the free long edge | Extended |
 | MK1 alt | Digital MEMS | ICS-43434 | C5656610 | 3.5 × 2.65 | 65 dBA fallback if analog capsule misses SMT | Extended |
 | U6 | Class-D PA | NS4150B | C189961 | MSOP-8 | Analog-in from ES8311 AOUT (Korvo path). VCC from **VSYS**. Alt: MAX98357A I2S | Extended |
 | SP1 | Speaker | KLJ-01304T-08R07W | C18186315 | 13 × 13 × 4.0 | KELIKING 8 Ω 0.7 W SMD can. JLC Extended, tape-and-reel. Sound faces the lid | Extended |
 | U3 | Li-ion charger | BQ24074RGTR | C54313 | VQFN-16 3×3 | Power-path. USB 500 mA (EN1/EN2), ISET 1.8 kΩ ≈ 500 mA. OUT = **VSYS**; BAT = pouch only. JLC Extended | Extended |
-| J1 | UART 1×4 | B-2100S04P-A110 | C124378 | 2.54 mm 1×4 THT | Vertical 1×4. 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. JLC wave-solders; not in the CPL | Wave |
+| J1 | UART 1×4 | B-2100S04P-A110 | C124378 | 2.54 mm 1×4 THT | Vertical 1×4. 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. **Do not assemble**: 8.54 mm tall in a ~5.45 mm lid cavity, tails poke B.Cu toward the phone, no UART window in the case. Keep the LCSC so JLC can ship it as extra parts; hand-solder at bring-up | Extra |
 | J2 | USB-C receptacle | 16-pin mid-mount | C165948 | ~3.2 mm | 5.1 kΩ on CC1/CC2; short edge; overmold must miss the phone | Extended |
 | J3 | microSD socket | TF-01 / equivalent | C91145 | low-profile | 4-bit SDMMC on the custom PCB | Basic/Ext |
 | U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |

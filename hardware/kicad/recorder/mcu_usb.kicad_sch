@@ -4547,7 +4547,7 @@
 		(at 160.00 175.00 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "f3788452-a31f-5ab5-8bc2-906e1166f317")
@@ -4606,7 +4606,7 @@
 		(effects (font (size 1.27 1.27)) (justify right))
 		(uuid "43e61f6e-e701-571c-8026-286b7fcbaf79")
 	)
-	(text "J1: 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND"
+	(text "J1: 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. Order extra, do not assemble."
 		(exclude_from_sim no)
 		(at 25.00 200.00 0)
 		(effects (font (size 2.0 2.0)) (justify left bottom))
