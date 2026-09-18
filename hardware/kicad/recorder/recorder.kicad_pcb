@@ -18443,15 +18443,6 @@
 		(uuid "0fed150a-174f-46ab-87bb-fb2be2b426f0")
 	)
 	(segment
-		(start 30.5202 16.2049)
-		(end 30.5202 11.8298)
-		(width 0.15)
-		(locked yes)
-		(layer "F.Cu")
-		(net "/Audio/AGND")
-		(uuid "231a3ac9-f32b-4171-b69a-87d086e75cc6")
-	)
-	(segment
 		(start 30 10.2)
 		(end 30.85 10.8)
 		(width 0.15)
@@ -18468,15 +18459,6 @@
 		(layer "F.Cu")
 		(net "/Audio/AGND")
 		(uuid "29ce9a16-da4d-45c0-b926-8536aeae4215")
-	)
-	(segment
-		(start 30.5201 16.2049)
-		(end 30.5202 16.2049)
-		(width 0.15)
-		(locked yes)
-		(layer "F.Cu")
-		(net "/Audio/AGND")
-		(uuid "2d362b8b-0413-4c7c-a5dd-c50fcea004fe")
 	)
 	(segment
 		(start 20.4814 20.4981)
