@@ -246,6 +246,7 @@ def main() -> int:
     run([sys.executable, str(REPO / "hardware" / "kicad" / "check_drc.py")])
     run([sys.executable, str(REPO / "hardware" / "kicad" / "check_mcu.py")])
     run([sys.executable, str(REPO / "hardware" / "kicad" / "check_pins.py")])
+    run([sys.executable, str(RECORDER / "test_generate_jlc.py")])
 
     # Placement needs pcbnew, which on Windows only lives inside KiCad's own
     # python.exe. Every other gate here is plain Python on purpose, so this one

@@ -2306,6 +2306,12 @@ ROUTED_OPEN_ITEMS = [
     "PGOOD), and 4 are the H1-H4 mounting holes, which are mechanical and "
     "have no symbol. Copper DRC, unconnected count and footprint/library "
     "parity are all zero.",
+    "JLC SMT assembly: every part on the JLC BOM and CPL has an LCSC code "
+    "in docs/bom.md. J1 (UART header) and MK1 (IM73A135) are flagged "
+    "exclude_from_bom and exclude_from_pos_files; solder those by hand. "
+    "BT1 stays on the BOM for wave solder and stays out of the "
+    "pick-and-place file. generate_jlc.py refuses to write the CSVs if a "
+    "machine-placed part is missing a code.",
 ]
 
 

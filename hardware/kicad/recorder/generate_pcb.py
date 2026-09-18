@@ -296,10 +296,21 @@ PLACEMENT = {
 # left in the pick-and-place file is a feeder the machine cannot fill. J1 is
 # the bring-up UART, soldered by hand and clipped off afterwards. BT1 is a THT
 # connector JLC can wave-solder; it still does not belong in the
-# pick-and-place file.
+# pick-and-place file. MK1 is an analog MEMS the BOM keeps off the machine:
+# JLC lists the IM73A135 as high-difficulty, and this land is a local
+# adaptation around the sound port, not their library drawing.
 NO_PICK_AND_PLACE = {
     "J1": "2.54 mm UART header, hand-soldered at bring-up",
     "BT1": "JST-PH through-hole, wave or hand",
+    "MK1": "analog MEMS, hand-place after SMT",
+}
+
+# Parts the machine must not try to source. J1 has no LCSC feeder. MK1 is
+# bought and placed by hand even though JLC stocks C3171831. BT1 stays on
+# the BOM so they can wave-solder the JST-PH.
+NO_BOM = {
+    "J1": "hand-soldered at bring-up, no LCSC feeder",
+    "MK1": "hand-place, not in the JLC SMT order",
 }
 
 MOUNTING_HOLES = [
@@ -511,10 +522,10 @@ def main():
         if rot:
             fp.SetOrientationDegrees(rot)
         fp.SetPath(pcbnew.KIID_PATH())
-        # The schematic decides what is on the BOM, not the land pattern.
-        fp.SetExcludedFromBOM(False)
-        if ref in NO_PICK_AND_PLACE:
-            fp.SetExcludedFromPosFiles(True)
+        # The schematic decides what is on the board. Assembly flags are
+        # this file's: JLC should not pick or source J1 / MK1.
+        fp.SetExcludedFromBOM(ref in NO_BOM)
+        fp.SetExcludedFromPosFiles(ref in NO_PICK_AND_PLACE)
         for pad in fp.Pads():
             name = pad_net.get((ref, pad.GetNumber()))
             if name and name in netmap:

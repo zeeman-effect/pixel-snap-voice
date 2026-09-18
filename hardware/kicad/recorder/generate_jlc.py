@@ -22,9 +22,11 @@ Who owns which number:
     `exclude_from_bom`. That is a board edit and shows up in a diff, instead
     of a list of references hidden in a script.
   * LCSC order codes come from the LCSC column of `docs/bom.md`, which is
-    where a human picks parts. Refs with no number there are emitted blank,
-    exactly as the hand-written file had them, and listed on stdout so it is
-    obvious what still needs sourcing.
+    where a human picks parts. A BOM or pick-and-place row with no number
+    is a feeder JLC cannot fill, so this script refuses to write the CSVs
+    until every assembled part has a code. Hand-placed parts (J1, MK1)
+    stay off those files via the board's exclude flags, not via a blank
+    cell.
 """
 
 import csv
@@ -144,10 +146,8 @@ def write_cpl(board, placed):
     return len(placed)
 
 
-def write_bom(board):
+def write_bom(board, codes):
     parts = [fp for fp in board.GetFootprints() if not fp.IsExcludedFromBOM()]
-    codes = lcsc_by_ref({fp.GetReference() for fp in parts})
-
     groups = {}
     for fp in parts:
         ref = fp.GetReference()
@@ -163,22 +163,63 @@ def write_bom(board):
         out.writerow(["Comment", "Designator", "Footprint", "LCSC Part #"])
         for (value, footprint, code), refs in rows:
             out.writerow([value, ",".join(refs), footprint, code])
+    return [fp.GetReference() for fp in parts]
 
-    unsourced = sorted((fp.GetReference() for fp in parts
-                        if fp.GetReference() not in codes), key=ref_key)
-    return len(parts), unsourced
+
+def sourced_or_die(kind, refs, codes):
+    """Refuse a JLC upload whose machine file still has blank LCSC cells."""
+    missing = sorted((ref for ref in refs if ref not in codes), key=ref_key)
+    if missing:
+        raise SystemExit(
+            f"{kind} still has no LCSC number in docs/bom.md: "
+            + ", ".join(missing)
+            + ". Put the order code in the Electrical table, or flag the "
+            "footprint exclude_from_bom / exclude_from_pos_files if JLC "
+            "must not place it."
+        )
+
+
+HAND_PLACE = {
+    "J1": "UART header, soldered at bring-up",
+    "MK1": "analog MEMS, placed after SMT",
+}
+
+
+def require_hand_place(board):
+    """J1 and MK1 stay off the JLC order even if someone types an LCSC code."""
+    by_ref = {fp.GetReference(): fp for fp in board.GetFootprints()}
+    problems = []
+    for ref, reason in HAND_PLACE.items():
+        fp = by_ref.get(ref)
+        if fp is None:
+            problems.append(f"{ref} is missing ({reason})")
+            continue
+        if not fp.IsExcludedFromBOM() or not fp.IsExcludedFromPosFiles():
+            problems.append(
+                f"{ref} must be exclude_from_bom and exclude_from_pos_files "
+                f"({reason})"
+            )
+    if problems:
+        raise SystemExit("hand-placed parts leaked into the JLC order:\n  "
+                         + "\n  ".join(problems))
 
 
 def main():
     board = pcbnew.LoadBoard(PCB)
     if board is None:
         raise SystemExit(f"could not load {PCB}")
+    require_hand_place(board)
+    bom_refs = [fp.GetReference() for fp in board.GetFootprints()
+                if not fp.IsExcludedFromBOM()]
+    pos_refs = [fp.GetReference() for fp in board.GetFootprints()
+                if not fp.IsExcludedFromPosFiles()]
+    codes = lcsc_by_ref(set(bom_refs) | set(pos_refs))
+    sourced_or_die("jlcpcb_bom.csv", bom_refs, codes)
+    sourced_or_die("jlcpcb_cpl.csv", pos_refs, codes)
     placed = write_cpl(board, read_pos())
-    lines, unsourced = write_bom(board)
+    lines = len(write_bom(board, codes))
     print(f"jlcpcb_cpl.csv: {placed} placements")
     print(f"jlcpcb_bom.csv: {lines} parts")
-    if unsourced:
-        print("  no LCSC number in docs/bom.md yet: " + ", ".join(unsourced))
     return 0
 
 
