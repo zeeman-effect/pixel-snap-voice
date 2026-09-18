@@ -11,7 +11,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | --- | --- | --- | --- | --- | --- | --- |
 | U1 | MCU module | ESP32-S3-MINI-1U-N8 | C2980299 | 15.4 × 15.4 × 2.4 mm | Native USB; 8 MB flash; IPEX unpopulated | Extended |
 | U2 | Audio codec | ES8311 | C962342 | QFN-20 3×3 | I2S master; 12.288 MHz oscillator into MCLK; analog island. No XI/XO | Extended |
-| Y1 | Codec oscillator | KC3225Z12.2880C1KX00 | C1857159 | 3225 4-pin | CMOS oscillator, 1.71–3.63 V, output to ES8311 MCLK. Same land as Abracon ASE. Pin 1 OE tied high to **3V3A**. Not a crystal | Extended |
+| Y1 | Codec oscillator | Y322512.288MNCCZ | C49207908 | 3225 4-pin | JLYE CMOS oscillator, 1.8–3.3 V, output to ES8311 MCLK. Same land as Abracon ASE. Pin 1 OE tied high to **3V3A**. Not a crystal. Replaces Kyocera `C1857159`, which JLC SMT listed as a product shortfall. Backup if this also shorts: Lucki `C5917271` | Extended |
 | U8 | Analog LDO | LP5907MFX-3.3/NOPB | C80670 | SOT-23-5 | Dedicated 3.3 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33** | Extended |
 | U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from **VSYS** | Basic |
 | U5 | Load switch | AP22804AW5-7 | C3001659 | SOT-23-5 | Active-high EN. Switches U4 out onto **VDD33**; cuts sleep current. Do not substitute the B (active-low) die | Extended |

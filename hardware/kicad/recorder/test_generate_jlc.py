@@ -24,7 +24,7 @@ class LcscTable(unittest.TestCase):
         self.assertEqual(codes["Ragnd"], "C21189")
         self.assertEqual(codes["U5"], "C3001659")
         self.assertEqual(codes["U8"], "C80670")
-        self.assertEqual(codes["Y1"], "C1857159")
+        self.assertEqual(codes["Y1"], "C49207908")
         self.assertEqual(codes["BT1"], "C173752")
         self.assertNotIn("MAG1", codes)
         # J1 stays off the JLC files. MK1 has a buy-it-yourself code in
