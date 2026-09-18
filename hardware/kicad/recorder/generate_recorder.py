@@ -254,17 +254,19 @@ def inst(
     footprint: str = "",
     rot: float = 0,
     mirror: str = "",
+    in_bom: bool = True,
 ) -> str:
     pin_xml = "\n".join(
         f'\t\t(pin "{n}" (uuid "{uid(ref + "-p-" + n)}"))' for n in pins
     )
     mir = f"\t\t(mirror {mirror})\n" if mirror else ""
+    bom = "yes" if in_bom else "no"
     return f"""	(symbol
 		(lib_id "{lib_id}")
 		(at {x:.2f} {y:.2f} {rot:.0f})
 {mir}		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom {bom})
 		(on_board yes)
 		(dnp no)
 		(uuid "{uid("sym-" + ref)}")
@@ -636,7 +638,7 @@ def build() -> None:
     stub(mcu, 270, 140, r_pins, "1", "CC2", "r3-cc")
     stub(mcu, 270, 140, r_pins, "2", "GND", "r3-g")
 
-    mcu.add(inst("Connector_Generic:Conn_01x04", "J1", "UART0", 160, 175, conn4_pins, "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"))
+    mcu.add(inst("Connector_Generic:Conn_01x04", "J1", "UART0", 160, 175, conn4_pins, "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", in_bom=False))
     stub(mcu, 160, 175, conn4_pins, "1", "VDD33", "uart-v")
     stub(mcu, 160, 175, conn4_pins, "2", "UART_RX", "uart-rx", False)
     stub(mcu, 160, 175, conn4_pins, "3", "UART_TX", "uart-tx", False)
@@ -708,7 +710,7 @@ def build() -> None:
     stub(aud, 90, 160, osc_pins, "3", "I2S_MCLK", "y1out")
     stub(aud, 90, 160, osc_pins, "4", "3V3A", "y1v")
 
-    aud.add(inst(mic_id, "MK1", "IM73A135", 40, 175, mic_pins, "PSV:IM73A135_PG-LLGA-5-3"))
+    aud.add(inst(mic_id, "MK1", "IM73A135", 40, 175, mic_pins, "PSV:IM73A135_PG-LLGA-5-3", in_bom=False))
     stub(aud, 40, 175, mic_pins, "1", "MIC_OUT", "mk-out", False)
     stub(aud, 40, 175, mic_pins, "2", "3V3A", "mk-v")
     stub(aud, 40, 175, mic_pins, "3", "AGND", "mk-g", False)

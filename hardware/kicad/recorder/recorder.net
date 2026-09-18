@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/workspace/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-09-16T17:54:32")
+		(date "2026-09-18T16:39:33")
 		(tool "Eeschema 10.0.6-10.0.6~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -434,6 +434,9 @@
 			(property
 				(name "Sheetfile")
 				(value "mcu_usb.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
@@ -1812,6 +1815,9 @@
 			(property
 				(name "Sheetfile")
 				(value "audio.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(property
 				(name "ki_keywords")
