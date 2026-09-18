@@ -276,7 +276,7 @@ PLACEMENT = {
     "Ragnd": (26.0, 16.5, 0, "AGND to GND stitch"),
     "Y1": (16.0, 24.0, 0, "12.288 MHz oscillator into ES8311 MCLK"),
     # --- Analog island: analog supply ---
-    "U8": (26.0, 31.0, 0, "LP5907 low-noise LDO, VSYS -> 3V3A"),
+    "U8": (26.0, 31.0, 0, "LP5907-2.8 low-noise LDO, VSYS -> 2.8 V analog (net 3V3A)"),
     "C9": (21.0, 31.0, 0, "3V3A output cap"),
     "R5": (22.0, 34.5, 0, "I2C SDA pull-up"),
     "R6": (27.0, 34.5, 0, "I2C SCL pull-up"),
@@ -293,13 +293,17 @@ PLACEMENT = {
 }
 
 # JLCPCB's SMT line places surface-mount parts only, so a through-hole part
-# left in the pick-and-place file is a feeder the machine cannot fill. J1 is
-# the bring-up UART, soldered by hand and clipped off afterwards. BT1 is a THT
-# connector JLC can wave-solder; it still does not belong in the
-# pick-and-place file.
+# left in the pick-and-place file is a feeder the machine cannot fill.
+# J1 is bring-up UART: the vertical header will not fit under the lid and
+# the tails poke toward the phone, so it stays off the assembly BOM. Order
+# C124378 as extra parts and hand-solder a header if you need UART0.
+# BT1 stays in the BOM (JLC wave-solders the JST-PH) and out of the CPL.
 NO_PICK_AND_PLACE = {
-    "J1": "2.54 mm UART header, hand-soldered at bring-up",
-    "BT1": "JST-PH through-hole, wave or hand",
+    "J1": "2.54 mm UART header, extra parts only, do not assemble",
+    "BT1": "JST-PH through-hole, JLC wave-solders C173752",
+}
+NO_BOM = {
+    "J1": "UART header, order C124378 as extra parts, do not solder",
 }
 
 MOUNTING_HOLES = [
@@ -511,8 +515,7 @@ def main():
         if rot:
             fp.SetOrientationDegrees(rot)
         fp.SetPath(pcbnew.KIID_PATH())
-        # The schematic decides what is on the BOM, not the land pattern.
-        fp.SetExcludedFromBOM(False)
+        fp.SetExcludedFromBOM(ref in NO_BOM)
         if ref in NO_PICK_AND_PLACE:
             fp.SetExcludedFromPosFiles(True)
         for pad in fp.Pads():

@@ -17,7 +17,7 @@ This product already exists: [ESP32-OpenMic](https://codeberg.org/RevK/ESP32-Ope
 
 ## Default (v1 custom PCB)
 
-ESP32-S3-MINI-1U + **ES8311 as I2S master** (12.288 MHz oscillator → MCLK) + analog MEMS (**IM73A135** or **ICS-40730**, ~73–74 dBA) + **NS4150B** into a KELIKING KLJ-01304T-08R07W (13 mm SMD can, LCSC C18186315), or ES8311 headphone jack if 9 mm loses.
+ESP32-S3-MINI-1U + **ES8311 as I2S master** (12.288 MHz oscillator → MCLK) + analog MEMS (**IM73A135**, ~73 dBA, 2.8 V VDD) + **NS4150B** into a KELIKING KLJ-01304T-08R07W (13 mm SMD can, LCSC C18186315), or ES8311 headphone jack if 9 mm loses.
 
 **Fallback:** ICS-43434 into the S3 or ES8311 digital-mic pin (capture stays 65 dBA; playback still good).
 

@@ -3098,7 +3098,7 @@
 		(uuid "bcb61f81-5673-54f0-9fa0-1fbf6646270b")
 		(property "Reference" "U8" (at 80.00 197.00 0)
 			(effects (font (size 1.27 1.27))))
-		(property "Value" "LP5907MFX-3.3" (at 80.00 199.50 0)
+		(property "Value" "LP5907MFX-2.8" (at 80.00 199.50 0)
 			(effects (font (size 1.27 1.27))))
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5" (at 80.00 205.00 0)
 			(effects (font (size 1.27 1.27)) hide))

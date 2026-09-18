@@ -56,7 +56,7 @@ def drc_counts(kicad: Path, extra: list[str]) -> dict:
     return json.loads(out.read_text(encoding="utf-8"))
 
 
-# kicad-cli pcb drc --schematic-parity reports these 27 notes and every one is
+# kicad-cli pcb drc --schematic-parity reports these 28 notes and every one is
 # expected. Counting them is not a check: a new extra footprint, or a pad that
 # quietly lost its net, lands in the same list and the old gate still plotted.
 # Each key is (violation type, reference, pad or field name). Add a key only
@@ -83,7 +83,8 @@ EXPECTED_PARITY.update({
     ("net_conflict", "U3", "8"): "BQ24074 PGOOD left open; charge status is STAT",
     ("net_conflict", "U4", "4"): "AP2112K-3.3 pin 4 is NC",
     ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
-    ("net_conflict", "U8", "4"): "LP5907MFX-3.3 pin 4 is NC",
+    ("net_conflict", "U8", "4"): "LP5907 pin 4 is NC",
+    ("net_conflict", "MK1", "3"): "IM73A135 pin 3 is OUT−, left open for single-ended",
 })
 
 _PAD = re.compile(r"^Pad (\S+) \[.*\] of (\w+) on ")

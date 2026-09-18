@@ -2,7 +2,7 @@
 
 Do this on the first SMT board **after** `python scripts/check_gates.py` is green. Do not power a board that failed ERC/DRC/envelope/`recorder_test`.
 
-Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv` and `jlcpcb_cpl.csv`. A green `check_gates.py` writes all three from `hardware/kicad/recorder/recorder.kicad_pcb`, so order from the files that run just produced. Do not power or order from an export that still fails DRC.
+Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv`, `jlcpcb_cpl.csv`, and `jlcpcb_extra.csv`. A green `check_gates.py` writes them from `hardware/kicad/recorder/recorder.kicad_pcb`, so order from the files that run just produced. Do not power or order from an export that still fails DRC.
 
 ## Flash
 
@@ -11,14 +11,14 @@ USB-C is the first-flash path (ESP32-S3 USB-Serial/JTAG). After TinyUSB MSC take
 1. Hold **Boot** (SW_BOOT, GPIO0 to GND).
 2. Tap **Reset** (SW_RST, EN to GND), then release Reset.
 3. Release Boot.
-4. `idf.py -p COMx flash` over USB-C, or UART0 on J1 (3V3, U0RXD, U0TXD, GND).
+4. `idf.py -p COMx flash` over USB-C, or UART0 on J1 (3V3, U0RXD, U0TXD, GND) if you hand-soldered the extra-parts header. JLC does not assemble J1.
 
 The 5 mm actuators sit 1.65 mm under the outer skin. A hole in 1.2 mm PETG does not reach them. Do not wire GPIO0 as a firmware button. SW1 stays the record control.
 
 ## Order of tests
 
 1. **USB serial** — native USB-Serial/JTAG or UART0. Confirm the S3 enumerates and `idf.py monitor` shows `pixel-snap-voice on custom`.
-2. **Rails** — **VDD33** at U4/U5 (MCU) vs **3V3A** at U8 LP5907. They must not be shorted together. **VSYS** at U3 OUT / U4 VIN (USB ~4.4 V or cell). **VBAT** ~3.7–4.2 V at BT1 with a pouch; it must not be strapped to VSYS. VBUS ~5 V when plugged in (J2).
+2. **Rails** — **VDD33** at U4/U5 (MCU, 3.3 V) vs **3V3A** at U8 LP5907-2.8 (~2.8 V). They must not be shorted together. **3V3A is 2.8 V on purpose**: IM73A135 VDD abs max is 3.0 V. **VSYS** at U3 OUT / U4 VIN (USB ~4.4 V or cell). **VBAT** ~3.7–4.2 V at BT1 with a pouch; it must not be strapped to VSYS. VBUS ~5 V when plugged in (J2).
 3. **I2C codec** — scan address 0x18. ES8311 ACK.
 4. **I2S** — codec is master. Y1 is the 12.288 MHz oscillator into ES8311 MCLK. Scope MCLK/BCLK/WS. Play a tone / loopback before trusting the mic.
 5. **Mic capture** — short press records `/recordings/YYYYMMDD-HHMMSS.wav` at 48 kHz. Copy off via SD reader if MSC is not up yet. Play on a desktop.
@@ -39,7 +39,7 @@ Measure record current (PA off) and playback current. Update [`docs/bom.md`](bom
 | Symptom | First check |
 | --- | --- |
 | No 3.3 V | U4, U5, solder on the module |
-| Codec NACK | 3V3A (U8), I2C pull-ups, Y1 output on MCLK |
-| Hiss / no mic | Analog island, mic port not against glass, MK1 bias |
+| Codec NACK | 3V3A at U8 (~2.8 V), I2C pull-ups, Y1 output on MCLK |
+| Hiss / no mic | Analog island, mic port not against glass, MK1 bias at 2.8 V, OUT− not shorted to AGND |
 | No MSC | TinyUSB config, SD still mounted by VFS, USB D+/D− swap |
 | Brownout on play | USB cable, PA supply from VSYS, decoupling |
