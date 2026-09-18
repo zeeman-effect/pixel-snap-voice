@@ -23,7 +23,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | J1 | UART 1×4 | pin header | — | 2.54 mm | 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. **Hand-solder**; off the JLC BOM and CPL | hand |
 | J2 | USB-C receptacle | 16-pin mid-mount | C165948 | ~3.2 mm | 5.1 kΩ on CC1/CC2; short edge; overmold must miss the phone | Extended |
 | J3 | microSD socket | TF-01 / equivalent | C91145 | low-profile | 4-bit SDMMC on the custom PCB | Basic/Ext |
-| U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |
+| U7 | USB ESD | USBLC6-2SC6 | C7519 | SOT-23-6 | Next to J2 on D+/D−. ST part; `C8678` is an SS34 SMA Schottky, not this chip | Extended |
 | BT1 | 1S battery connector | S2B-PH-K-S | C173752 | JST-PH 2.0 mm THT | Side-entry. Plug a protected 1S pouch (PHR-2). Optional: USB-C runs the board with BT1 open. On the JLC BOM for wave solder, not in the pick-and-place file | Extended |
 | SW1 | Record button | Panasonic EVQP7C01P | C388883 | 3.5 × 2.9 × 1.35 mm | **Side push**: the plunger fires sideways at the left wall, so nothing has to poke through the phone-facing face. SPST, 2.2 N, 0.2 mm travel, 100k cycles, reflow. Short = record, long = power. Two moulded bosses drop into NPTH holes and take the sideways load off the solder. Was listed here as "side-fire, C318885": that code is an XKB TS-1187A-C-J-B, a 5.1 × 5.1 × 5 mm **top-actuated** switch, so the line was wrong on both the part and the direction | Extended |
 | SW_BOOT / SW_RST | Boot / Reset | XKB TS-1187A-C-J-B | C318885 | 5.1 × 5.1 × 5 mm | Top-actuated SPST for prototype download. Hold Boot, tap Reset, release Boot. They strap GPIO0 and EN to GND; they are not firmware buttons. **Lid-off only** this spin | Extended |

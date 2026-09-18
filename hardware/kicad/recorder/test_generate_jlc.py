@@ -11,12 +11,13 @@ from generate_jlc import HAND_PLACE, lcsc_by_ref, sourced_or_die
 class LcscTable(unittest.TestCase):
     def test_assembled_refs_have_codes(self):
         refs = {
-            "C1", "C21", "F1", "R4", "R8", "Ragnd", "U5", "U8", "Y1", "BT1",
-            "J1", "MK1", "MAG1",
+            "C1", "C21", "F1", "R4", "R8", "Ragnd", "U5", "U7", "U8", "Y1",
+            "BT1", "J1", "MK1", "MAG1",
         }
         codes = lcsc_by_ref(refs)
         self.assertEqual(codes["C1"], "C45783")
         self.assertEqual(codes["F1"], "C883095")
+        self.assertEqual(codes["U7"], "C7519")
         self.assertEqual(codes["C21"], "C19702")
         self.assertEqual(codes["R4"], "C4177")
         self.assertEqual(codes["R8"], "C22991")
