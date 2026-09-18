@@ -9,7 +9,7 @@
 "10uF","C21","C_0603_1608Metric","C19702"
 "status","D1","LED_0603_1608Metric","C2286"
 "chg","D2","LED_0603_1608Metric","C2286"
-"500mA PTC","F1","Fuse_0603_1608Metric","C37010"
+"500mA PTC","F1","Fuse_0603_1608Metric","C883095"
 "USB_C_16P","J2","USB_C_Receptacle_HRO_TYPE-C-31-M-12","C165948"
 "microSD","J3","microSD_HC_Wuerth_693072010801","C91145"
 "10k","R1,R7,R10,Rboot,Rsd0,Rsd1,Rsd2,Rsd3,Rsd4,Rstat","R_0603_1608Metric","C25804"

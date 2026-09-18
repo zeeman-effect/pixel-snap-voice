@@ -44,7 +44,7 @@ The LCSC column of the **Electrical** table is the only place order codes are ty
 | C7 | U4 output | 2.2 µF 16 V X5R | C23630 | 0603 | AP2112 recommended Cout | Basic |
 | C8 / C20 | 10 µF bulk | 10 µF 25 V X5R | C15850 | 0805 | VDD33 after U5, VBAT at the pouch | Basic |
 | C21 | VBAT at U3 | 10 µF 10 V X5R | C19702 | 0603 | Local ceramic on BAT when the pouch is unplugged | Basic |
-| F1 | VBUS PTC | 500 mA 6 V | C37010 | 0603/1206 | Between VBUS and charger | Basic |
+| F1 | VBUS PTC | BSMD0603-050-6V | C883095 | 0603 | 500 mA hold, 6 V, 1 A trip. Between VBUS and charger. `C37010` was a dead LCSC number, so JLC showed F1 as No Part Selected | Extended |
 | MAG1 | Magnet ring | Qi2 / MagSafe accessory | — | OD 56 / ID 44 / 1.1 mm | Buy; do not machine. Pocket to the part you receive | — |
 | SH1 | Steel shunt | thin plate | — | ~0.3 mm | **Behind** MAG1, away from the phone. Not the outer chassis | — |
 
