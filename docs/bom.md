@@ -14,7 +14,7 @@ BT1 is through-hole, so it stays out of the pick-and-place file. It still needs 
 | --- | --- | --- | --- | --- | --- | --- |
 | U1 | MCU module | ESP32-S3-MINI-1U-N8 | C2980299 | 15.4 × 15.4 × 2.4 mm | Native USB; 8 MB flash; IPEX unpopulated | Extended |
 | U2 | Audio codec | ES8311 | C962342 | QFN-20 3×3 | I2S master; 12.288 MHz oscillator into MCLK; analog island. No XI/XO | Extended |
-| Y1 | Codec oscillator | Y322512.288MNCCZ | C49207908 | 3225 4-pin | JLYE CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.8–3.3 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE is strapped to **3V3A** (2.8 V). Not a crystal. Replaces Kyocera `C1857159`, a JLC SMT shortfall. Backup: Lucki `C5917271` | Extended |
+| Y1 | Codec oscillator | Y322512.288MNCCZ | C49207908 | 3225 4-pin | JLYE CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.8–3.3 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE and VDD are on **3V3A** (2.8 V). Not a crystal. Replaces Kyocera `C1857159`, a JLC SMT shortfall. Do **not** substitute a 3.3 V-only can such as Lucki `C5917271` (2.97 V min) | Extended |
 | U8 | Analog LDO | LP5907MFX-2.8/NOPB | C186700 | SOT-23-5 | Dedicated 2.8 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33**. IM73A135 VDD abs max is 3.0 V (typ 2.75 V); ES8311 AVDD is 1.7–3.6 V so 2.8 V is legal on both. Same SOT-23-5 pinout as the 3.3 V SKU. TI part, JLC Extended | Extended |
 | U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from **VSYS** | Basic |
 | U5 | Load switch | AP22804AW5-7 | C3001659 | SOT-25 | Switches U4 out onto **VDD33**; cuts sleep current | Extended |
