@@ -242,6 +242,7 @@ def main() -> int:
     run([str(test)], cwd=test.parent)
 
     run([sys.executable, str(REPO / "hardware" / "cad" / "check_envelope.py")])
+    run([sys.executable, str(RECORDER / "test_jlc_order_codes.py")])
     run([sys.executable, str(RECORDER / "verify_schematic.py")])
     run([sys.executable, str(REPO / "hardware" / "kicad" / "check_kicad_format.py")])
     run([sys.executable, str(REPO / "hardware" / "kicad" / "check_drc.py")])

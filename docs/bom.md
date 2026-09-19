@@ -14,7 +14,7 @@ BT1 is through-hole, so it stays out of the pick-and-place file. It still needs 
 | --- | --- | --- | --- | --- | --- | --- |
 | U1 | MCU module | ESP32-S3-MINI-1U-N8 | C2980299 | 15.4 × 15.4 × 2.4 mm | Native USB; 8 MB flash; IPEX unpopulated | Extended |
 | U2 | Audio codec | ES8311 | C962342 | QFN-20 3×3 | I2S master; 12.288 MHz oscillator into MCLK; analog island. No XI/XO | Extended |
-| Y1 | Codec oscillator | KC3225Z12.2880C1KX00 | C1857159 | 3225 4-pin | Kyocera CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.71–3.63 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE is strapped to **3V3A** (2.8 V). Not a crystal | Extended |
+| Y1 | Codec oscillator | Y322512.288MNCCZ | C49207908 | 3225 4-pin | JLYE CMOS oscillator into ES8311 MCLK; S3 is I2S slave. 1.8–3.3 V, same pinout as the Abracon ASE land (1=OE, 2=GND, 3=OUT, 4=VDD). OE and VDD are on **3V3A** (2.8 V). Not a crystal. Replaces Kyocera `C1857159`, a JLC SMT shortfall. Do **not** substitute a 3.3 V-only can such as Lucki `C5917271` (2.97 V min) | Extended |
 | U8 | Analog LDO | LP5907MFX-2.8/NOPB | C186700 | SOT-23-5 | Dedicated 2.8 V (**3V3A**) for AVDD + mic + Y1. Do **not** share **VDD33**. IM73A135 VDD abs max is 3.0 V (typ 2.75 V); ES8311 AVDD is 1.7–3.6 V so 2.8 V is legal on both. Same SOT-23-5 pinout as the 3.3 V SKU. TI part, JLC Extended | Extended |
 | U4 | MCU 3.3 V | AP2112K-3.3TRG1 | C51118 | SOT-25 | First spin LDO (buck preferred later). VIN from **VSYS** | Basic |
 | U5 | Load switch | AP22804AW5-7 | C3001659 | SOT-25 | Switches U4 out onto **VDD33**; cuts sleep current | Extended |
@@ -26,14 +26,14 @@ BT1 is through-hole, so it stays out of the pick-and-place file. It still needs 
 | J1 | UART 1×4 | B-2100S04P-A110 | C124378 | 2.54 mm 1×4 THT | Vertical 1×4. 3V3, U0RXD (adapter TX), U0TXD (adapter RX), GND. **Do not assemble**: 8.54 mm tall in a ~5.45 mm lid cavity, tails poke B.Cu toward the phone, no UART window in the case. Keep the LCSC so JLC can ship it as extra parts; hand-solder at bring-up | Extra |
 | J2 | USB-C receptacle | 16-pin mid-mount | C165948 | ~3.2 mm | 5.1 kΩ on CC1/CC2; short edge; overmold must miss the phone | Extended |
 | J3 | microSD socket | TF-01 / equivalent | C91145 | low-profile | 4-bit SDMMC on the custom PCB | Basic/Ext |
-| U7 | USB ESD | USBLC6-2SC6 | C8678 | SOT-23-6 | Next to J2 on D+/D− | Basic |
+| U7 | USB ESD | USBLC6-2SC6 | C7519 | SOT-23-6 | Next to J2 on D+/D−. ST part; `C8678` is an SS34 SMA Schottky, not this chip | Extended |
 | BT1 | 1S battery connector | S2B-PH-K-S | C173752 | JST-PH 2.0 mm THT | Side-entry. Plug a protected 1S pouch (PHR-2). USB-C runs the board with BT1 open. JLC wave-solders; not in the CPL | Wave |
 | SW1 | Record button | Panasonic EVQP7C01P | C388883 | 3.5 × 2.9 × 1.35 mm | **Side push**: the plunger fires sideways at the left wall, so nothing has to poke through the phone-facing face. SPST, 2.2 N, 0.2 mm travel, 100k cycles, reflow. Short = record, long = power. Two moulded bosses drop into NPTH holes and take the sideways load off the solder. Was listed here as "side-fire, C318885": that code is an XKB TS-1187A-C-J-B, a 5.1 × 5.1 × 5 mm **top-actuated** switch, so the line was wrong on both the part and the direction | Extended |
 | SW_BOOT / SW_RST | Boot / Reset | XKB TS-1187A-C-J-B | C318885 | 5.1 × 5.1 × 5 mm | Top-actuated SPST for prototype download. Hold Boot, tap Reset, release Boot. They strap GPIO0 and EN to GND; they are not firmware buttons. **Lid-off only** this spin | Extended |
 | D1 | Status LED | 0603 red | C2286 | 0603 | Record / error (GPIO2) | Basic |
 | D2 | Charge LED | 0603 | C2286 | 0603 | On U3 STAT / **CHG_STAT** | Basic |
 | R2 / R3 | CC pulldowns | 0603WAF5101T5E | C23186 | 0603 5.1 kΩ 1% | USB-C UFP Rd on J2. Schematic value is 5.11 kΩ; this Basic part is 5.1 kΩ (the Type-C number) | Basic |
-| F1 | VBUS PTC | 500 mA 6 V | C37010 | 0603/1206 | Between VBUS and charger | Basic |
+| F1 | VBUS PTC | BSMD0603-050-6V | C883095 | 0603 | 500 mA hold, 6 V, 1 A trip. Between VBUS and charger. `C37010` was a dead LCSC number, so JLC showed F1 as No Part Selected | Extended |
 | MAG1 | Magnet ring | Qi2 / MagSafe accessory | — | OD 56 / ID 44 / 1.1 mm | Buy; do not machine. Pocket to the part you receive | — |
 | SH1 | Steel shunt | thin plate | — | ~0.3 mm | **Behind** MAG1, away from the phone. Not the outer chassis | — |
 
