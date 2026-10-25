@@ -24,7 +24,7 @@ python scripts/check_gates.py
 
 Sheets: `mcu_usb`, `audio`, `power`, `io` (global labels join them). Pin map: [`pinmap.md`](pinmap.md).
 
-Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. SP1 is the KELIKING KLJ-01304T-08R07W land in `PSV.pretty`.
+Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. J2 is the C6276862 stadium land in `PSV.pretty` (22.30 × 7.70 mm, vendor drawing).
 
 ## Design rules
 
@@ -62,14 +62,15 @@ The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit o
 
 ## Keepouts
 
-- No tall parts on B.Cu (phone / shunt side)
-- Mic on the right long edge, away from U4 / U5
-- USB-C (**J2**) on the bottom short edge, offset +8 mm
-- JST-PH battery (**BT1**) on the top-left, land `JST_PH_S2B-PH-K`. USB-C is the only 5 V inlet
+- No tall parts on B.Cu except the taped pouch and the BT1 pads (phone / shunt side)
+- Mic on the phone-right long edge
+- Magnetic pad (**J2**) at (0, 36) on F.Cu, rot 0, phone-top / camera end, land `PSV:YZ103915020T_4P`
+- Battery pads (**BT1**) on B.Cu at (−17, 35), land `PSV:Battery_Pigtail_2P`. The magnetic pad is the only 5 V inlet
+- **J3** is CSNP32GCR01-AOW on land `PSV:ZDSD32GLGEAG` at (−22, −18) on F.Cu. Not a card socket. Pins 3 CLK, 4 ground, 5 CMD, 8 power.
 - Analog island (U2, U8, MK1, Y1) off **VDD33**
-- Analog footprint centres off the magnet circle; SP1 also by courtyard, because the 13 mm can holds a magnet (`check_placement.py`)
-- PA LC away from the magnet circle (comment layer)
-- MINI-1U module (15.4 × 15.4 mm). No PCB-antenna keepout. IPEX unpopulated
+- Analog footprint centres off the magnet circle (`check_placement.py`)
+- Nothing taller than ~0.5 mm under the 51.5 × 66 mm pouch tape at (0, 0)
+- MINI-1U module (15.4 × 15.4 mm). No PCB-antenna keepout. IPEX takes a lid W.FL / MHF III pigtail
 - 4× M1.6 holes. No fiducials on this first pass.
 
 Gerbers: `fab/` after `scripts/check_gates.py`, which runs `kicad-cli pcb drc` first and then writes the Gerbers, both drill files, the pick-and-place CSV, `recorder-jlc.zip` and the JLCPCB CSVs (`jlcpcb_bom.csv`, `jlcpcb_cpl.csv`, `jlcpcb_extra.csv`, via [`recorder/generate_jlc.py`](recorder/generate_jlc.py)) in one pass from `recorder.kicad_pcb`. Do not hand-export or hand-edit only part of that set: a drill file that does not match the copper is a scrap board, and a pick-and-place row that does not match it is a misassembled one. Both CSVs were hand-kept until four decoupling capacitors were found still sitting at their pre-route coordinates. The gate runs DRC at every severity and with `--schematic-parity`, then runs it again with `--refill-zones` and refuses to plot if the answers differ — `kicad-cli` plots the fill stored in the board, so a stale pour would ship while DRC quietly refilled and passed it.

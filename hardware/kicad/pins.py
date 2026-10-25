@@ -16,7 +16,6 @@ MCU_PINS = [
     ("GPIO5", "I2C_SCL", "bidirectional"),
     ("GPIO6", "SD_D0", "bidirectional"),
     ("GPIO7", "SD_CMD", "bidirectional"),
-    ("GPIO8", "PA_EN", "output"),
     ("GPIO9", "CHG_STAT", "input"),
     ("GPIO10", "I2S_DIN", "input"),
     ("GPIO11", "I2S_DOUT", "output"),

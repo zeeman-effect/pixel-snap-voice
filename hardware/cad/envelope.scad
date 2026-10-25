@@ -18,7 +18,7 @@ module camera_bar() {
 }
 
 module magnet_ring() {
-    translate([0, 0, adhesive_t])
+    translate([0, 0, magnet_skin])
         difference() {
             cylinder(h = magnet_t, d = magnet_od);
             translate([0, 0, -0.1])
@@ -27,8 +27,8 @@ module magnet_ring() {
 }
 
 module shunt() {
-    translate([0, 0, adhesive_t + magnet_t])
-        cylinder(h = shunt_t, d = magnet_od + 1.0);
+    translate([0, 0, magnet_skin + magnet_t])
+        cylinder(h = max(shunt_t, 0.01), d = magnet_od + 1.0);
 }
 
 module accessory_outline(h = acc_t) {
@@ -43,12 +43,12 @@ module usb_overmold() {
 }
 
 module mic_port() {
-    translate([acc_w / 2 - 0.2, mic_y - 1.5, adhesive_t + magnet_t + shunt_t + pcb_t])
+    translate([acc_w / 2 - 0.2, mic_y - 1.5, magnet_skin + magnet_t + shunt_t + pcb_t])
         cube([wall + 0.4, 3.0, 1.5]);
 }
 
 module pcb() {
-    z = adhesive_t + magnet_t + shunt_t;
+    z = magnet_skin + magnet_t + shunt_t;
     translate([-pcb_w / 2, -pcb_h / 2, z])
         cube([pcb_w, pcb_h, pcb_t]);
 }
@@ -56,7 +56,8 @@ module pcb() {
 %phone_body();
 #camera_bar();
 color("SteelBlue") magnet_ring();
-color("Silver") shunt();
+if (shunt_t > 0.01)
+    color("Silver") shunt();
 color("ForestGreen", 0.4) pcb();
 color("Orange", 0.3) accessory_outline();
 color("Red", 0.5) usb_overmold();

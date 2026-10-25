@@ -76,6 +76,9 @@ RecorderStatus recorder_start(void)
     if (g_state == RECORDER_USB_MSC) {
         return RECORDER_ERR_USB;
     }
+    if (g_state == RECORDER_WIFI_SHARE) {
+        return RECORDER_ERR_SHARE;
+    }
     if (g_state == RECORDER_RECORDING || g_state == RECORDER_PLAYING) {
         return RECORDER_ERR_BUSY;
     }
@@ -165,6 +168,9 @@ RecorderStatus recorder_play(const char *path)
     }
     if (g_state == RECORDER_USB_MSC) {
         return RECORDER_ERR_USB;
+    }
+    if (g_state == RECORDER_WIFI_SHARE) {
+        return RECORDER_ERR_SHARE;
     }
     if (g_state == RECORDER_RECORDING || g_state == RECORDER_PLAYING) {
         return RECORDER_ERR_BUSY;
@@ -262,6 +268,26 @@ void recorder_on_usb_attach(void)
 void recorder_on_usb_detach(void)
 {
     if (g_state == RECORDER_USB_MSC) {
+        g_state = RECORDER_IDLE;
+    }
+}
+
+void recorder_on_share_start(void)
+{
+    if (g_state == RECORDER_USB_MSC) {
+        return;
+    }
+    if (g_state == RECORDER_RECORDING) {
+        (void)recorder_stop();
+    } else if (g_state == RECORDER_PLAYING) {
+        (void)recorder_play_stop();
+    }
+    g_state = RECORDER_WIFI_SHARE;
+}
+
+void recorder_on_share_stop(void)
+{
+    if (g_state == RECORDER_WIFI_SHARE) {
         g_state = RECORDER_IDLE;
     }
 }

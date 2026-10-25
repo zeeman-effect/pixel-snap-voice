@@ -11,53 +11,60 @@ Phone-facing view of the accessory.
 - **+Y** = toward the camera bar (phone top)
 - **+Z** = away from the glass (out of the phone)
 
-The KiCad board origin matches. Edge.Cuts is the 64 × 86 mm PCB, not the 67 × 90 mm shell.
+The KiCad board origin matches. Edge.Cuts is the 59.6 × 85.6 mm PCB, not the 62 × 88 mm shell. The board fills the shell to exactly one 1.2 mm wall per side, so **the inner wall face is the board edge**. Nothing on the board may overhang Edge.Cuts.
 
 ## Height map (phone glass → outside)
 
 | Layer | Z span (mm) | Notes |
 | --- | --- | --- |
-| Adhesive | 0.00–0.15 | Ring stock / VHB, phone-facing |
-| Magnet ring | 0.15–1.25 | Ferromagnetic only here + shunt |
-| Steel shunt | 1.25–1.55 | Behind the ring, away from the phone |
-| PCB | 1.55–2.35 | 0.8 mm; **B.Cu** is the flat phone-facing side |
-| Tray / lid split | 2.35 | `tray_h` = adhesive + magnet + shunt + PCB = 2.35 mm. `lid_h` = 6.65 mm |
-| Tall parts | 2.35–5.55 | USB-C 3.2 mm, module 2.4 mm, SD on **F.Cu**. In the lid |
-| LiPo pocket | 2.35–7.35 | 5.0 mm pouch at (0, 10), +Y of U1/J2 and −Y of SP1 |
-| Speaker (SP1) | 2.35–6.35 | 4.0 mm KELIKING can on F.Cu. Sound faces the lid |
-| Back shell | 7.80–9.00 | 1.2 mm PETG (`shell_back`). `speaker_grille()` opens the skin over SP1 |
+| Phone-side skin | 0.00–0.85 | Closed 6061 or PETG. No hole. This is the non-ferrous gap Apple uses when it measures accessory flux |
+| Magnet ring | 0.85–2.35 | Blind annular well, 54.1 mm OD / 46 mm ID / 1.5 mm. Steel plate is already on the ring, facing the pouch |
+| Clocking magnet | 0.85–2.35 | Blind 5 × 12 mm well on **−Y** (6 o'clock, long side toward the phone bottom), 1.2 mm of metal between it and the ring well |
+| Air under cell | 2.35–2.50 | About 0.15 mm so the wrapped pouch is not a spacer |
+| LiPo pouch | 2.50–6.05 | 3.3 mm Jauch pack + 0.15 mm tape + 0.1 mm swell, taped to **B.Cu** at (0, 0). Four 5.0 mm posts carry the board |
+| PCB | 6.05–6.85 | 0.8 mm; **B.Cu** faces the pouch and the magnet backs. BT1 is on B.Cu west of J2, just north of the cell |
+| Tray / lid split | 6.85 | `tray_h` is 6.85 mm. `lid_h` stays 3.80 mm |
+| Joint | 6.85–8.20 | PETG: 0.6 mm tray lip inside a 0.45 mm lid skirt. Metal tray has no lip; screws locate the plastic lid |
+| Tall parts | 6.85–9.25 | Module 2.4 mm, magnetic pad 2.0 mm, 0.8 mm SD NAND on **F.Cu**. In the lid |
+| Magnetic pad (J2) | 6.85–8.85 | 2.0 mm C6276862 stadium (22.30 × 7.70) on F.Cu at (0, 36), rot 0, phone-top / camera end. Lid dishes to 8.70 mm over the pad so the gold is 0.15 mm proud. Well is through that dish |
+| Back shell | 9.45–10.65 | 1.2 mm natural translucent PETG (`shell_back`). Wave engraving into the skin, clipped off the pogo dish. D1 and D2 read through this lid |
 
-Envelope budget is **9.0 mm**. USB stack is 6.75 mm. Speaker stack is 7.55 mm. Battery stack is 8.55 mm.
+Envelope budget is **10.65 mm**. The DigiKey pack is 0.1 mm thicker than the old 3.2 mm cell, so the tray grew with it. Pogo face is 8.85 mm. The lid cavity over the board is still 2.60 mm.
 
-`case.scad` puts a 0.4 mm PETG floor under the magnet ring so it cannot fall through. That floor is a print trick. It does not change the stack numbers in `params.json`. Edit those if the stack changes. After the real ring arrives, shim, then tighten the pocket.
+The tray floor is 2.35 mm, with wells milled from the inside down to the 0.85 mm skin. The outer wall is 1.2 mm up to the lid split, and four 5.0 mm M1.6 posts stand at the hole centres. There is no pouch pocket, no pigtail channel, and no lid clip. Glue holds the magnets. A clamp plate would sit in the 0.15 mm air under the pouch.
 
-The tray also leaves a 0.5 mm PETG floor on the phone face under MK1. A 3 mm collector under the B.Cu NPTH at (30.00, 9.32) and a 3 mm channel in +X take that hole out the right wall, where it joins `mic_port()`. MK1 is on F.Cu. A port that faces the glass muffles recordings. If you move MK1, move the duct and the wall hole with it.
-
-SW_BOOT / SW_RST are 5.1 × 5.1 × 5.0 mm top-actuated parts on F.Cu. Lid cavity above the PCB is 5.45 mm, so the actuators sit 1.65 mm under the outer skin. **Lid-off only** this spin: a flush hole in 1.2 mm PETG does not reach them.
+MK1's bottom-port NPTH is at (27.50, 16.32) on B.Cu. A rib under that hole stops 0.40 mm short of the board. A foam frame sits in the gap (land about 3.6 × 6.0 mm, 2 mm hole, 0.8 mm closed-cell compressed to 0.40 mm). A 3.4 × 3.6 mm pocket in the rib top holds a 3 mm mesh disk on a shoulder 0.80 mm below the land. Three 0.60 mm holes, 1.10 mm apart, pass through the phone-right wall into that pocket, inside a 4.2 × 1.8 mm recess 0.35 mm deep. The pouch ends at x = 25.75, so the land cannot grow inboard of x = 26.15. MK1 is on F.Cu. A port that faces the glass muffles recordings.
 
 ## XY locations (magnet-centered)
 
-Edge features are the wall or board edge (PCB is 64 × 86 mm, so the long edges are ±32 mm and the short edges are ±43 mm). Footprint centers are inset.
+Edge features are the wall or board edge. The PCB is 59.6 × 85.6 mm, so its long edges are ±29.8 mm and its short edges are ±42.8 mm. The case outer is ±31 / ±44 mm.
 
-The official board is `hardware/kicad/recorder/recorder.kicad_pcb`. Footprint XY lives in `hardware/kicad/recorder/placement.json`.
+The official board is `hardware/kicad/recorder/recorder.kicad_pcb`. Footprint XY lives in `hardware/kicad/recorder/placement.json` on this 59.6 × 85.6 mm outline. `check_envelope.py` twins MK1, SW1, J2, BT1 and the keepouts below to that file.
 
 The table below is the CAD wall-cut contract from `params.json`. Change the case cuts when you move a part or caliper a phone and a stuffed board.
 
-| Feature | X (mm) | Y (mm) | Max Z above PCB |
+| Feature | X (mm) | Y (mm) | Max Z above PCB / notes |
 | --- | --- | --- | --- |
-| USB-C edge / overmold | +8.0 | −45.0 (accessory bottom wall) | 3.2 mm (F.Cu) |
-| USB-C footprint (J2) | +8.0 | −37.6 | 3.2 mm (F.Cu). Mouth at y=−43. Rectangular wall slot this pass |
-| Mic port (wall) | +33.5 (right long wall) | +10.0 | 3 × 2 mm hole at the tray/lid split (`mic_port()`). Tray `mic_duct()` joins this hole. |
-| Mic capsule (MK1) | +30.0 | +10.0 | IM73A135 on **F.Cu**, rot 90°. Bottom-port NPTH is at (30.00, 9.32) on **B.Cu**. Port must not face glass. The tray ducts that hole under the PCB to the right wall. |
-| Button edge | −33.5 (left long wall) | +12.0 | 3 × 2.2 mm press-through slot (`button_hole()`). Needs a moulded nub to span the 0.9 mm from the inner wall face to the actuator tip. |
-| Button (SW1) | −29.3 | +12.0 | side-actuated Panasonic EVQP7C01P, rot 270° so the actuator faces the left wall. Tip 0.6 mm inside the board edge; copper 1.46 mm off it. |
-| LED (D1) | −29.0 | +18.0 | side window in the lid wall, not through the back |
-| SD slot (J3) | see placement.json |  | no mouth in this pass |
-| Speaker (SP1) | 0.0 | +36.0 | 4.0 mm KELIKING KLJ-01304T on F.Cu. Sound faces the lid; `speaker_grille()` opens the back skin |
-| JST-PH (BT1) | −23.5 | +34.0 | S2B-PH-K-S, 6.0 mm tall. Pad 1 (VBAT) at this XY; cable toward y=+43. `jst_window()` cuts shell_back over the housing |
-| LiPo pocket | 0.0 | +10.0 | 40 × 30 × 5 mm pouch. Lid `battery_fence()` outer is 43.6 × 33.6 mm around this. Was y=12; that put the +Y wall 0.7 mm from SP1. |
-| MCU module (U1) | +14.0 | −18.0 | 2.4 mm, next to USB; MINI-1U, IPEX unused |
-| Mounting holes | ±(32−3.5), ±(43−3.5) | M1.6 clearance |
+| Magnetic pad (J2) | 0.0 | +36.0 | 22.30 × 7.70 × 2.0 mm stadium (F.Cu), rot 0°. Lid dish + through-well. Cable male C5126845. Phone-top / camera end, opposite the tray clocking magnet |
+| Mic port (wall) | +31.0 (phone-right long wall) | +16.32 | Three 0.60 mm holes at 1.10 mm pitch, in a 4.2 × 1.8 mm recess. Foam land and mesh pocket are inside the tray, below the seam |
+| Mic capsule (MK1) | +27.5 | +17.0 | IM73A135 on **F.Cu**, rot 90°. Bottom-port NPTH is at (27.50, 16.32) on **B.Cu**. Port must not face glass |
+| Record pill (wall) | −31.0 (phone-left long wall) | +12.0 | Captive TPU 95A in the lid. Flush 10 × 3.2 mm rounded bezel, 0.65 mm proud press pad. Left side when the accessory is snapped on the phone. Install from inside |
+| Button (SW1) | −27.1 | +12.0 | Side-actuated Panasonic EVQP7C01P, rot 270° so the actuator faces the phone-left wall. Tip at x = −29.2, 0.6 mm inside the board edge. The switch is the spring |
+| LED (D1, D2) | ≈ −29 / phone-left wall | +18.0 / charger is the phone-bottom end | Face the lid. No side windows. Lid is natural translucent PETG |
+| SD NAND (J3) | −22.0 | −18.0 | CSNP32GCR01-AOW, 8.0 × 6.2 mm LGA-8 on F.Cu. No wall slot |
+| Side ridges | ±31.0 (both long walls, tray and lid) | skip pill and mic | 0.35 mm × 0.6 mm flutes at 1.6 mm pitch, tilted 18° from vertical. Same cut on both halves so they read as one strip when closed |
+| Lid wave art | ±18.0 | 0.0 | Two foci, concentric rings that run off the lid. 0.35 mm into `shell_back`. Clipped off the pogo dish, the IPEX well, and the four boss footprints |
+| IPEX well | +17.9 | −13.0 | 7.0 mm well, 0.85 mm into the 1.2 mm lid skin over U1’s W.FL / MHF III jack. Leaves 0.35 mm of PETG. Print the lid outer-face down so that skin is the first layer |
+| Antenna tape | −2.0 | −33.0 | 30 × 5 mm mark, 0.2 mm into the inner ceiling, phone-bottom end, long axis along +X. Matches Inventek B24P-W. Do not enlarge the IPEX well. Clear of U1, J2, the button, and the bosses |
+| Battery pads (BT1) | −17.0 | +35.0 | Two flat **B.Cu** pads for the pouch pigtail, west of J2 and just north of the cell. Pad 1 VBAT (west), pad 2 GND. Tape the cell on and kapton the joints |
+| LiPo pouch | 0.0 | 0.0 | Jauch LP305166JH pack, 66 × 51.5 × 3.3 mm, 1200 mAh min, taped to B.Cu. 70 mm leads. Clears the four posts by about 3.8 mm |
+| MCU module (U1) | +14.0 | −18.0 | 2.4 mm; MINI-1U, IPEX toward the lid well. On F.Cu; may overlap the pouch in XY |
+| Mounting posts | ±26.3 | ±39.3 | Four 5.0 mm cylinders. Lid is clearance plus a 3.2 mm outer CSK. Tray tap is 1.35 mm, 2.5 mm deep, and stops above the 2.35 mm inner floor. The 0.85 mm skin stays closed. No printed threads |
+
+### Board keepouts the case sets
+
+- **Pouch:** the cell is under B.Cu. F.Cu under the 51.5 × 66 mm outline at (0, 0) may take parts. Posts stay clear of that outline.
+- **Lid standoffs:** nothing within 2 mm of a hole centre. `check_placement.py` already keeps courtyards 2.1 mm off.
 
 ### Recorder designators
 
@@ -65,37 +72,69 @@ These are the recorder project names. Do not keep the old generated-board map.
 
 | Ref | What |
 | --- | --- |
-| J2 | USB-C receptacle |
-| J3 | microSD |
-| J1 | UART header |
+| J2 | 4-pin magnetic pad (C6276862) |
+| J3 | CSNP32GCR01-AOW 4 GB SD NAND |
 | U8 | analog LDO (codec / mic) |
 | VDD33 | MCU 3.3 V rail |
 | U1 | ESP32-S3-MINI-1U |
-| BT1 | JST-PH S2B-PH-K-S (pad 1 at −23.5, 34) |
+| BT1 | Pouch pigtail solder pads on B.Cu at (−17, 35) |
 
 Export KiCad STEP (`File → Export → STEP`) and import next to `case.scad` (OpenSCAD cannot import STEP; use the STL from `case.scad` plus the KiCad 3D view, or Fusion/Onshape for a boolean). `check_envelope.py` is the automated gate; a 3D collision pass is visual.
 
 ## PETG print fit on a Pixel 10
 
-`case.scad` already lays the two parts on one plate: tray at the origin, lid shifted +X.
+`case.scad` writes each part already in print orientation:
 
-1. Print in PETG. Tray sits phone-face down. Lid sits mating-face down (the rabbet groove is on the bed).
-2. Magnet pocket is 0.3 mm loose on OD. Drop in the bought ring + steel shunt (shunt **behind** the ring, away from the phone). Shim with tape. Do not chase a tight magnet until the real ring is on the desk. Isolate the shunt from any later metal lid with tape.
-3. M1.6 screws. `hole_d` 1.7 mm and the boss bore are **clearance**, not a tap. Do not thread PETG. Nuts or heat-set inserts come later. Keep screw heads off the phone glass.
-4. Drop in a dummy PCB (or the first fab) and a 5 mm dummy pouch. The pouch pocket is 40 × 30 × 5 mm at (0, 10), clear of U1, J2 and SP1. Confirm the lid grille sits over the speaker and the fence wall does not hit the can.
+```bash
+cd hardware/cad
+openscad -D 'part="tray"' -o export/tray.stl case.scad
+openscad -D 'part="lid"' -o export/lid.stl case.scad
+openscad -D 'part="button"' -o export/button.stl case.scad
+openscad -D 'part="pouch"' -o export/dummy_pouch.stl case.scad
+openscad -o export/plate.stl case.scad    # tray + lid + TPU pill on one plate
+# 6061 tray (blind magnet wells, no skirt). Lid stays PETG:
+openscad -D 'variant="metal"' -D 'part="tray"' -o export/metal/tray.stl case.scad
+openscad -D 'part="lid"' -o export/metal/lid.stl case.scad
+# Worn-orientation STLs for the 6061 shots (metal tray, fn=96):
+openscad -D 'variant="metal"' -D 'part="tray"' -D render_fn=96 -o ../../build/case-renders/tray_worn.stl case.scad
+openscad -D 'part="lid_worn"' -D render_fn=96 -o ../../build/case-renders/lid_worn.stl case.scad
+openscad -D 'part="button_worn"' -D render_fn=96 -o ../../build/case-renders/button_worn.stl case.scad
+# Board GLB (from repo root; also writes build/product-renders/recorder.glb):
+python ../../hardware/kicad/recorder/product_renders/export_board_3d.py
+# One still per script. render_metal.py is the scene library, not a batch.
+# blender --background --python renders/shells_inside.py    # empty interiors
+# blender --background --python renders/shells_outside.py   # empty exteriors
+# blender --background --python renders/exploded.py         # lid, PCB, pouch, magnets, tray
+# blender --background --python renders/top.py              # closed stack, CSK screws, J2 at camera end
+# blender --background --python renders/button.py           # TPU pill side
+# blender --background --python renders/grille.py           # mic holes
+# blender --background --python renders/tray_magnets.py     # tray wells with ring seated
+# PNGs land in build/case-renders/case-6061-<name>.png
+# Orbit the same closed case (GLB + HTML, no PNG render):
+# blender --background --python export_case_viewer.py
+# python -m http.server 8765 --directory ../../build/case-renders
+# open http://127.0.0.1:8765/case-6061.html
+# Lid in those shots is natural translucent PETG; the tray stays 6061.
+# The board sits on the four posts. J2 is the C6276862 stadium (black
+# PA46 + four gold faces). U1 / J3 / MK1 / Y1 are boxes when KiCad has
+# no STEP.
+```
+
+1. Print the tray and lid in PETG. Print the record pill in TPU 95A. The tray sits phone-face down. The lid sits outer-face down, with the cavity up. Printing the lid mating-face down makes the back skin one 57 × 83 mm bridge.
+2. The ring well is 0.3 mm loose on the OD. Drop in the N52 ring, steel face up, and the clocking magnet in the −Y well. Glue those faces. Do not put tape between the magnets and the phone-side skin.
+3. M1.6 screws from the lid. Lid holes are clearance (`hole_d` 1.7 mm) with a shallow CSK in the outer skin. Each tray post is a 1.35 mm **tap drill**, 2.5 mm deep, that stops above the 2.35 mm inner floor. The 0.85 mm skin stays closed — tap M1.6 in 6061; PETG takes a thread-former. Do not print threads. The metal copy has no mating lip, so the screws are what locate the lid. The phone face has no screw heads.
+4. Drop the TPU pill into the lid from the inside before the board goes in. Solder the pigtail to B.Cu BT1, tape the cell to the board underside, wrap it in kapton including the face toward the magnets. Seat a dummy PCB (or the first fab) on the four posts. Confirm about 0.15 mm of air under the wrapped cell and that the lid closes flat.
 5. Snap to the Pixel. Confirm:
    - camera bar not covered
-   - USB-C cable overmold misses the phone
-   - mic port is on the long edge, not against glass
-   - button reachable while snapped
+   - magnetic cable seats and its overmold misses the phone
+   - mic port is three holes in a recess on the phone-right long edge, not against glass
+   - the TPU pill clicks SW1 and the switch pushes it back out
+   - the side ridges give enough grip to slide it off the ring
    - snap hold feels OK (add or remove tape shims)
-   - tray and lid still locate on the lip after a few open/close cycles
+   - D1 / D2 read through the natural PETG lid
+   - IPEX well sits over U1 and the FPC mark is on the inner ceiling toward the phone-bottom end
 6. Only then order SMT, or order PCB+SMT in parallel if this 3D check is clean and you accept a spin.
 
-Assembly order: ring adhesive on glass side → ring → shunt → PCB (flat to shunt) → pouch → lid. Screws plus the mating lip hold it. No snap-fit this pass.
+Assembly order: glue the ring and the clocking magnet into the wells, steel face up → TPU pill in the lid → tape the 2.4 GHz FPC onto the lid ceiling mark and route the W.FL / MHF III pigtail to the IPEX well → solder BT1, tape and kapton the pouch on B.Cu → PCB onto the four posts → mate the pigtail to U1. Close the lid. Screws from the lid into the tapped posts. No snap-fit this pass. Do not run Wi-Fi with the IPEX open.
 
-Pixel body and Pixelsnap center stay the published defaults until you caliper a real phone. **Caliper before any 6061 toolpath.** Chassis is PETG first, then 6061, never steel.
-
-## If 9 mm loses
-
-SP1 is a 4.0 mm SMD can. The speaker stack is 7.55 mm under a 9.0 mm envelope. If a stuffed board still blows the stack, use the ES8311 3.5 mm jack and drop the PA. That decision belongs at this height-stack check, not after fab.
+Pixel body and Pixelsnap center stay the published defaults until you caliper a real phone. **Caliper before any 6061 toolpath.** Chassis is PETG first (`variant` default), then the 6061 copy (`-D variant="metal"`), never steel. The metal tray has blind wells and a closed 0.85 mm skin. Glue holds the magnets. The metal lid has no 0.45 mm skirt; four M1.6 screws locate it. Print `part="button"` in TPU 95A and drop it in from the inside. The quote STEP is `export/metal/tray.step` from `python hardware/cad/export_metal_step.py` (HOLD). Tap M1.6 after CNC. The lid stays PETG. `python hardware/cad/check_dfm.py` is the shop-rules gate.

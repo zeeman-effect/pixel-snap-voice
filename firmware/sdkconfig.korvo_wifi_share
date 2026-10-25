@@ -1,0 +1,14 @@
+# Overlay for Phase 0 SoftAP prove-out on ESP32-S3-Korvo-2.
+# Default sdkconfig.defaults stays Korvo + play-on-double-press + MSC on.
+# Merge this file after that default (see firmware/README.md).
+#
+# Double-press then starts PixelSnapVoice / voicenote1 at http://192.168.4.1
+# instead of on-board playback. Use any key on the Korvo analog ladder.
+CONFIG_PSV_BOARD_KORVO2=y
+CONFIG_PSV_WIFI_SHARE=y
+CONFIG_PSV_WIFI_SHARE_DOUBLE=y
+#
+# MSC is off here so this prove keeps USB-Serial/JTAG. Korvo native
+# D+/D- are reserved. Custom-board MSC is TINYUSB_MSC_EVENT_MOUNT_CHANGED
+# plus exclusive NAND. Pull the SD card and use a reader for this prove.
+# CONFIG_PSV_USB_MSC is not set

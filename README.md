@@ -1,6 +1,6 @@
 # pixel-snap-voice
 
-A one-off slim rectangular **voice-note recorder** that snaps to the back of a **Google Pixel 10** using Pixelsnap / Qi2 magnets (MagSafe-style accessory rings work). It records raw WAV files, charges and dumps data over USB-C, and leaves transcription to a computer.
+A one-off slim rectangular **voice-note recorder** that snaps to the back of a **Google Pixel 10** using Pixelsnap / Qi2 magnets (MagSafe-style accessory rings work). It records raw WAV files, charges and dumps data over USB, can share those files over its own Wi-Fi network, and leaves transcription to a computer.
 
 This repo holds hardware, firmware, simulation, and (later) a local transcription helper. The first board is meant to be ordered from quick-turn services after the sims pass — not invented from unsolved problems.
 
@@ -9,7 +9,8 @@ This repo holds hardware, firmware, simulation, and (later) a local transcriptio
 - ESP32-S3-MINI-1U, **ES8311 codec** (I2S master), analog MEMS mic, class-D speaker (or headphone jack if thickness loses)
 - 16-bit PCM WAV, **48 kHz** mono (~173 MB/hour)
 - USB Mass Storage when plugged into a computer
-- No on-device transcription, no Wi-Fi in v1, no wireless charging through the accessory
+- Wi-Fi share: the recorder makes its own WPA2 network and serves `/recordings` in a browser (and read-only WebDAV)
+- No on-device transcription, no Bluetooth file transfer, no wireless charging through the accessory
 
 MCU choice and why we did **not** switch off Espressif: [`docs/audio-platform.md`](docs/audio-platform.md).
 
@@ -27,8 +28,30 @@ MCU choice and why we did **not** switch off Espressif: [`docs/audio-platform.md
 | [`sim/spice/`](sim/spice/) | USB → charger → battery → 3.3 V model |
 | [`hardware/cad/`](hardware/cad/) | Parametric envelope (OpenSCAD) + keepout checker |
 | [`hardware/kicad/`](hardware/kicad/) | KiCad 10 schematic / PCB / stackup notes |
-| [`.cursor/skills/`](.cursor/skills/) | Agent skills, including vendored [KiStack](https://github.com/American-Embedded/kistack) KiCad workflows |
+| [`scripts/`](scripts/) | `check_gates.py` ship gate, `setup-ubuntu.sh` toolchain install |
+| [`.claude/skills/`](.claude/skills/) | Agent skills, including vendored [KiStack](https://github.com/American-Embedded/kistack) KiCad workflows |
 | [`software/`](software/) | Local whisper.cpp CLI (`transcribe.py`) |
+
+## Set up a machine
+
+The hardware checks need KiCad 10 (`kicad-cli` plus its `pcbnew` Python module), the host sim needs CMake and a C compiler, the power-path sim needs ngspice, and `route_pcb.py` needs the freerouting autorouter.
+
+**Ubuntu 24.04** (a dev box, CI runner, container, or a cloud coding agent): from the repo root, run
+
+```bash
+bash scripts/setup-ubuntu.sh
+```
+
+It installs build-essential, CMake, ngspice, KiCad 10 from the official KiCad PPA, and freerouting 2.4.1 into `/opt/freerouting`, then builds the host sim into `build/host`. It is safe to run again. It uses `sudo` for apt unless it is already root. For a cloud agent or CI job, make that command the environment's setup or install step.
+
+**Windows or macOS:** there is no script. Install by hand:
+
+- [KiCad 10](https://www.kicad.org/download/). Run the `pcbnew` scripts (`generate_pcb.py`, `route_pcb.py`, `check_placement.py`) with KiCad's bundled `python`, not system Python.
+- CMake and a C compiler (MSVC, MinGW, or clang).
+- [ngspice](https://ngspice.sourceforge.io/), only for the power-path sim.
+- [freerouting](https://github.com/freerouting/freerouting/releases), only for `route_pcb.py`. Put it on `PATH`, unpack it to `~/.local/opt/freerouting/`, or set `PSV_FREEROUTING` to the launcher.
+
+Firmware needs ESP-IDF on top of this. See [`firmware/README.md`](firmware/README.md).
 
 ## Simulate first
 

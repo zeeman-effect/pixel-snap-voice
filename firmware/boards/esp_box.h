@@ -25,6 +25,7 @@
 
 #define PSV_I2S_SLAVE 0
 #define PSV_HAS_ES7210 1
+#define PSV_HAS_PLAYBACK 1
 #define PSV_CODEC_MASTER 0
 
 #define PSV_SD_CLK GPIO_NUM_NC

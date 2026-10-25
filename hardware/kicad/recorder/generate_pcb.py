@@ -16,7 +16,7 @@ script wipes existing copper.
 Coordinates are board coordinates in millimetres with the origin at the
 magnet-ring (Pixelsnap) centre, matching hardware/cad/params.json: +X is phone
 right and +Y is toward the camera bar. These are written straight into the
-.kicad_pcb, so the USB edge is the y = -43 edge of the file.
+.kicad_pcb, so the USB edge is the y = -42.8 edge of the file.
 """
 
 import json
@@ -129,7 +129,7 @@ DESIGN_RULES = {
 NET_CLASSES = {
     "Default": {"clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3, "priority": -1},
     "USB": {"clearance": 0.15, "track_width": 0.2, "diff_pair_width": 0.2, "diff_pair_gap": 0.2, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
-    # Charge and rail currents, up to the 500 mA the BQ24074 ISET resistor
+    # Charge and rail currents, up to the 500 mA the BQ24073 ISET resistor
     # sets. 0.3 mm of 1 oz outer copper carries that with room to spare.
     "POWER": {"clearance": 0.15, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "priority": 0},
 }
@@ -176,69 +176,66 @@ def apply_project_policy(project_path=PROJECT):
 # ---------------------------------------------------------------------------
 # Placement: ref -> (x_mm, y_mm, rotation_deg, note)
 #
-# Floorplan, in board coordinates:
-#   y -43 .. -30   USB-C, ESD, charger, both regulators. All the switching and
-#                  charge current lives on this short edge, as far from the
-#                  microphone as the board allows.
-#   y -30 .. -8    MCU, microSD, UART header. Digital only.
-#   y  -8 .. +8    Magnet ring interior. Empty except SW_BOOT / SW_RST on
-#                  the east edge, outside r=28, for prototype download.
-#   y  +8 .. +43   Analog island: mic, codec, analog LDO, oscillator, class-D
-#                  amp, speaker, battery leads.
+# Floorplan, in board coordinates (59.6 x 85.6 mm: edges x = +/-29.8,
+# y = +/-42.8). The 6 o'clock end is -Y, with the camera at +Y. The board
+# and lid were spun 180° around the magnet origin so J2 sits at phone-top;
+# the tray clocking magnet stays at 6 o'clock.
+#   y +14 .. +42.8  Analog: mic, codec, analog LDO, oscillator, and magnetic
+#                   pad J2 at (0, +36) on the camera / phone-top end. No
+#                   USB-C mouth. No speaker or class-D amp.
+#   y -33 .. +33    Ring interior and the 51.5 x 66 mm Jauch pouch taped
+#                   to B.Cu at (0, 0). Nothing taller than ~0.5 mm sits
+#                   under that tape outline. SW1 and the status LED stay
+#                   west (phone-left); I2C pull-ups and MK1 stay east.
+#   y -42.8 .. -26  Charger and both regulators on the phone-bottom end.
 # The magnet ring is an annulus from r = 22 to r = 28 about the origin. Every
 # analog part is placed outside r = 28.
 # ---------------------------------------------------------------------------
 PLACEMENT = {
-    # --- USB-C, ESD, protection (bottom short edge) ---
-    # J2's 16 contacts are a single row at the mouth end of the footprint, so
-    # the whole part has to sit inboard of y=-43 rather than overhang it. At
-    # y=-37.6 the front pad row clears the edge by 0.63 mm and the connector
-    # body face lands 1.75 mm inside the edge, which the case wall covers.
-    "J2": (8.0, -37.6, 0, "USB-C receptacle, mouth faces the y=-43 edge"),
-    "U7": (8.0, -31.0, 0, "USBLC6-2SC6 ESD, directly behind J2 on D+/D-"),
-    "R2": (0.5, -40.0, 90, "CC1 5.11k Rd, sink-only"),
-    "R3": (15.5, -40.0, 90, "CC2 5.11k Rd, sink-only"),
-    "F1": (17.5, -40.0, 90, "VBUS PTC"),
-    "C4": (20.5, -40.0, 90, "VBUS_CHG bulk"),
-    # --- Battery charger (BQ24074 VQFN-16, same USB-edge island) ---
-    "U3": (24.0, -39.5, 180, "BQ24074, rotated so OUT/programming face C5 and the resistors"),
-    "C5": (21.0, -35.5, 90, "VSYS bulk at charger OUT"),
-    # 0603 10 µF on VBAT. The east aisle between U3 and H2 is inside the
-    # 2.1 mm hole keepout, x=26.2 sits on the CHG_STAT climb to U1, and
-    # y=-34 puts the designator into H2's silk and the board edge. This
-    # seat is north of Rstat, east of the C1 column, over the VBAT F.Cu
-    # that already runs the right edge.
-    "C21": (30.8, -26.5, 270, "VBAT ceramic at U3 BAT, TI 4.7-47uF"),
-    "R4": (19.0, -32.8, 0, "ISET ~500 mA, east of the VBUS climb to F1"),
-    "R8": (17.5, -31.0, 0, "ILIM USB current backup"),
-    "R9": (17.5, -28.5, 0, "TMR safety timer"),
-    "R10": (21.0, -31.0, 0, "TS 10k, no pack NTC"),
-    "R11": (21.0, -28.5, 0, "ITERM ~10 percent"),
-    "Rstat": (28.0, -36.0, 0, "CHG_STAT pull-up"),
-    "Rchg": (28.0, -33.0, 0, "charge LED series resistor"),
-    "D2": (24.0, -33.0, 0, "charge status LED"),
-    # --- Regulators (left of the USB block, still on the bottom edge) ---
+    # --- Magnetic pad + ESD (old speaker seat, lid face) ---
+    "J2": (0.0, 36.0, 0, "C6276862 4-pin magnetic pad, lid well at params pogo_x/y"),
+    "U7": (14.8, 36.0, 0, "USBLC6-2SC6 ESD, west of the 22.3 mm pogo body"),
+    # --- Battery charger (BQ24073 VQFN-16, phone-bottom island) ---
+    # Same relative layout as the routed 64 x 86 board, shifted (-2.4, +0.2)
+    # so U3 clears H2 at (26.3, -39.3) and the edge runs keep their margin.
+    "F1": (15.1, -39.8, 90, "VBUS PTC"),
+    "C4": (18.1, -39.8, 90, "VBUS_CHG bulk"),
+    "U3": (21.6, -39.3, 180, "BQ24073, rotated so OUT/programming face C5 and the resistors"),
+    "C5": (18.6, -35.3, 90, "VSYS bulk at charger OUT"),
+    # West of Rstat/Rchg, over the VBAT B.Cu trunk that climbs the left edge
+    # to the pouch. The aisle between U3 and H2 is inside the hole keepout.
+    "C21": (28.6, -34.0, 90, "VBAT ceramic at U3 BAT, TI 4.7-47uF"),
+    "R4": (16.6, -32.6, 0, "ISET ~500 mA, west of the VBUS climb to F1"),
+    "R8": (15.1, -30.8, 0, "ILIM USB current backup"),
+    "R9": (15.1, -28.3, 0, "TMR safety timer"),
+    "R10": (18.6, -30.8, 0, "TS 10k, no pack NTC"),
+    "R11": (18.6, -28.3, 0, "ITERM ~10 percent"),
+    "Rstat": (25.6, -35.8, 0, "CHG_STAT pull-up"),
+    "Rchg": (25.6, -32.8, 0, "charge LED series resistor"),
+    "D2": (21.6, -32.8, 0, "charge status LED"),
+    # --- Regulators (right of the charger, still on the camera end) ---
     "U4": (-6.0, -39.5, 0, "AP2112K-3.3, VSYS -> 3V3_RAW"),
     "C7": (-2.5, -40.0, 90, "3V3_RAW output cap"),
     "U5": (-16.0, -39.5, 0, "AP22804 load switch, 3V3_RAW -> VDD33"),
     "C8": (-20.5, -40.0, 90, "VDD33 bulk"),
     "C6": (-10.5, -36.0, 90, "VSYS decoupling at U4"),
     # --- MCU ---
-    "U1": (14.0, -18.0, 0, "ESP32-S3-MINI-1U-N8, IPEX part, no PCB antenna"),
+    "U1": (14.0, -18.0, 0, "ESP32-S3-MINI-1U-N8, IPEX to lid FPC, no PCB antenna"),
     "C1": (24.5, -25.0, 90, "VDD33 22uF bulk at the module"),
     "C3": (24.5, -21.5, 90, "VDD33 100nF at the module"),
     "C2": (24.5, -18.0, 90, "EN delay cap"),
     "R1": (24.5, -14.5, 90, "EN pull-up"),
     "Rboot": (24.5, -11.0, 90, "IO0 boot pull-up"),
-    # Rotated 90 so pad 1 (BOOT / EN) is the west pair, toward the pull-ups,
-    # and pad 2 (GND) is the east pair, where the F.Cu pour can reach it.
-    # Measured on the land: 270 put pad 1 on the east edge instead.
-    "SW_BOOT": (28.5, 3.2, 90, "prototype Boot: GPIO0 to GND, lid-off only"),
-    "SW_RST": (28.5, -5.0, 90, "prototype Reset: EN to GND, lid-off only"),
-    # --- UART header (kept off the USB edge) ---
-    "J1": (1.5, -30.0, 0, "1x04 UART0 header, programming only"),
-    # --- microSD ---
-    "J3": (-22.5, -18.0, 90, "microSD, card slot faces the x=-32 edge"),
+    # Bring-up pads for download mode once MSC owns the magnetic USB: short TP_BOOT to
+    # TP_GND, pulse TP_EN to TP_GND, release. A column just south of Rboot,
+    # west of the fence and north of the analog island, with room beside each
+    # pad for a legible designator. The column west of C1-Rboot has none.
+    "TP_BOOT": (27.6, -7.4, 0, "GPIO0 test pad, south of Rboot"),
+    "TP_EN": (27.6, -3.6, 0, "EN test pad"),
+    "TP_GND": (27.6, 0.2, 0, "GND test pad"),
+    "TP_3V3": (27.6, 4.0, 0, "VDD33 test pad"),
+    # --- Soldered SD NAND (old socket seat, no wall slot) ---
+    "J3": (-22.0, -18.0, 0, "CSNP32GCR01-AOW 4 GB SD NAND, LGA-8"),
     "Rsd0": (-11.0, -25.0, 0, "SD_CMD pull-up"),
     "Rsd1": (-11.0, -22.5, 0, "SD_D0 pull-up"),
     "Rsd2": (-11.0, -20.0, 0, "SD_D1 pull-up"),
@@ -246,71 +243,74 @@ PLACEMENT = {
     "Rsd4": (-11.0, -15.0, 0, "SD_D3 pull-up"),
     "C14": (-11.0, -12.0, 0, "VDD33 decoupling for the SD rail"),
     # --- Left edge user IO ---
-    # Rotated 270 so the side actuator points at -X, the left wall, and pushed
-    # out to x = -29.3 so the plunger tip sits 0.6 mm inside the board edge and
-    # 0.9 mm from the inner wall face. Copper stays 1.46 mm off the edge.
-    "SW1": (-29.3, 12.0, 270, "record button, side actuator faces the left "
-                              "wall, params button_y_mm = 12"),
-    "D1": (-29.0, 18.0, 90, "status LED, params led_y_mm = 18"),
-    "Rled": (-29.0, 22.0, 90, "status LED series resistor"),
+    # Rotated 270 so the side actuator points at -X, the phone-left wall
+    # when the accessory is snapped on the phone. Its tip is local (0, 2.1),
+    # so x = -27.1 puts it 0.6 mm inside the board edge, where
+    # params.json button_tip_inset_mm and the case key nub expect it.
+    "SW1": (-27.1, 12.0, 270, "record button, side actuator faces the left "
+                              "wall; TPU pill in the lid is the finger target"),
+    # Rot 90 puts D1's pad 1 north, toward the trace from U1, and pad 2
+    # south beside Rled pad 1.
+    "D1": (-28.6, 18.0, 270, "status LED under the translucent PETG lid"),
+    "Rled": (-28.6, 21.4, 270, "status LED series resistor"),
     # --- Analog island: microphone ---
-    "MK1": (30.0, 10.0, 90, "IM73A135 analog MEMS mic, params mic_y_mm = 10"),
-    "C15": (26.5, 10.0, 90, "MIC_OUT DC block"),
+    # Rot 90 puts the bottom-port NPTH (local 0.68, 0) at (27.5, 16.32),
+    # the CAD mic_npth the tray seal collects.
+    "MK1": (27.5, 17.0, 90, "IM73A135 analog MEMS mic, params mic_y_mm = 17"),
     # --- Analog island: codec ---
-    "U2": (26.0, 22.0, 0, "ES8311 codec, I2S master"),
-    "C10": (20.5, 20.0, 0, "VMID"),
-    "C16": (20.5, 26.0, 0, "MIC_N reference"),
-    # U2's right-hand pins are 3V3A, AOUTP, AOUTN, DACVREF, ADCVREF reading
-    # down from y=22.8 on a 0.4 mm pitch. Escaping that pitch needs a fan
-    # that splays to 0.8 mm about 1.9 mm out from the pad row, and these four
-    # capacitors used to sit lying down right in that landing zone: C17's pad
-    # blocked the AOUTN and DACVREF escapes outright and freerouting called
-    # both unroutable. Stood on end at x = 30.5 they clear the fan by 0.7 mm,
-    # and they now read down the column in the same order as the pins they
-    # bypass, so nothing has to cross anything else to reach them.
-    "C17": (30.5, 26.0, 270, "AOUTP DC block, clear of the codec escape fan"),
-    "C18": (30.5, 23.0, 270, "AOUTN DC block, clear of the codec escape fan"),
-    "C12": (30.5, 20.0, 90, "DACVREF, clear of the codec escape fan"),
-    "C11": (30.5, 17.0, 90, "ADCVREF, moved off U2's west side to its pin"),
-    "C13": (26.0, 27.5, 0, "3V3A decoupling at the codec"),
-    "Ragnd": (26.0, 16.5, 0, "AGND to GND stitch"),
-    "Y1": (16.0, 24.0, 0, "12.288 MHz oscillator into ES8311 MCLK"),
+    # Rot 90 turns the codec so each pin row faces what it drives: AOUT and
+    # the references south into the open band, the mic inputs west toward
+    # MK1, MCLK/SCL north toward Y1 and U1, I2S east toward the module. The
+    # 0.4 mm rows fan out about 1.9 mm before anything else may sit there,
+    # so every cap is parked past that ring.
+    "U2": (24.5, 29.0, 270, "ES8311 codec, I2S master"),
+    "C15": (28.8, 28.2, 270, "MIC_OUT DC block, pad 1 toward MK1"),
+    "C16": (28.8, 31.3, 270, "MIC_N reference"),
+    "C10": (28.8, 34.4, 270, "VMID"),
+    "C13": (21.6, 33.9, 180, "3V3A decoupling at the codec"),
+    "C12": (25.1, 34.2, 270, "DACVREF"),
+    "C11": (26.7, 34.2, 270, "ADCVREF"),
+    "Ragnd": (-14.0, 29.5, 0, "AGND to GND stitch, under the pouch outline on F.Cu, east of the analog island"),
+    # West of the 51.5 mm pouch (x <= -25.75). A 1.0 mm-tall can will not fit
+    # under the tape outline.
+    "Y1": (27.2, 23.0, 180, "12.288 MHz oscillator into ES8311 MCLK"),
     # --- Analog island: analog supply ---
-    "U8": (26.0, 31.0, 0, "LP5907-2.8 low-noise LDO, VSYS -> 2.8 V analog (net 3V3A)"),
-    "C9": (21.0, 31.0, 0, "3V3A output cap"),
-    "R5": (22.0, 34.5, 0, "I2C SDA pull-up"),
-    "R6": (27.0, 34.5, 0, "I2C SCL pull-up"),
-    # --- Analog island: class-D amp and speaker ---
-    "U6": (12.0, 31.0, 0, "NS4150B class-D amp"),
-    "C19": (12.0, 27.5, 0, "PA bypass"),
-    "R7": (16.5, 27.5, 0, "PA input bias"),
-    "SP1": (0.0, 36.0, 0, "KELIKING 13 mm SMD speaker, LCSC C18186315"),
+    "U8": (17.5, 30.8, 0, "LP5907-2.8 low-noise LDO, VSYS -> 2.8 V analog (net 3V3A)"),
+    "C9": (12.4, 29.8, 180, "3V3A output cap, east of U8, north of the 7.7 mm pogo body"),
+    # West of the pouch tape outline (x < -26 with the 1 mm keepout).
+    "R5": (27.5, 7.1, 90, "I2C SDA pull-up"),
+    "R6": (27.5, 10.5, 90, "I2C SCL pull-up"),
     # --- Battery ---
-    # BT1 is a JST-PH for a 1S pouch. USB-C is the only 5 V inlet; the BQ24074
-    # power-path rail (VSYS) keeps the board alive with BT1 open.
-    "BT1": (-23.5, 34.0, 0, "JST-PH S2B-PH-K-S, pad 1 VBAT, cable faces the y=+43 edge"),
-    "C20": (-16.0, 26.0, 0, "VBAT bulk at the pouch"),
+    # BT1 is two SMT solder pads for the pouch pigtail on B.Cu, west of J2
+    # and just north of the 66 mm cell. Flip to the back after placing; rot
+    # 0 keeps pad 1 west. The magnetic pad is the only 5 V inlet; VSYS
+    # stays up with BT1 open.
+    "BT1": (-17.0, 35.0, 0, "B.Cu pouch pigtail pads, pad 1 VBAT (west), pad 2 GND"),
+    "C20": (-25.5, 29.4, 90, "VBAT bulk at the pouch pads"),
 }
 
-# JLCPCB's SMT line places surface-mount parts only, so a through-hole part
-# left in the pick-and-place file is a feeder the machine cannot fill.
-# J1 is bring-up UART: the vertical header will not fit under the lid and
-# the tails poke toward the phone, so it stays off the assembly BOM. Order
-# C124378 as extra parts and hand-solder a header if you need UART0.
-# BT1 stays in the BOM (JLC wave-solders the JST-PH) and out of the CPL.
-NO_PICK_AND_PLACE = {
-    "J1": "2.54 mm UART header, extra parts only, do not assemble",
-    "BT1": "JST-PH through-hole, JLC wave-solders C173752",
+# JLCPCB's SMT line places surface-mount parts only. BT1 is two bare pads
+# the pigtail is hand-soldered to and the TP_* parts are bare test pads:
+# nothing to place, nothing to buy, nothing in the extra-parts bag.
+_BARE_PADS = {
+    "BT1": "pouch pigtail solder pads, hand-soldered at assembly",
+    "TP_3V3": "bare test pad",
+    "TP_GND": "bare test pad",
+    "TP_EN": "bare test pad",
+    "TP_BOOT": "bare test pad",
 }
-NO_BOM = {
-    "J1": "UART header, order C124378 as extra parts, do not solder",
-}
+NO_PICK_AND_PLACE = dict(_BARE_PADS)
+NO_BOM = dict(_BARE_PADS)
+# Flipped after place so pad 1 (VBAT) stays west. See apply_hollow_tray.py.
+BOTTOM = {"BT1"}
 
+# 3.5 mm in from both edges, where params.json hole_inset_mm and the lid
+# standoffs put them.
 MOUNTING_HOLES = [
-    ("H1", -28.5, -39.5),
-    ("H2", 28.5, -39.5),
-    ("H3", -28.5, 39.5),
-    ("H4", 28.5, 39.5),
+    ("H1", 26.3, 39.3),
+    ("H2", -26.3, 39.3),
+    ("H3", 26.3, -39.3),
+    ("H4", -26.3, -39.3),
 ]
 
 # 4-layer 0.8 mm build. Copper and dielectric numbers are baked into STACKUP
@@ -469,7 +469,7 @@ def main():
     )
     add_text(
         board,
-        "B.Cu faces the phone. F.Cu carries the battery and every tall part.",
+        "B.Cu faces the phone. The pouch and BT1 sit on B.Cu; tall parts stay on F.Cu.",
         0,
         4,
         pcbnew.Cmts_User,
@@ -514,6 +514,8 @@ def main():
         fp.SetPosition(vec(x, y))
         if rot:
             fp.SetOrientationDegrees(rot)
+        if ref in BOTTOM:
+            fp.Flip(fp.GetPosition(), False)
         fp.SetPath(pcbnew.KIID_PATH())
         fp.SetExcludedFromBOM(ref in NO_BOM)
         if ref in NO_PICK_AND_PLACE:
@@ -530,8 +532,8 @@ def main():
                 "sheet": comp["sheet"],
                 "x_mm": x,
                 "y_mm": y,
-                "rot_deg": rot,
-                "layer": "F.Cu",
+                "rot_deg": round(fp.GetOrientationDegrees()) % 360,
+                "layer": "B.Cu" if ref in BOTTOM else "F.Cu",
                 "footprint": placed_fpid,
                 "footprint_in_schematic": comp["footprint"],
                 "substitution_reason": sub_note,
@@ -592,7 +594,7 @@ def main():
             "recorder.kicad_pcb. Origin is the magnet-ring (Pixelsnap) "
             "centre; +X phone right, +Y toward the camera bar. Coordinates "
             "are written verbatim into recorder.kicad_pcb, so the USB edge "
-            "is y = -43. Re-running this script wipes copper. Edit both "
+            "is y = -42.8. Re-running this script wipes copper. Edit both "
             "files when a part moves."
         ),
         "board": {
@@ -614,7 +616,7 @@ def main():
             "kind": "graphic annotation, not a DRC rule area",
             "note": (
                 "Ring is an annulus from r=22 to r=28 about the origin, below "
-                "B.Cu. Every analog part (MK1, U2, U8, Y1, U6, SP1) is placed "
+                "B.Cu. Every analog part (MK1, U2, U8, Y1) is placed "
                 "outside r=28."
             ),
         },
@@ -643,11 +645,12 @@ def main():
             "No copper pours. In1.Cu (GND) and In2.Cu (VDD33) are named and in "
             "the stackup but carry no zones until route_pcb.py runs.",
             "MK1 sound port. The mic is on F.Cu and its port is an NPTH "
-            "through the board, so the acoustic path opens on the B.Cu side, "
-            "which faces the phone. The PETG tray ducts it out to the right "
-            "wall; keep case.scad in step if the mic ever moves.",
-            "SW1 is a side-actuated Panasonic EVQP7C01P aimed at the left "
-            "wall, so the case aperture presses it directly and needs no "
+            "through the board at (27.5, 16.32), so the acoustic path opens "
+            "on the B.Cu side, which faces the phone. The PETG tray ducts it "
+            "out to the right wall; keep params.json mic_npth and case.scad "
+            "in step if the mic ever moves.",
+            "SW1 is a side-actuated Panasonic EVQP7C01P aimed at the "
+            "phone-left wall, so the case aperture presses it directly and needs no "
             "lever. Its two 0.7 mm NPTH board guides take the sideways load "
             "instead of the solder joints.",
         ],

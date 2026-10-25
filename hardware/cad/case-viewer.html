@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case — orbit</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(ellipse at 50% 38%, #f4f4f6 0%, #c5c5ca 58%, #9a9aa0 100%);
+      font-family: system-ui, sans-serif;
+      color: #1c1c1e;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+    }
+    .parts {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 12px 14px;
+      max-height: calc(100% - 32px);
+      overflow: auto;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    .parts legend {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #5c5c61;
+      padding: 0 0 4px;
+    }
+    .parts label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .parts input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+    }
+    .parts .track {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 22px;
+      border-radius: 999px;
+      background: #c7c7cc;
+      position: relative;
+    }
+    .parts .track::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      top: 2px;
+      left: 2px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+    .parts input:checked + .track {
+      background: #1c1c1e;
+    }
+    .parts input:checked + .track::after {
+      transform: translateX(14px);
+    }
+    .parts input:focus-visible + .track {
+      outline: 2px solid #1c1c1e;
+      outline-offset: 2px;
+    }
+    .parts input:disabled + .track {
+      opacity: 0.45;
+    }
+    .parts input:disabled ~ span {
+      color: #8e8e93;
+    }
+    .hint {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    @media (max-width: 720px) {
+      .parts {
+        top: auto;
+        right: 12px;
+        bottom: 64px;
+        left: 12px;
+        max-height: 42%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <model-viewer
+    id="case"
+    src="case-6061.glb?v=7"
+    alt="Closed recorder case: bead-blasted 6061 tray and natural translucent PETG lid"
+    camera-controls
+    touch-action="pan-y"
+    interaction-prompt="auto"
+    camera-orbit="32deg 68deg 115%"
+    field-of-view="28deg"
+    min-field-of-view="8deg"
+    max-field-of-view="45deg"
+    exposure="1.15"
+    shadow-intensity="0.55"
+    shadow-softness="0.8"
+    environment-image="neutral"
+    tone-mapping="commerce">
+  </model-viewer>
+  <fieldset class="parts">
+    <legend>Parts</legend>
+    <label><input type="checkbox" data-part="lid" checked><span class="track"></span><span>Top case</span></label>
+    <label><input type="checkbox" data-part="tray" checked><span class="track"></span><span>Bottom case</span></label>
+    <label><input type="checkbox" data-part="pcb" checked><span class="track"></span><span>PCB</span></label>
+    <label><input type="checkbox" data-part="pouch" checked><span class="track"></span><span>Battery pouch</span></label>
+    <label><input type="checkbox" data-part="magnets" checked><span class="track"></span><span>Magnet ring</span></label>
+    <label><input type="checkbox" data-part="charger" checked><span class="track"></span><span>Pogo pad</span></label>
+    <label><input type="checkbox" data-part="pill" checked><span class="track"></span><span>Button pill</span></label>
+    <label><input type="checkbox" data-part="screws" checked><span class="track"></span><span>Screws</span></label>
+  </fieldset>
+  <p class="hint">Drag to turn. Scroll to zoom. Right-drag to slide. Switches hide a part in place.</p>
+  <script>
+    const viewer = document.querySelector("#case");
+    const panel = document.querySelector(".parts");
+
+    function sceneOf(el) {
+      for (const sym of Object.getOwnPropertySymbols(el)) {
+        const value = el[sym];
+        if (value && value.isScene && typeof value.getObjectByName === "function") {
+          return value;
+        }
+      }
+      return null;
+    }
+
+    function under(obj, root) {
+      for (let node = obj; node; node = node.parent) {
+        if (node === root) return true;
+      }
+      return false;
+    }
+
+    function meshesExcept(root, skip) {
+      const found = [];
+      root.traverse((obj) => {
+        if (!obj.isMesh) return;
+        if (skip.some((item) => item && (obj === item || under(obj, item)))) return;
+        found.push(obj);
+      });
+      return found;
+    }
+
+    function meshesNamed(scene, prefix) {
+      const found = [];
+      scene.traverse((obj) => {
+        if (obj.isMesh && obj.name.startsWith(prefix)) found.push(obj);
+      });
+      return found;
+    }
+
+    function show(objects, shown, keepChildren) {
+      for (const obj of objects) {
+        if (keepChildren) obj.layers.set(shown ? 0 : 1);
+        else obj.visible = shown;
+      }
+    }
+
+    function redraw() {
+      if (typeof viewer.jumpCameraToGoal === "function") viewer.jumpCameraToGoal();
+    }
+
+    let groups = null;
+
+    function apply(id, shown) {
+      const group = groups && groups[id];
+      if (!group) return;
+      show(group.objects, shown, group.keepChildren);
+      redraw();
+    }
+
+    panel.addEventListener("change", (event) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.dataset.part) return;
+      apply(input.dataset.part, input.checked);
+    });
+
+    viewer.addEventListener("load", () => {
+      const scene = sceneOf(viewer);
+      if (!scene) {
+        document.querySelector(".hint").textContent = "The model loaded, but its parts could not be listed.";
+        return;
+      }
+      const lid = scene.getObjectByName("Lid");
+      const tray = scene.getObjectByName("Tray");
+      const board = scene.getObjectByName("Board");
+      const pouch = scene.getObjectByName("Pouch");
+      const magnets = scene.getObjectByName("Magnets");
+      const screws = scene.getObjectByName("Screws");
+      const pill = scene.getObjectByName("Pill");
+      const charger = meshesNamed(scene, "YZ103915020T").concat(meshesNamed(scene, "FB_J2"));
+      const pcb = board ? meshesExcept(board, [pouch, ...charger]) : [];
+      const magnetMeshes = [
+        magnets,
+        scene.getObjectByName("MagnetRing"),
+        scene.getObjectByName("ClockMagnet"),
+      ].filter(Boolean);
+      const screwMeshes = [];
+      for (const obj of [screws, ...meshesNamed(scene, "Screw")]) {
+        if (obj && !screwMeshes.includes(obj)) screwMeshes.push(obj);
+      }
+      groups = {
+        lid: {objects: lid ? [lid] : [], keepChildren: true},
+        tray: {objects: tray ? [tray] : [], keepChildren: true},
+        pcb: {objects: pcb, keepChildren: false},
+        pouch: {objects: pouch ? [pouch] : [], keepChildren: false},
+        magnets: {objects: magnetMeshes, keepChildren: false},
+        charger: {objects: charger, keepChildren: false},
+        pill: {objects: pill ? [pill] : [], keepChildren: false},
+        screws: {objects: screwMeshes, keepChildren: false},
+      };
+      for (const input of panel.querySelectorAll("input[data-part]")) {
+        const group = groups[input.dataset.part];
+        if (!group || group.objects.length === 0) {
+          input.disabled = true;
+          input.checked = false;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

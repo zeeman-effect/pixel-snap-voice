@@ -8,6 +8,7 @@ typedef enum {
     RECORDER_RECORDING,
     RECORDER_PLAYING,
     RECORDER_USB_MSC,
+    RECORDER_WIFI_SHARE,
     RECORDER_ERROR
 } RecorderState;
 
@@ -16,7 +17,8 @@ typedef enum {
     RECORDER_ERR = -1,
     RECORDER_ERR_BUSY = -2,
     RECORDER_ERR_FULL = -3,
-    RECORDER_ERR_USB = -4
+    RECORDER_ERR_USB = -4,
+    RECORDER_ERR_SHARE = -5
 } RecorderStatus;
 
 void recorder_init(void);
@@ -35,6 +37,10 @@ RecorderStatus recorder_play_last(void);
 RecorderStatus recorder_play_read(void *pcm, size_t nbytes, size_t *got);
 RecorderStatus recorder_play_stop(void);
 
-/* USB attach: stop record/play and enter MSC (no new recordings). */
+/* USB attach: stop record/play/share and enter MSC (no new recordings). */
 void recorder_on_usb_attach(void);
 void recorder_on_usb_detach(void);
+
+/* Wi-Fi share: stop record/play. USB attach still wins. */
+void recorder_on_share_start(void);
+void recorder_on_share_stop(void);

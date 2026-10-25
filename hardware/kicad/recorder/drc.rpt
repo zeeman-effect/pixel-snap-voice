@@ -1,21 +1,21 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-09-18T15:53:06 **
+** Created on 2026-10-23T22:52:00 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 28 Footprint errors **
-[net_conflict]: No corresponding pin found in schematic
+** Found 32 Footprint errors **
+[footprint_symbol_field_mismatch]: Field 'Datasheet' differs (PCB: 'https://www.lcsc.com/product-detail/C6276862.html', Schematic: '~')
     Local override; warning
-    @(9.2500 mm, -41.6450 mm): Pad A8 [unconnected-(J2-SBU1-PadA8)] of J2 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(6.2500 mm, -41.6450 mm): Pad B8 [unconnected-(J2-SBU2-PadB8)] of J2 on F.Cu
+    @(0.0000 mm, 36.0000 mm): Footprint J2
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(7.0000 mm, -18.8500 mm): Pad 7 [unconnected-(U1-IO3-Pad7)] of U1 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(7.0000 mm, -14.6000 mm): Pad 12 [PA_EN] of U1 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(15.7000 mm, -11.0000 mm): Pad 25 [unconnected-(U1-IO21-Pad25)] of U1 on F.Cu
@@ -66,10 +66,19 @@
     @(21.0000 mm, -23.1000 mm): Pad 44 [unconnected-(U1-IO46-Pad44)] of U1 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
-    @(30.8500 mm, 11.5000 mm): Pad 3 [unconnected-(MK1-OUT--Pad3)] of MK1 on F.Cu
+    @(28.3500 mm, 18.5000 mm): Pad 3 [unconnected-(MK1-OUT--Pad3)] of MK1 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
-    @(23.2500 mm, -40.9375 mm): Pad 8 [unconnected-(U3-~{PGOOD}-Pad8)] of U3 on F.Cu
+    @(24.1000 mm, 30.4500 mm): Pad 12 [/Audio/AOUTP] of U2 on F.Cu
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(24.5000 mm, 30.4500 mm): Pad 13 [/Audio/AOUTN] of U2 on F.Cu
+[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: '1S pouch pigtail solder pads, no connector', Schematic: '')
+    Local override; warning
+    @(-17.0000 mm, 35.0000 mm): Footprint BT1
+[net_conflict]: No corresponding pin found in schematic
+    Local override; warning
+    @(21.3500 mm, -40.7375 mm): Pad 7 [unconnected-(U3-~{PGOOD}-Pad7)] of U3 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
     @(-4.8625 mm, -38.5500 mm): Pad 4 [unconnected-(U4-NC-Pad4)] of U4 on F.Cu
@@ -78,19 +87,22 @@
     @(-17.1375 mm, -38.5500 mm): Pad 3 [unconnected-(U5-~{FLG}-Pad3)] of U5 on F.Cu
 [net_conflict]: No corresponding pin found in schematic
     Local override; warning
-    @(27.1375 mm, 31.9500 mm): Pad 4 [unconnected-(U8-NC-Pad4)] of U8 on F.Cu
+    @(18.6375 mm, 31.7500 mm): Pad 4 [unconnected-(U8-NC-Pad4)] of U8 on F.Cu
+[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: 'CS 32 Gbit (4 GB) SD NAND, LGA-8 8.0 x 6.2 mm. SD 2.0 1-bit and 4-bit. JLCPCB C2841139. Pins 3 CLK, 4 VSS, 5 CMD, 8 VDD.', Schematic: '')
+    Local override; warning
+    @(-22.0000 mm, -18.0000 mm): Footprint J3
 [extra_footprint]: Extra footprint
     Local override; warning
-    @(-28.5000 mm, -39.5000 mm): Footprint H1
+    @(26.3000 mm, -39.3000 mm): Footprint H2
 [extra_footprint]: Extra footprint
     Local override; warning
-    @(-28.5000 mm, 39.5000 mm): Footprint H3
+    @(-26.3000 mm, 39.3000 mm): Footprint H3
 [extra_footprint]: Extra footprint
     Local override; warning
-    @(28.5000 mm, -39.5000 mm): Footprint H2
+    @(26.3000 mm, 39.3000 mm): Footprint H4
 [extra_footprint]: Extra footprint
     Local override; warning
-    @(28.5000 mm, 39.5000 mm): Footprint H4
+    @(-26.3000 mm, -39.3000 mm): Footprint H1
 
 ** Ignored checks **
     - Footprint has no courtyard defined

@@ -20,7 +20,6 @@ NET_TO_MACRO = {
     "I2S_WS": "PSV_I2S_WS",
     "I2S_DOUT": "PSV_I2S_DOUT",
     "I2S_DIN": "PSV_I2S_DIN",
-    "PA_EN": "PSV_PA_EN",
     "SD_CLK": "PSV_SD_CLK",
     "SD_CMD": "PSV_SD_CMD",
     "SD_D0": "PSV_SD_D0",

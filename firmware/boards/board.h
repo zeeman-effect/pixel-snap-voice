@@ -13,3 +13,7 @@
 #ifndef PSV_SD_MOUNT
 #define PSV_SD_MOUNT CONFIG_PSV_SD_MOUNT_POINT
 #endif
+
+#ifndef PSV_SD_FORMAT_IF_BLANK
+#define PSV_SD_FORMAT_IF_BLANK 0
+#endif

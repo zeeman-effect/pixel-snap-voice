@@ -56,7 +56,7 @@ def drc_counts(kicad: Path, extra: list[str]) -> dict:
     return json.loads(out.read_text(encoding="utf-8"))
 
 
-# kicad-cli pcb drc --schematic-parity reports these 28 notes and every one is
+# kicad-cli pcb drc --schematic-parity reports these notes and every one is
 # expected. Counting them is not a check: a new extra footprint, or a pad that
 # quietly lost its net, lands in the same list and the old gate still plotted.
 # Each key is (violation type, reference, pad or field name). Add a key only
@@ -78,13 +78,20 @@ EXPECTED_PARITY.update({
                 "34", "35", "36", "37", "38", "41", "44")
 })
 EXPECTED_PARITY.update({
-    ("net_conflict", "J2", "A8"): "USB-C SBU1: v1 is a 5 V sink, no alt mode",
-    ("net_conflict", "J2", "B8"): "USB-C SBU2: v1 is a 5 V sink, no alt mode",
-    ("net_conflict", "U3", "8"): "BQ24074 PGOOD left open; charge status is STAT",
+    ("net_conflict", "U1", "12"): "PA_EN castellation; the speaker amp is gone",
+    ("net_conflict", "U2", "12"): "ES8311 AOUTP left open; v1 has no speaker",
+    ("net_conflict", "U2", "13"): "ES8311 AOUTN left open; v1 has no speaker",
+    ("net_conflict", "U3", "7"): "BQ24073 PGOOD left open; charge status is STAT",
     ("net_conflict", "U4", "4"): "AP2112K-3.3 pin 4 is NC",
     ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
     ("net_conflict", "U8", "4"): "LP5907 pin 4 is NC",
     ("net_conflict", "MK1", "3"): "IM73A135 pin 3 is OUT−, left open for single-ended",
+    ("footprint_symbol_field_mismatch", "BT1", "Description"):
+        "Device:Battery symbol vs PSV pigtail land; no housing on the board",
+    ("footprint_symbol_field_mismatch", "J2", "Datasheet"):
+        "sheet instance has no datasheet; the LCSC page is on the footprint",
+    ("footprint_symbol_field_mismatch", "J3", "Description"):
+        "sheet instance has no description; the NAND text is on the footprint",
 })
 
 _PAD = re.compile(r"^Pad (\S+) \[.*\] of (\w+) on ")

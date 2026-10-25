@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Idempotent Cloud Agent setup for pixel-snap-voice.
+# Idempotent toolchain setup for pixel-snap-voice on Ubuntu 24.04 (noble).
+# Works on a dev box, a CI runner, a container, or any cloud coding agent:
+#   bash scripts/setup-ubuntu.sh
 # Adds the hardware/sim toolchain that the repo's checks and README expect:
 #   - build-essential + cmake  -> host recorder simulation (sim/host)
 #   - ngspice                  -> power-path SPICE sim (sim/spice/power_path.cir)
@@ -7,8 +9,8 @@
 #     pcbnew python module,        (verify_schematic.py, check_gates.py, DRC, gerbers)
 #     footprints, symbols)
 #   - freerouting              -> autorouter driven by route_pcb.py
-# The base image already ships gcc/clang, cmake, make, python3 and git; this
-# script only fills the gaps and is safe to run repeatedly.
+# Needs python3 and git already present. Safe to run repeatedly. Runs apt
+# through sudo unless it is already root (many containers have no sudo).
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,9 +19,12 @@ KICAD_LIST="/etc/apt/sources.list.d/kicad-ubuntu-kicad-10_0-releases-noble.sourc
 FREEROUTING_VER="2.4.1"
 FREEROUTING_DIR="/opt/freerouting"
 
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; fi
+
 echo "== apt: base packages =="
-sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+$SUDO env DEBIAN_FRONTEND=noninteractive apt-get update -qq
+$SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
   software-properties-common ca-certificates build-essential cmake ngspice \
   curl unzip
 
@@ -28,12 +33,12 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommen
 # source already exists.
 if [ ! -f "$KICAD_LIST" ]; then
   echo "== apt: adding KiCad 10 PPA =="
-  sudo add-apt-repository -y "$KICAD_PPA"
+  $SUDO add-apt-repository -y "$KICAD_PPA"
 fi
 
 echo "== apt: KiCad 10 =="
-sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+$SUDO env DEBIAN_FRONTEND=noninteractive apt-get update -qq
+$SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
   kicad kicad-footprints kicad-symbols
 
 # freerouting is the autorouter route_pcb.py drives over Specctra DSN/SES.
@@ -45,9 +50,9 @@ if [ ! -x "$FREEROUTING_DIR/bin/freerouting" ]; then
   curl -fsSL -o "$tmp/fr.zip" \
     "https://github.com/freerouting/freerouting/releases/download/v${FREEROUTING_VER}/freerouting-${FREEROUTING_VER}-linux-x64.zip"
   unzip -q "$tmp/fr.zip" -d "$tmp"
-  sudo rm -rf "$FREEROUTING_DIR"
-  sudo mv "$tmp/freerouting-${FREEROUTING_VER}-linux-x64" "$FREEROUTING_DIR"
-  sudo chmod +x "$FREEROUTING_DIR/bin/freerouting"
+  $SUDO rm -rf "$FREEROUTING_DIR"
+  $SUDO mv "$tmp/freerouting-${FREEROUTING_VER}-linux-x64" "$FREEROUTING_DIR"
+  $SUDO chmod +x "$FREEROUTING_DIR/bin/freerouting"
   rm -rf "$tmp"
 fi
 
@@ -61,4 +66,4 @@ echo "== build host recorder simulation =="
 cmake -S "$REPO/sim/host" -B "$REPO/build/host"
 cmake --build "$REPO/build/host"
 
-echo "== install.sh done =="
+echo "== setup-ubuntu.sh done =="

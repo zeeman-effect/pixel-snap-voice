@@ -62,8 +62,12 @@ def main() -> int:
             str(PCB),
         ]
     )
+    case_glb = REPO / "build" / "case-renders" / "board.glb"
+    case_glb.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(glb, case_glb)
     print("wrote", step, "bytes", step.stat().st_size)
     print("wrote", glb, "bytes", glb.stat().st_size)
+    print("wrote", case_glb, "bytes", case_glb.stat().st_size)
     return 0
 
 

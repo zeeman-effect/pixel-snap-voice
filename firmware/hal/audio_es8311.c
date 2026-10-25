@@ -12,6 +12,10 @@
 #include "esp_log.h"
 #include "es8311_codec.h"
 
+#ifndef I2S_GPIO_UNUSED
+#define I2S_GPIO_UNUSED GPIO_NUM_NC
+#endif
+
 #if PSV_HAS_ES7210
 #include "es7210_adc.h"
 #endif
@@ -52,7 +56,12 @@ static esp_err_t init_i2s(void)
                                                         I2S_SLOT_MODE_MONO),
         .gpio_cfg =
             {
-                .mclk = PSV_I2S_MCLK,
+                /*
+                 * Codec-master custom board: Y1 already drives ES8311 MCLK.
+                 * Do not let the S3 output on that net (GPIO14 on custom).
+                 * Korvo / ESP-BOX keep PSV_I2S_MCLK as an S3-generated clock.
+                 */
+                .mclk = (PSV_CODEC_MASTER && PSV_I2S_SLAVE) ? I2S_GPIO_UNUSED : PSV_I2S_MCLK,
                 .bclk = PSV_I2S_BCLK,
                 .ws = PSV_I2S_WS,
                 .dout = PSV_I2S_DOUT,

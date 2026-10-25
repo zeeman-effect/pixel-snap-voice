@@ -29,6 +29,7 @@ _autosave-*
 *.step
 *.stp
 !hardware/kicad/exports/*.step
+!hardware/cad/export/metal/tray.step
 
 .DS_Store
 Thumbs.db
@@ -37,3 +38,6 @@ Thumbs.db
 .vscode/
 .audit/
 scratch/
+
+# Host sim output (recorder_sim writes recordings/ under the working directory)
+/recordings/
