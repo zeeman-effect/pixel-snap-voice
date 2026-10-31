@@ -56,7 +56,7 @@ This repo vendors the KiCad skills from [American-Embedded/KiStack](https://gith
 | `kicad-panelize` | KiKit panelization |
 | `pcb-product-render` | Blender product shots of the board |
 
-Files live in `.claude/skills/<skill-name>/`, next to this repo's existing `make-board-manufacturable` skill. Claude Code discovers skills there; Cursor also scans `.claude/skills/`. If a Cursor build or Cloud Agent stops seeing them, that is the first thing to check. Source pin: `skills-lock.json`. License: `.claude/skills/kistack-LICENSE`.
+Files live in `.claude/skills/<skill-name>/`, next to this repo's own `make-board-manufacturable` and `show-image` skills. `/show-image <path.png>` opens a render in the Windows viewer with `explorer.exe "$(wslpath -a -w <path>)"`. Claude Code discovers skills there; Cursor also scans `.claude/skills/`. If a Cursor build or Cloud Agent stops seeing them, that is the first thing to check. Source pin: `skills-lock.json`. License: `.claude/skills/kistack-LICENSE`.
 
 These skills do not replace this project's generators. Product sheets still come from `generate_recorder.py`. Product copper still lives in `hardware/kicad/recorder/recorder.kicad_pcb`. If a KiStack workflow and a repo rule disagree, follow `AGENTS.md`.
 
@@ -97,6 +97,7 @@ Update this section when it stops being true.
 - Computer-side whisper.cpp wrapper is `software/transcribe.py`.
 - Toolchain setup on Ubuntu 24.04 (dev box, CI, container, cloud agent) is `bash scripts/setup-ubuntu.sh`: KiCad 10 + `pcbnew`, ngspice, CMake, freerouting in `/opt/freerouting`, then the host sim build. Windows and macOS steps are in the README under "Set up a machine". Keep both in sync when a tool or version changes.
 - KiStack KiCad skills are vendored in `.claude/skills/` (`kicad-schematic`, `kicad-pcb`, and the rest of the table above).
+- Current render stills are tracked in `docs/renders/` (`board/`, `case/`). Render scripts still write to `build/product-renders/` and `build/case-renders/`; `python3 scripts/sync_renders.py` copies the PNGs across. `.githooks/pre-push` runs it with `--check` and blocks a push while the tracked copies are behind. Enable it once per clone with `git config core.hooksPath .githooks`.
 
 `python scripts/check_gates.py` is the ship gate and it now does the whole job itself: it runs `check_placement.py` when `pcbnew` is importable, runs `kicad-cli pcb drc` at every severity and with `--schematic-parity`, and then writes Gerbers, both drill files, the pick-and-place CSV, `recorder-jlc.zip` and the two JLCPCB assembly CSVs from `recorder.kicad_pcb` in one pass. Do not hand-export or hand-edit part of that set — a drill file that does not match the copper is a scrap board, and a pick-and-place row that does not match it is a misassembled one. It also runs DRC a second time with `--refill-zones` and refuses to plot if the two disagree, because `kicad-cli` plots the fill stored in the board: a stale pour would otherwise ship while DRC quietly refilled and called it clean.
 

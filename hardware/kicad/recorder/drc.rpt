@@ -1,93 +1,27 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-10-23T22:52:00 **
+** Created on 2026-10-25T14:23:20 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 32 Footprint errors **
+** Found 10 Footprint errors **
 [footprint_symbol_field_mismatch]: Field 'Datasheet' differs (PCB: 'https://www.lcsc.com/product-detail/C6276862.html', Schematic: '~')
     Local override; warning
     @(0.0000 mm, 36.0000 mm): Footprint J2
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(7.0000 mm, -18.8500 mm): Pad 7 [unconnected-(U1-IO3-Pad7)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
+[net_conflict]: Pad net (PA_EN) doesn't match net given by schematic (unconnected-(U1-IO8-Pad12))
     Local override; warning
     @(7.0000 mm, -14.6000 mm): Pad 12 [PA_EN] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(15.7000 mm, -11.0000 mm): Pad 25 [unconnected-(U1-IO21-Pad25)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(16.5500 mm, -11.0000 mm): Pad 26 [unconnected-(U1-IO26-Pad26)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(17.4000 mm, -11.0000 mm): Pad 27 [unconnected-(U1-IO47-Pad27)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(18.2500 mm, -11.0000 mm): Pad 28 [unconnected-(U1-IO33-Pad28)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(19.1000 mm, -11.0000 mm): Pad 29 [unconnected-(U1-IO34-Pad29)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(19.9500 mm, -11.0000 mm): Pad 30 [unconnected-(U1-IO48-Pad30)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -12.0500 mm): Pad 31 [unconnected-(U1-IO35-Pad31)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -12.9000 mm): Pad 32 [unconnected-(U1-IO36-Pad32)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -13.7500 mm): Pad 33 [unconnected-(U1-IO37-Pad33)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -14.6000 mm): Pad 34 [unconnected-(U1-IO38-Pad34)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -15.4500 mm): Pad 35 [unconnected-(U1-IO39-Pad35)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -16.3000 mm): Pad 36 [unconnected-(U1-IO40-Pad36)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -17.1500 mm): Pad 37 [unconnected-(U1-IO41-Pad37)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -18.0000 mm): Pad 38 [unconnected-(U1-IO42-Pad38)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -20.5500 mm): Pad 41 [unconnected-(U1-IO45-Pad41)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.0000 mm, -23.1000 mm): Pad 44 [unconnected-(U1-IO46-Pad44)] of U1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(28.3500 mm, 18.5000 mm): Pad 3 [unconnected-(MK1-OUT--Pad3)] of MK1 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
+[net_conflict]: Pad net (/Audio/AOUTP) doesn't match net given by schematic (unconnected-(U2-OUTP-Pad12))
     Local override; warning
     @(24.1000 mm, 30.4500 mm): Pad 12 [/Audio/AOUTP] of U2 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
+[net_conflict]: Pad net (/Audio/AOUTN) doesn't match net given by schematic (unconnected-(U2-OUTN-Pad13))
     Local override; warning
     @(24.5000 mm, 30.4500 mm): Pad 13 [/Audio/AOUTN] of U2 on F.Cu
 [footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: '1S pouch pigtail solder pads, no connector', Schematic: '')
     Local override; warning
     @(-17.0000 mm, 35.0000 mm): Footprint BT1
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(21.3500 mm, -40.7375 mm): Pad 7 [unconnected-(U3-~{PGOOD}-Pad7)] of U3 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(-4.8625 mm, -38.5500 mm): Pad 4 [unconnected-(U4-NC-Pad4)] of U4 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(-17.1375 mm, -38.5500 mm): Pad 3 [unconnected-(U5-~{FLG}-Pad3)] of U5 on F.Cu
-[net_conflict]: No corresponding pin found in schematic
-    Local override; warning
-    @(18.6375 mm, 31.7500 mm): Pad 4 [unconnected-(U8-NC-Pad4)] of U8 on F.Cu
 [footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: 'CS 32 Gbit (4 GB) SD NAND, LGA-8 8.0 x 6.2 mm. SD 2.0 1-bit and 4-bit. JLCPCB C2841139. Pins 3 CLK, 4 VSS, 5 CMD, 8 VDD.', Schematic: '')
     Local override; warning
     @(-22.0000 mm, -18.0000 mm): Footprint J3

@@ -172,6 +172,7 @@
         {
           "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
+          "td_enabled": false,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
@@ -183,6 +184,7 @@
         {
           "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
+          "td_enabled": false,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
@@ -194,6 +196,7 @@
         {
           "td_allow_use_two_tracks": true,
           "td_curve_segcount": 0,
+          "td_enabled": false,
           "td_height_ratio": 1.0,
           "td_length_ratio": 0.5,
           "td_maxheight": 2.0,
@@ -316,40 +319,40 @@
     "meta": {
       "version": 5
     },
-    "net_colors": null,
-    "netclass_assignments": null,
+    "net_colors": {},
+    "netclass_assignments": {},
     "netclass_patterns": [
       {
-        "pattern": "USB_DP",
-        "netclass": "USB"
+        "netclass": "USB",
+        "pattern": "USB_DP"
       },
       {
-        "pattern": "USB_DM",
-        "netclass": "USB"
+        "netclass": "USB",
+        "pattern": "USB_DM"
       },
       {
-        "pattern": "VBUS",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "VBUS"
       },
       {
-        "pattern": "VBUS_CHG",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "VBUS_CHG"
       },
       {
-        "pattern": "VBAT",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "VBAT"
       },
       {
-        "pattern": "VSYS",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "VSYS"
       },
       {
-        "pattern": "/Power/3V3_RAW",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "/Power/3V3_RAW"
       },
       {
-        "pattern": "3V3A",
-        "netclass": "POWER"
+        "netclass": "POWER",
+        "pattern": "3V3A"
       }
     ]
   },

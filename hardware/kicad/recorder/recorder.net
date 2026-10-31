@@ -1,9 +1,9 @@
 (export
 	(version "E")
 	(design
-		(source "C:\\Users\\zachr\\Documents\\GitHub\\pixel-snap-voice\\hardware\\kicad\\recorder\\recorder.kicad_sch")
-		(date "2026-10-23T22:51:48")
-		(tool "Eeschema 10.0.5")
+		(source "/home/zachr/repos/pixel-snap-voice/hardware/kicad/recorder/recorder.kicad_sch")
+		(date "2026-10-25T14:23:06")
+		(tool "Eeschema 10.0.7-10.0.7~ubuntu24.04.1")
 		(sheet
 			(number "1")
 			(name "/")
@@ -864,46 +864,10 @@
 							(num "3")
 						)
 						(pin
-							(num "2")
-						)
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "56")
-						)
-						(pin
-							(num "58")
-						)
-						(pin
-							(num "59")
-						)
-						(pin
-							(num "60")
-						)
-						(pin
-							(num "61")
-						)
-						(pin
-							(num "62")
-						)
-						(pin
-							(num "63")
-						)
-						(pin
-							(num "64")
+							(num "55")
 						)
 						(pin
 							(num "65")
-						)
-						(pin
-							(num "57")
-						)
-						(pin
-							(num "42")
-						)
-						(pin
-							(num "43")
 						)
 						(pin
 							(num "46")
@@ -933,7 +897,43 @@
 							(num "54")
 						)
 						(pin
-							(num "55")
+							(num "56")
+						)
+						(pin
+							(num "57")
+						)
+						(pin
+							(num "58")
+						)
+						(pin
+							(num "59")
+						)
+						(pin
+							(num "60")
+						)
+						(pin
+							(num "61")
+						)
+						(pin
+							(num "62")
+						)
+						(pin
+							(num "63")
+						)
+						(pin
+							(num "64")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
 						)
 						(pin
 							(num "39")
@@ -4792,36 +4792,8 @@
 	)
 	(libraries
 		(library
-			(logical "Device")
-			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
-		)
-		(library
-			(logical "Oscillator")
-			(uri "${KICAD10_SYMBOL_DIR}/Oscillator.kicad_sym")
-		)
-		(library
 			(logical "PSV")
 			(uri "${KIPRJMOD}/PSV.kicad_sym")
-		)
-		(library
-			(logical "Power_Management")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Management.kicad_sym")
-		)
-		(library
-			(logical "Power_Protection")
-			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
-		)
-		(library
-			(logical "RF_Module")
-			(uri "${KICAD10_SYMBOL_DIR}/RF_Module.kicad_sym")
-		)
-		(library
-			(logical "Regulator_Linear")
-			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
-		)
-		(library
-			(logical "Switch")
-			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
 		)
 	)
 	(nets

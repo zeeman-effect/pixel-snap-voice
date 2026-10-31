@@ -1,0 +1,4 @@
+#!/bin/sh
+# Block a push while docs/renders/ is older than the renders in build/.
+# Enable once per clone: git config core.hooksPath .githooks
+exec python3 "$(git rev-parse --show-toplevel)/scripts/sync_renders.py" --check

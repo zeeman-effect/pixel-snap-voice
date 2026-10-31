@@ -74,7 +74,7 @@ There is no finished LCSC SKU. `C5126845` is the male housing only. Do not Add-t
 
 J2 on the board is `C6276862`. JLCPCB places that one. Extra pads for a click-test are a separate LCSC parts line. JLC will not mail unused SMT extras, so do not try to get those pads from the assembly cart.
 
-Recipe (LCSC catalog 17 Oct 2026; housing 46 in stock, pad 155 in stock, both min 1):
+Recipe (LCSC catalog 25 Oct 2026; housing 26 in stock, pad 135 in stock, both min 1):
 
 | Line | Qty | Notes |
 | --- | --- | --- |

@@ -2,7 +2,7 @@
 
 Quantities are for **one** device plus a few passives of margin. Prefer JLCPCB SMT / LCSC Basic. Do not design around **INMP441** (EOL).
 
-LCSC numbers below were captured from the public catalog (Sep 2026). Re-check stock and Basic vs Extended before the SMT order.
+LCSC numbers below were captured from the public catalog (Sep 2026). Every assembly code, plus the cable housing, USB-A plug and ICS-43434 alt, was re-checked against the JLCPCB parts library on 25 Oct 2026: all in stock at JLC, MPNs match, Basic vs Extended matches the SMT column. Thinnest JLC stock that day: J2 `C6276862` 135, J3 `C2841139` 389, U1 `C2980299` 639. Re-check again before the SMT order.
 
 The LCSC column of the tables below is the only place order codes are typed. `hardware/kicad/recorder/generate_jlc.py` reads it, joins it to `recorder.kicad_pcb`, and writes `hardware/kicad/jlcpcb_bom.csv`, `jlcpcb_cpl.csv`, and `jlcpcb_extra.csv` during `python scripts/check_gates.py`. A board part on the assembly BOM with no number fails that script: JLCPCB will not machine-place an empty cell. Do not hand-edit those CSVs — put the number here and re-run the gates.
 
@@ -22,7 +22,7 @@ BT1 is two SMT pads for a pouch pigtail (`PSV:Battery_Pigtail_2P`). There is no 
 | MK1 alt | Digital MEMS | ICS-43434 | C5656610 | 3.5 × 2.65 | 65 dBA fallback if analog capsule misses SMT | Extended |
 | U3 | Li-ion charger | BQ24073RGTR | C15220 | VQFN-16 3×3 | Power-path. USB 500 mA (EN1 pin 6 high, EN2 pin 5 low), ISET 1.8 kΩ ≈ 500 mA. OUT = **VSYS** at 4.4 V; BAT = pouch only. Pin 15 is TD, held low by R11 so termination stays at the default 10%. Pin 8 is VSS. Replaces BQ24074RGTR `C54313`, which JLCPCB was short. JLC Extended | Extended |
 | J2 | Magnetic pad | YZ103915020T-04025-02 | C6276862 | 22.3 × 7.7 × 2.0 stadium | 4-pin female on the lid face. Vendor drawing: capsule with full-radius ends, 2.54 mm pitch. Pin 1 VBUS, 2 D−, 3 D+, 4 GND until a click-test. No CC | Extended |
-| Cable | Magnetic USB-A lead | YZP0048-20048-04025-03 | C5126845 | 4.8 mm male housing | **Not a finished lead.** LCSC lists a housing (46 in stock, min 1, 17 Oct 2026). Order 2 custom sets on [lcsccable.com/customize](https://lcsccable.com/customize): Terminal Harness, Side A **Housing only** `C5126845` (no Terminal), Side B USB-A 2.0 male `C2765195`, 1000 mm, pin 1–4 = VBUS / D− / D+ / GND. Extra pads: **3× C6276862** from the LCSC parts cart (min 1). Cable MOQ is 1 set. Do not put C6276862 on the cable. Do not buy Amazon MagSafe lookalikes. Recipe below | — |
+| Cable | Magnetic USB-A lead | YZP0048-20048-04025-03 | C5126845 | 4.8 mm male housing | **Not a finished lead.** LCSC lists a housing (26 in stock, min 1, 25 Oct 2026). Order 2 custom sets on [lcsccable.com/customize](https://lcsccable.com/customize): Terminal Harness, Side A **Housing only** `C5126845` (no Terminal), Side B USB-A 2.0 male `C2765195`, 1000 mm, pin 1–4 = VBUS / D− / D+ / GND. Extra pads: **3× C6276862** from the LCSC parts cart (min 1). Cable MOQ is 1 set. Do not put C6276862 on the cable. Do not buy Amazon MagSafe lookalikes. Recipe below | — |
 | J3 | SD NAND | CSNP32GCR01-AOW | C2841139 | LGA-8 8.0 × 6.2 × 0.75 mm | CS 32 Gbit (4 GB), SD 2.0 1-bit and 4-bit. Pin order is 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Same land as Zetta ZDSD32GLGEAG (`C5188571`), which was out of stock. Not the microSD socket order. Firmware formats FAT if blank. Do not buy the 8 Gbit grade | Extended |
 | U7 | USB ESD | USBLC6-2SC6 | C7519 | SOT-23-6 | Next to J2 on D+/D−. ST part; `C8678` is an SS34 SMA Schottky, not this chip | Extended |
 | BT1 | 1S pouch pads | — | — | two SMT pads on B.Cu | Solder the Jauch 70 mm pigtail at (−17, 35): pad 1 VBAT (west), pad 2 GND. Tape the cell on and kapton the joints. The magnetic pad runs the board with the pouch off. No LCSC — nothing for JLC to place | Off |
@@ -37,7 +37,7 @@ BT1 is two SMT pads for a pouch pigtail (`PSV:Battery_Pigtail_2P`). There is no 
 
 `C5126845` is the Xinyangze male housing (`YZP0048-20048-04025-03`). It is 4.8 mm tall, 4 pins at 2.5 mm, 12 V / 1 A. LCSC will not ship a USB-A cable if you only Add-to-Cart that number. J2 on the board is the female pad `C6276862`; JLCPCB places that one. Extra pads for a click-test come from the LCSC parts cart — JLC will not mail unused SMT extras.
 
-Checked on LCSC 17 Oct 2026: housing 46 in stock, min 1, Custom Cables MOQ 1 set. Female pad 155 in stock, min 1, multiple 1. Quote in 24–48 h. Custom cables cannot be returned or cancelled.
+Checked on LCSC 25 Oct 2026: housing 26 in stock, min 1, Custom Cables MOQ 1 set. Female pad 135 in stock, min 1, multiple 1. Quote in 24–48 h. Custom cables cannot be returned or cancelled.
 
 | What | Qty | Where | Notes |
 | --- | --- | --- | --- |
