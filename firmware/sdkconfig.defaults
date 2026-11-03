@@ -1,9 +1,11 @@
-# Pixel Snap Voice — ESP32-S3, no Wi-Fi in v1
+# Pixel Snap Voice — ESP32-S3. Wi-Fi stack is linked; the radio stays off until share.
 CONFIG_IDF_TARGET="esp32s3"
 CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
 CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
 CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240=y
 
+# Phase 0 default board. SoftAP prove-out (double-press share, MSC off):
+# merge sdkconfig.korvo_wifi_share — see firmware/README.md.
 CONFIG_PSV_BOARD_KORVO2=y
 CONFIG_PSV_USB_MSC=y
 
@@ -19,7 +21,9 @@ CONFIG_TINYUSB=y
 CONFIG_TINYUSB_MSC_ENABLED=y
 CONFIG_TINYUSB_MSC_BUFSIZE=8192
 
-# Keep BLE/Wi-Fi off. This accessory is a recorder, not a radio.
+# Wi-Fi on for SoftAP share. Bluetooth stays off (this S3 is BLE-only).
 CONFIG_BT_ENABLED=n
-CONFIG_ESP_WIFI_ENABLED=n
+CONFIG_ESP_WIFI_ENABLED=y
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=y
+CONFIG_PSV_WIFI_SHARE=y
 CONFIG_COMPILER_OPTIMIZATION_SIZE=y

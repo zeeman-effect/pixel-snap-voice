@@ -199,6 +199,37 @@ static void test_usb_stops_playback(const char *root)
     expect(recorder_state() == RECORDER_IDLE, "idle after usb play abort");
 }
 
+static void test_share_blocks_record_and_play(const char *root)
+{
+    int16_t pcm[32];
+    (void)root;
+    memset(pcm, 0, sizeof(pcm));
+    recorder_init();
+    recorder_on_share_start();
+    expect(recorder_state() == RECORDER_WIFI_SHARE, "wifi share");
+    expect(recorder_start() == RECORDER_ERR_SHARE, "no record on share");
+    expect(recorder_play("recordings/x.wav") == RECORDER_ERR_SHARE, "no play on share");
+    recorder_on_share_stop();
+    expect(recorder_state() == RECORDER_IDLE, "idle after share stop");
+    expect(recorder_start() == RECORDER_OK, "record after share");
+    expect(recorder_write(pcm, sizeof(pcm)) == RECORDER_OK, "write after share");
+    expect(recorder_stop() == RECORDER_OK, "stop after share");
+}
+
+static void test_usb_wins_over_share(void)
+{
+    recorder_init();
+    recorder_on_share_start();
+    expect(recorder_state() == RECORDER_WIFI_SHARE, "share before usb");
+    recorder_on_usb_attach();
+    expect(recorder_state() == RECORDER_USB_MSC, "usb wins over share");
+    expect(recorder_start() == RECORDER_ERR_USB, "no record on usb after share");
+    recorder_on_share_stop();
+    expect(recorder_state() == RECORDER_USB_MSC, "share stop does not leave usb");
+    recorder_on_usb_detach();
+    expect(recorder_state() == RECORDER_IDLE, "idle after usb unplug");
+}
+
 int main(void)
 {
     const char *root = "sim_out";
@@ -212,6 +243,8 @@ int main(void)
     test_usb_stops_recording();
     test_playback_into_dummy_dac(root);
     test_usb_stops_playback(root);
+    test_share_blocks_record_and_play(root);
+    test_usb_wins_over_share();
 
     if (g_fail) {
         fprintf(stderr, "recorder_test: FAILED\n");

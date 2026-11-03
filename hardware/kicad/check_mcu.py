@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if the MCU module fights v1 (USB recorder, no radio)."""
+"""Fail if the MCU module fights the MINI-1U radio (IPEX lid FPC, no PCB antenna)."""
 
 from __future__ import annotations
 
@@ -12,12 +12,25 @@ REPO = HERE.parent.parent
 PARAMS = json.loads((REPO / "hardware" / "cad" / "params.json").read_text(encoding="utf-8"))
 RECORDER_MCU_SCH = HERE / "recorder" / "mcu_usb.kicad_sch"
 
-# PCB-antenna SKU. Forbidden while Wi-Fi is out of scope.
+# PCB-antenna SKU. Forbidden: that antenna sits next to the steel ring.
 PCB_ANTENNA_MARKERS = (
     "ESP32-S3-MINI-1-N8",
     "C2913206",
     "antenna DNP",
     "Antenna footprint unused",
+)
+
+# Old buy text that treats first-gen U.FL as the MINI-1U jack. Historical
+# "do not buy U.FL" wording is fine; these phrases are the product connector.
+WRONG_JACK_PHRASES = (
+    "MHF1 / U.FL",
+    "MHF1 pigtail",
+    "lid MHF1",
+    "Mate an MHF1",
+    "mate the MHF1",
+    "mated MHF1",
+    "antenna.connector must be MHF1",
+    "U.FL on the MINI-1U",
 )
 
 SKIP_DIR_NAMES = frozenset(
@@ -100,16 +113,32 @@ def main() -> int:
         if key not in mcu:
             errors.append(f"params.json mcu missing {key}")
 
+    ant = PARAMS.get("antenna")
+    if not isinstance(ant, dict):
+        errors.append("params.json has no antenna object (lid IPEX well)")
+    else:
+        if ant.get("kind") != "ipex_fpc":
+            errors.append("antenna.kind must be ipex_fpc")
+        # MINI-1U jack is Hirose W.FL / I-PEX MHF III, not first-gen U.FL / MHF1.
+        connector = str(ant.get("connector", "")).strip()
+        wfl_names = {"W.FL", "WFL", "MHF3", "MHF III", "MHFIII"}
+        if connector not in wfl_names:
+            errors.append(
+                "antenna.connector must be W.FL (I-PEX MHF III on the MINI-1U; "
+                "not first-gen U.FL / MHF1)"
+            )
+
     if mcu.get("family") != "ESP32-S3":
         errors.append("mcu.family must stay ESP32-S3")
-    if mcu.get("wifi_v1"):
-        errors.append("mcu.wifi_v1 is true; v1 has Wi-Fi out of scope")
-    if mcu.get("antenna_used_v1"):
-        errors.append("mcu.antenna_used_v1 is true; v1 does not use a radio")
-    if not mcu.get("wifi_v1") and mcu.get("antenna") == "pcb":
-        errors.append("pcb-trace antenna module while Wi-Fi is out of scope; use MINI-1U (ipex) or a no-antenna part")
-    if mcu.get("antenna") not in {"ipex", "none"}:
-        errors.append(f"mcu.antenna {mcu.get('antenna')!r} is not ipex or none")
+    if not mcu.get("wifi_v1"):
+        errors.append("mcu.wifi_v1 is false; Wi-Fi share is in scope")
+    if not mcu.get("antenna_used_v1"):
+        errors.append("mcu.antenna_used_v1 is false; the IPEX pigtail is in use")
+    if mcu.get("antenna") != "ipex":
+        errors.append(
+            f"mcu.antenna {mcu.get('antenna')!r} must be ipex; "
+            "a PCB-antenna module sits next to the steel ring"
+        )
     if "MINI-1U" not in str(mcu.get("mpn", "")):
         errors.append(f"mcu.mpn {mcu.get('mpn')!r} is not a MINI-1U SKU")
 
@@ -120,16 +149,30 @@ def main() -> int:
         errors.append("recorder/mcu_usb.kicad_sch does not name mcu.mpn")
 
     defaults = (REPO / "firmware" / "sdkconfig.defaults").read_text(encoding="utf-8")
-    if "CONFIG_ESP_WIFI_ENABLED=n" not in defaults:
-        errors.append("firmware/sdkconfig.defaults does not set CONFIG_ESP_WIFI_ENABLED=n")
+    if "CONFIG_ESP_WIFI_ENABLED=y" not in defaults:
+        errors.append("firmware/sdkconfig.defaults does not set CONFIG_ESP_WIFI_ENABLED=y")
+    if "CONFIG_ESP_WIFI_ENABLED=n" in defaults:
+        errors.append("firmware/sdkconfig.defaults still disables Wi-Fi")
     if "CONFIG_BT_ENABLED=n" not in defaults:
         errors.append("firmware/sdkconfig.defaults does not set CONFIG_BT_ENABLED=n")
+    if "CONFIG_BT_ENABLED=y" in defaults:
+        errors.append("firmware/sdkconfig.defaults must leave Bluetooth off")
+
+    kconfig = (REPO / "firmware" / "main" / "Kconfig.projbuild").read_text(encoding="utf-8")
+    if "config PSV_WIFI_SHARE" not in kconfig:
+        errors.append("firmware/main/Kconfig.projbuild has no PSV_WIFI_SHARE")
 
     for path in iter_scan_files():
         text = path.read_text(encoding="utf-8")
         for marker in PCB_ANTENNA_MARKERS:
             if marker in text:
                 errors.append(f"{rel(path)} still has {marker!r}")
+        for phrase in WRONG_JACK_PHRASES:
+            if phrase in text:
+                errors.append(
+                    f"{rel(path)} still names {phrase!r} as the product RF jack; "
+                    "MINI-1U is W.FL / I-PEX MHF III"
+                )
 
     if errors:
         print("check_mcu: FAIL")

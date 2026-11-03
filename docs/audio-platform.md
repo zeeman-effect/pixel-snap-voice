@@ -11,7 +11,7 @@ The S3 is not the hiss or the missing speaker. The original BOM recorded from a 
 3. **Power / layout** — analog mics and codec ADCs die if they share a noisy 3.3 V buck. Give the codec a dedicated analog LDO.
 4. **ESP32-S3 has no APLL** — 48 kHz from the 160 MHz PLL is slightly inexact. Fix: **ES8311 is I2S master** with a 12.288 MHz oscillator into MCLK; the S3 is slave. ~0.1% pitch error is inaudible for voice notes. The codec has no XI/XO pins.
 
-USB full-speed is enough to dump 48 kHz / 16-bit mono (~96 kB/s). Wi-Fi stays off. Use the MINI-1U module (IPEX, no cable), not the MINI-1 PCB-antenna sibling. The antenna keepout and extra 5.1 mm of module length buy nothing on a radio-off board that sits on a steel shunt.
+USB full-speed is enough to dump 48 kHz / 16-bit mono (~96 kB/s). Wi-Fi share is a second dump path: the recorder’s own SoftAP, a browser page, and read-only WebDAV. Use the MINI-1U module (IPEX plus a lid W.FL / I-PEX MHF III FPC), not the MINI-1 PCB-antenna sibling. A PCB antenna would sit next to the steel ring and the aluminum tray; the plastic lid does not fix that. Bluetooth Classic is not on this S3, so BLE file transfer is out. SMB and TLS stay out to keep RAM on the no-PSRAM module.
 
 This product already exists: [ESP32-OpenMic](https://codeberg.org/RevK/ESP32-OpenMic) (S3 module + ICS-43434 + MAX98357A + USB MSC). Espressif voice boards use **ES8311 + analog mic + class-D**, not a different SoC: [ESP32-S3-Korvo-2](https://docs.espressif.com/projects/esp-adf/en/latest/design-guide/dev-boards/user-guide-esp32-s3-korvo-2.html), IDF [`i2s_es8311`](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/i2s.html), [`esp_codec_dev`](https://components.espressif.com/components/espressif/esp_codec_dev).
 
@@ -47,4 +47,4 @@ A 100 dB codec ADC cannot invent capsule SNR. The codec **does** buy PGA/ALC, an
 
 ## Firmware delta (stay on ESP-IDF)
 
-Add `esp_codec_dev` ES8311 duplex I2S. WAV writer already parameterized via `PSV_SAMPLE_RATE_HZ`. USB MSC unchanged. Phase 0 should use a Korvo-2 / ESP-BOX / OpenMic-class board to prove playback, not Sense-only PDM.
+Add `esp_codec_dev` ES8311 duplex I2S. WAV writer already parameterized via `PSV_SAMPLE_RATE_HZ`. USB MSC stays. Wi-Fi share is an ESP-only HAL (`firmware/hal/wifi_share.c`); the portable core only knows a share state. Prove the file page on a Korvo-2 (board antenna) before the custom IPEX pigtail. Phase 0 should use a Korvo-2 / ESP-BOX / OpenMic-class board to prove playback, not Sense-only PDM.

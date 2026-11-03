@@ -10,7 +10,9 @@ idf_component_register(
         "../hal/button.c"
         "../hal/led.c"
         "../hal/usb_msc.c"
+        "../hal/wifi_share.c"
         "../hal/power.c"
+        "../hal/download_mode.c"
     INCLUDE_DIRS
         "."
         "../core"
@@ -29,6 +31,11 @@ idf_component_register(
         esp_adc
         vfs
         usb
+        esp_wifi
+        esp_http_server
+        esp_netif
+        esp_event
+        lwip
         esp_codec_dev
         esp_tinyusb
 )

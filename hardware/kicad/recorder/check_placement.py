@@ -9,9 +9,8 @@ Checks, in order:
   1. every footprint courtyard sits inside the board outline
   2. no two courtyards overlap
   3. nothing collides with a mounting hole keepout
-  4. the analog chain stays clear of the magnet ring (centres; SP1 also
-     by courtyard, because the can is 13 mm and holds a magnet)
-  5. SP1 XY matches the CAD speaker grille in params.json
+  4. the analog chain stays clear of the magnet ring (centres)
+  5. J2 XY matches the CAD pogo well in params.json
   6. every pad that the netlist gives a net actually carries that net
   7. placement.json still describes the board it claims to describe
 
@@ -41,8 +40,10 @@ PARAMS = os.path.abspath(
     os.path.join(HERE, "..", "..", "cad", "params.json")
 )
 
-ANALOG = ["MK1", "U2", "U8", "Y1", "U6", "SP1", "C15", "C16", "C17", "C18"]
+ANALOG = ["MK1", "U2", "U8", "Y1", "C15", "C16"]
 HOLE_KEEPOUT_R = 2.1
+# J2 is the lid-face magnetic pad. No courtyard may hang off the board.
+USB_EDGE_LIP = {}
 
 
 CRTYD_LAYERS = (pcbnew.F_CrtYd, pcbnew.B_CrtYd)
@@ -148,7 +149,7 @@ def main():
             over.append(f"left by {-half_w - x0:.2f}")
         if x1 > half_w:
             over.append(f"right by {x1 - half_w:.2f}")
-        if y0 < -half_h:
+        if y0 < -half_h - USB_EDGE_LIP.get(ref, 0.0) - 1e-6:
             over.append(f"top by {-half_h - y0:.2f}")
         if y1 > half_h:
             over.append(f"bottom by {y1 - half_h:.2f}")
@@ -192,26 +193,18 @@ def main():
         print(f"  ring  {ref:6s} r={r:6.2f} mm  {mark}")
         if r <= ring_r:
             problems.append(f"RING       {ref:6s} centre r={r:.2f} <= {ring_r}")
-        if ref == "SP1":
-            body_r = closest_r(boxes[ref])
-            print(f"  ring  SP1    body closest r={body_r:6.2f} mm")
-            if body_r <= ring_r:
-                problems.append(
-                    f"RING       SP1    body r={body_r:.2f} <= {ring_r}"
-                )
-
-    sp1 = board.FindFootprintByReference("SP1")
-    if sp1 is None:
-        problems.append("MISSING    SP1")
+    j2 = board.FindFootprintByReference("J2")
+    if j2 is None:
+        problems.append("MISSING    J2")
     else:
-        sx = round(pcbnew.ToMM(sp1.GetPosition().x), 3)
-        sy = round(pcbnew.ToMM(sp1.GetPosition().y), 3)
-        cx = params["connectors"]["speaker_x_mm"]
-        cy = params["connectors"]["speaker_y_mm"]
-        if abs(sx - cx) > 0.01 or abs(sy - cy) > 0.01:
+        jx = round(pcbnew.ToMM(j2.GetPosition().x), 3)
+        jy = round(pcbnew.ToMM(j2.GetPosition().y), 3)
+        cx = params["connectors"]["pogo_x_mm"]
+        cy = params["connectors"]["pogo_y_mm"]
+        if abs(jx - cx) > 0.01 or abs(jy - cy) > 0.01:
             problems.append(
-                f"CAD        SP1 board ({sx},{sy}) != params.json speaker "
-                f"({cx},{cy}) — lid grille would miss the can"
+                f"CAD        J2 board ({jx},{jy}) != params.json pogo "
+                f"({cx},{cy}) — lid well would miss the pad"
             )
 
     unnetted = []

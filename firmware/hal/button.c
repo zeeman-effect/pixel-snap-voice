@@ -64,6 +64,11 @@ esp_err_t button_init(void)
     return ESP_OK;
 }
 
+int button_held(void)
+{
+    return raw_pressed();
+}
+
 psv_btn_event_t button_poll(void)
 {
     int64_t now = esp_timer_get_time();

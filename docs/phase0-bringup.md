@@ -21,7 +21,7 @@ Close second: [ESP32-OpenMic](https://codeberg.org/RevK/ESP32-OpenMic) (S3 modul
 5. USB-C: pull the SD card at first; TinyUSB MSC comes after the core is stable.
 6. Battery: runs from LiPo and charges from USB-C without browning out while recording or playing.
 
-On-device transcription, Wi-Fi, and the magnet shell are **not** Phase 0.
+On-device transcription, Bluetooth, and the magnet shell are **not** Phase 0. Wi-Fi share can be proven on Korvo-2 using that board’s antenna (recipe below). The custom PCB still needs the lid pigtail.
 
 ## Toolchain
 
@@ -33,6 +33,29 @@ idf.py set-target esp32s3
 idf.py build
 idf.py -p COMx flash monitor
 ```
+
+### Korvo SoftAP prove-out
+
+Prove SoftAP + `http://192.168.4.1` on Korvo-2 **before** the custom PCB. Default Phase 0 Korvo still plays on double-press; this overlay flips that gesture to share.
+
+MSC is **off** on the overlay so Korvo keeps USB-Serial/JTAG (native D+/D− are reserved). Custom-board MSC uses `TINYUSB_MSC_EVENT_MOUNT_CHANGED` and exclusive NAND. Pull the SD card and use a reader for this prove.
+
+```bash
+cd firmware
+idf.py -B build/korvo-share \
+  -D SDKCONFIG="$PWD/build/korvo-share/sdkconfig" \
+  -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.korvo_wifi_share" \
+  set-target esp32s3
+idf.py -B build/korvo-share \
+  -D SDKCONFIG="$PWD/build/korvo-share/sdkconfig" \
+  build
+# Flash only if a Korvo is plugged in:
+# idf.py -B build/korvo-share -D SDKCONFIG="$PWD/build/korvo-share/sdkconfig" -p COMx flash monitor
+```
+
+Same flags via menuconfig on a normal `sdkconfig`: **Pixel Snap Voice → Double-press toggles Wi-Fi share**, and unset **TinyUSB mass storage**.
+
+On the board: short press records, double-press any Korvo key starts **PixelSnapVoice** / **voicenote1**. Join that network and open `http://192.168.4.1`.
 
 Use `esp_codec_dev` + the Korvo/ESP-BOX ES8311 example for duplex I2S. Host-side iteration (no hardware):
 
@@ -56,7 +79,7 @@ Follow Espressif’s user guide for I2C to ES8311, I2S pins, PA enable, and anal
 | Record button | D1 (GPIO1) to GND, pull-up |
 | USB / battery | On-board USB-C, BAT± |
 
-Do not enable Wi-Fi.
+Leave Bluetooth off. Enable Wi-Fi share on Korvo only to prove the file page.
 
 ## USB Mass Storage
 

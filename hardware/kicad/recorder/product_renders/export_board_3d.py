@@ -34,19 +34,32 @@ def kicad_cli() -> Path:
     raise SystemExit("kicad-cli not found")
 
 
-def run(cmd: list[str]) -> None:
+def run(cmd: list[str], out: Path) -> None:
+    """Run one export. kicad-cli 10 exits 2 when a 3D model file is missing
+    but still writes the file; build_product_scene.py boxes those parts, so a
+    fresh output with missing-model warnings is fine. No output is not."""
     print("+", " ".join(cmd), flush=True)
-    subprocess.run(cmd, check=True)
+    out.unlink(missing_ok=True)
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        if not out.is_file():
+            raise SystemExit(f"kicad-cli exited {result.returncode} and wrote no {out.name}")
+        print(f"kicad-cli exited {result.returncode} (missing 3D models); kept {out.name}", flush=True)
 
 
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     cli = str(kicad_cli())
+    # A Windows kicad-cli run outside the KiCad GUI does not always resolve
+    # this variable, and then every library model reads as missing.
+    models = Path(cli).parents[1] / "share" / "kicad" / "3dmodels"
+    if models.is_dir():
+        os.environ.setdefault("KICAD10_3DMODEL_DIR", str(models))
     step = OUT / "recorder.step"
     glb = OUT / "recorder.glb"
     common = [cli, "pcb", "export"]
     shared = ["--force", "--no-dnp", "--subst-models", "--cut-vias-in-body"]
-    run(common + ["step", "--output", str(step), *shared, str(PCB)])
+    run(common + ["step", "--output", str(step), *shared, str(PCB)], step)
     run(
         common
         + [
@@ -60,10 +73,15 @@ def main() -> int:
             "--include-silkscreen",
             "--include-soldermask",
             str(PCB),
-        ]
+        ],
+        glb,
     )
+    case_glb = REPO / "build" / "case-renders" / "board.glb"
+    case_glb.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(glb, case_glb)
     print("wrote", step, "bytes", step.stat().st_size)
     print("wrote", glb, "bytes", glb.stat().st_size)
+    print("wrote", case_glb, "bytes", case_glb.stat().st_size)
     return 0
 
 

@@ -11,3 +11,5 @@ typedef enum {
 
 esp_err_t button_init(void);
 psv_btn_event_t button_poll(void);
+/* Raw level, no debounce or gesture state. For the boot-time download hold. */
+int button_held(void);

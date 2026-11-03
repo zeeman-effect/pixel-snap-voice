@@ -7,6 +7,7 @@ typedef enum {
     PSV_LED_RECORD,
     PSV_LED_PLAY,
     PSV_LED_CHARGE,
+    PSV_LED_SHARE,
     PSV_LED_ERROR
 } psv_led_mode_t;
 

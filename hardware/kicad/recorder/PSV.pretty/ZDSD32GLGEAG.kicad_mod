@@ -1,0 +1,170 @@
+(footprint "ZDSD32GLGEAG"
+	(version 20260206)
+	(generator "psv-hand-edit")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "SD NAND land, LGA-8, body 8.0 mm in X by 6.0-6.2 mm in Y, 1.27 mm pitch. Pads sit in two columns on the SHORT ends, 7.0 mm apart. Pads are 1.15 x 0.75 so one land covers CS CSNP*GCR01 (C = 7.0, 8 x 6.2), Zetta ZDSD*LGEAG (L = 0.80 from each end, 8 x 6.0/6.2) and MK MKDV* (D1 = 6.85, 8 x 6.0). Pin order is the vendor top view, not a microSD socket: pin 1 top-left, 1 DAT2, 2 DAT3, 3 CLK, 4 VSS down the left column, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD up the right. Before 1 Nov 2026 this land was mirrored and had its columns 5.4 mm apart along the long sides, which no SD NAND matches.")
+	(tags "SD NAND LGA-8 Zetta ZDSD32G")
+	(property "Reference" "REF**"
+		(at 0 -4.3 0)
+		(layer "F.SilkS")
+		(uuid "c5188571-0001-4000-8000-000000000001")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "ZDSD32GLGEAG"
+		(at 0 4.3 0)
+		(layer "F.Fab")
+		(uuid "c5188571-0001-4000-8000-000000000002")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "http://en.zettadevice.com/uploads/files/SD%20NAND/32%E5%92%8C64/1645752795ab7e012c7c6a815d.pdf"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c5188571-0001-4000-8000-000000000003")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8 8.0 x 6.0 mm. SD 2.0 1-bit and 4-bit. JLCPCB C7500178. Pins 3 CLK, 4 VSS, 5 CMD, 8 VDD."
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c5188571-0001-4000-8000-000000000004")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_text user "1"
+		(at -4.95 -1.905 0)
+		(layer "F.SilkS")
+		(uuid "c5188571-0001-4000-8000-000000000005")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_rect
+		(start -4.0 -3.1)
+		(end 4.0 3.1)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "c5188571-0001-4000-8000-000000000010")
+	)
+	(fp_circle
+		(center -2.45 -2.35)
+		(end -2.25 -2.35)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.Fab")
+		(uuid "c5188571-0001-4000-8000-000000000011")
+	)
+	(fp_rect
+		(start -4.6 -3.6)
+		(end 4.6 3.6)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "c5188571-0001-4000-8000-000000000012")
+	)
+	(fp_line
+		(start -3.9 -3.25)
+		(end 3.9 -3.25)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c5188571-0001-4000-8000-000000000013")
+	)
+	(fp_line
+		(start -3.9 3.25)
+		(end 3.9 3.25)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c5188571-0001-4000-8000-000000000014")
+	)
+	(pad "1" smd rect
+		(at -3.5 -1.905)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000021")
+	)
+	(pad "2" smd rect
+		(at -3.5 -0.635)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000022")
+	)
+	(pad "3" smd rect
+		(at -3.5 0.635)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000023")
+	)
+	(pad "4" smd rect
+		(at -3.5 1.905)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000024")
+	)
+	(pad "5" smd rect
+		(at 3.5 1.905)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000025")
+	)
+	(pad "6" smd rect
+		(at 3.5 0.635)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000026")
+	)
+	(pad "7" smd rect
+		(at 3.5 -0.635)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000027")
+	)
+	(pad "8" smd rect
+		(at 3.5 -1.905)
+		(size 1.15 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5188571-0001-4000-8000-000000000028")
+	)
+	(embedded_fonts no)
+)

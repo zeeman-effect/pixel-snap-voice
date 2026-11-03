@@ -21,18 +21,20 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
-REPO = Path(os.environ.get("PSV_REPO", Path(__file__).resolve().parents[3]))
+REPO = Path(os.environ.get("PSV_REPO", Path(__file__).resolve().parents[4]))
 OUT = REPO / "build" / "product-renders"
 GLB = OUT / "recorder.glb"
 BLEND = OUT / "recorder-product-renders.blend"
 INSPECT = OUT / "scene-inspect.json"
 
-BOARD_W = 64.0
-BOARD_H = 86.0
+BOARD_W = 59.6
+BOARD_H = 85.6
 SAMPLES = 160
 RESOLUTION = (1920, 1280)
 
-# KiCad XY, millimetres. z is height of the body.
+# KiCad XY, millimetres, from recorder.kicad_pcb. z is height of the body.
+# Only parts whose 3D model is missing from a stock KiCad 10 install. J2 has
+# its own WRL in PSV.pretty; BT1 is bare B.Cu pads, already in the GLB.
 FALLBACKS = [
     {
         "ref": "U1",
@@ -48,30 +50,30 @@ FALLBACKS = [
     {
         "ref": "U2",
         "kind": "qfn",
-        "x": 26.0,
-        "y": 22.0,
-        "rot": 0.0,
+        "x": 24.5,
+        "y": 29.0,
+        "rot": -90.0,
         "sx": 3.0,
         "sy": 3.0,
         "sz": 0.75,
-        "note": "ES8311: library QFN STEP name is missing",
+        "note": "ES8311: library QFN-20 STEP missing from this install",
     },
     {
         "ref": "Y1",
         "kind": "osc",
-        "x": 16.0,
-        "y": 24.0,
-        "rot": 0.0,
+        "x": 27.2,
+        "y": 23.0,
+        "rot": 180.0,
         "sx": 3.2,
         "sy": 2.5,
         "sz": 0.9,
-        "note": "12.288 MHz ASE 3.2x2.5: no matching STEP in this install",
+        "note": "12.288 MHz JLYE 3225 oscillator: no matching STEP in this install",
     },
     {
         "ref": "MK1",
         "kind": "mic",
-        "x": 30.0,
-        "y": 10.0,
+        "x": 27.5,
+        "y": 17.0,
         "rot": 90.0,
         "sx": 4.0,
         "sy": 3.0,
@@ -79,59 +81,26 @@ FALLBACKS = [
         "note": "IM73A135: no Infineon PG-LLGA STEP in this install",
     },
     {
-        "ref": "J2",
-        "kind": "usbc",
-        "x": 8.0,
-        "y": -37.6,
-        "rot": 0.0,
-        "sx": 9.0,
-        "sy": 7.4,
-        "sz": 3.2,
-        "note": "USB-C HRO TYPE-C-31-M-12: no HRO STEP in this install",
-    },
-    {
         "ref": "J3",
-        "kind": "sd",
-        "x": -22.5,
+        "kind": "lga",
+        "x": -22.0,
         "y": -18.0,
-        "rot": 90.0,
-        "sx": 14.5,
-        "sy": 14.0,
-        "sz": 1.8,
-        "note": "microSD Wuerth 693072010801: no Wuerth STEP; slot faces -X",
-    },
-    {
-        "ref": "SP1",
-        "kind": "speaker",
-        "x": 0.0,
-        "y": 36.0,
         "rot": 0.0,
-        "sx": 13.0,
-        "sy": 13.0,
-        "sz": 4.0,
-        "note": "KELIKING KLJ-01304T: footprint has no 3D model",
+        "sx": 8.0,
+        "sy": 6.0,
+        "sz": 0.75,
+        "note": "MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8; no vendor STEP",
     },
     {
         "ref": "U3",
         "kind": "qfn",
-        "x": 24.0,
-        "y": -39.5,
+        "x": 21.6,
+        "y": -39.3,
         "rot": 180.0,
         "sx": 3.0,
         "sy": 3.0,
-        "sz": 1.0,
-        "note": "BQ24074RGTR: library VQFN STEP name is missing",
-    },
-    {
-        "ref": "BT1",
-        "kind": "jst",
-        "x": -23.5,
-        "y": 34.0,
-        "rot": 0.0,
-        "sx": 5.9,
-        "sy": 7.6,
-        "sz": 6.0,
-        "note": "JST PH S2B-PH-K-S; KiCad STEP if the 3D plugin is installed",
+        "sz": 0.9,
+        "note": "BQ24073RGTR: library VQFN-16 STEP missing from this install",
     },
 ]
 
@@ -598,7 +567,7 @@ def add_fallbacks(fcu_z, mats):
                 loc,
                 (mm(spec["sx"]), mm(spec["sy"]), mm(spec["sz"])),
                 spec["rot"],
-                mats["chip"] if kind in {"qfn", "osc"} else mats["sensor"],
+                mats["chip"] if kind in {"qfn", "osc", "lga"} else mats["sensor"],
             )
             created.append(body.name)
     return created
@@ -711,7 +680,7 @@ def add_cameras(center):
 
     cam("hero", center + Vector((0.09, -0.13, 0.1)), center + Vector((0.0, 0.0, 0.002)), 45.0)
     cam("top", center + Vector((0.012, -0.02, 0.22)), center + Vector((0.0, 0.0, 0.001)), 50.0)
-    mic_x, mic_y = kicad_xy(30.0, 10.0)
+    mic_x, mic_y = kicad_xy(27.5, 17.0)
     cam(
         "sensor-detail",
         Vector((mic_x + 0.016, mic_y - 0.018, 0.022)),
@@ -876,7 +845,7 @@ def main():
         },
         "expected_outline_mm": [BOARD_W, BOARD_H],
         "outline_matches": holes_ok,
-        "outline": "rectangular 64 x 86 mm, no corner radius",
+        "outline": "59.6 x 85.6 mm",
         "fcu_z_mm": round(fcu_z * 1000, 3),
         "material_counts": counts,
         "fallbacks": FALLBACKS,

@@ -10,19 +10,24 @@ distro KiCad package puts it in the system python3; on Windows use
     python3 route_pcb.py --export-dsn F     # planes only, write a Specctra DSN
     python3 route_pcb.py --import-ses F     # apply a session, pour, stitch
     python3 route_pcb.py --finish-only      # drop stub vias, re-seat silk
+    python3 route_pcb.py --repair-only      # maze leftover opens, keep copper
 
 The router is freerouting (https://freerouting.app), driven headless through
 Specctra DSN/SES. The old in-tree A* router that used to live here is gone:
 it left 373 DRC errors and 38 open nets, mostly shorts and sub-minimum track
 widths, and no amount of grid tuning made it competitive with a real
 rip-up-and-retry router. Point PSV_FREEROUTING at the launcher, or put
-``freerouting`` on PATH; .cursor/install.sh installs it.
+``freerouting`` on PATH; scripts/setup-ubuntu.sh installs it.
 
 This script loads recorder.kicad_pcb. It never calls CreateEmptyBoard and it
 does not move footprints. Edge.Cuts, mounting holes, and placement stay as
 they are. It refuses to write while ~recorder.kicad_pcb.lck is present.
 
 Coordinates are the same magnet-centred millimetres as generate_pcb.py.
+The hand-routed stitch points in this file are from before the lid 180° spin
+(pogo now at +Y / phone-top; clocking magnet still 6 o'clock in the tray).
+Do not run a full re-route until those absolute points are regenerated;
+--planes-only still re-pours the zones that are already on the board.
 """
 
 from __future__ import annotations
@@ -136,7 +141,7 @@ def in_analog(x, y):
 
 
 def in_charger_keep(x, y):
-    """Skip the GND stitch grid over the BQ24074 body.
+    """Skip the GND stitch grid over the BQ24073 body.
 
     H2 sits 3 mm east of U3, so a 6 mm grid via lands on the QFN or crowds
     an ISET pad. The EP gets its own 0.6/0.3 via in fanout_charger.
@@ -282,6 +287,23 @@ def add_via(board, net, x, y, protect=False):
     via.SetWidth(pcbnew.F_Cu, pcbnew.FromMM(VIA_SIZE))
     via.SetWidth(pcbnew.B_Cu, pcbnew.FromMM(VIA_SIZE))
     via.SetDrill(pcbnew.FromMM(VIA_DRILL))
+    via.SetViaType(pcbnew.VIATYPE_THROUGH)
+    via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+    via.SetNet(net)
+    board.Add(via)
+    return via
+
+
+def add_via_custom(board, net, x, y, size, drill, protect=False):
+    """A via smaller than the 0.6 / 0.3 default. JLC still allows 0.55 / 0.25."""
+    if protect:
+        PROTECTED.add(("via", round(x, 3), round(y, 3)))
+    via = pcbnew.PCB_VIA(board)
+    via.SetPosition(vec(x, y))
+    via.SetFrontWidth(pcbnew.FromMM(size))
+    via.SetWidth(pcbnew.F_Cu, pcbnew.FromMM(size))
+    via.SetWidth(pcbnew.B_Cu, pcbnew.FromMM(size))
+    via.SetDrill(pcbnew.FromMM(drill))
     via.SetViaType(pcbnew.VIATYPE_THROUGH)
     via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
     via.SetNet(net)
@@ -1096,56 +1118,52 @@ def stitch_islands(board, obstacles, half_w, half_h):
 # ---------------------------------------------------------------------------
 
 
-# Height the connector pins climb to before anything is allowed to turn.
-# J2's two 0.65 mm NPTH board locks sit at (5.11, -40.2) and (10.89, -40.2).
-# With hole clearance those two pegs block their whole x column from
-# y = -40.85 up to y = -39.55, so the pad row can only breathe straight up.
-J2_LANE_TOP = -38.5
+# J2 sits at (8.0, -39.15) rotated 180 so the mouth is on y = -42.8. The
+# 16 SMD contacts are then one row at y = -35.105, already north of the
+# two 0.65 mm board-lock NPTH at y = -36.55. Climb +Y; do not dive south
+# through the locks. Same topology as the 64 x 86 board: climb, fan the
+# 0.5 mm data row out to 0.8 mm, D- joins on F.Cu, D+ vias 0.6 mm north
+# of that fan so a 0.6 mm barrel clears the other net. VBUS dives first
+# so its vias are never on the CC bus.
+VBUS_VIA_Y = -34.00
+J2_LANE_TOP = -33.40
+J2_FAN_Y = -32.90
+DP_LINK_Y = -32.40
+DM_WEST_Y = -31.80
 
-# Escape lane per contact: pad number -> x the trace climbs at. Each is
-# either the pad's own centre (0.3 mm contacts, 0.5 mm pitch, so the only
-# lane that clears both neighbours) or, for the 0.6 mm VBUS contacts, the
-# 0.115 mm-wide slot between the neighbouring pad and the board lock.
+# Escape lane per contact: pad number -> x the trace climbs at. On this
+# rotation that x is the pad's own centre.
 J2_LANES = {
-    "A4": ("VBUS", 5.82),
-    "A5": ("CC1", 6.75),
-    "B7": ("USB_DM", 7.25),
-    "A6": ("USB_DP", 7.75),
-    "A7": ("USB_DM", 8.25),
-    "B6": ("USB_DP", 8.75),
-    "B5": ("CC2", 9.75),
-    "A9": ("VBUS", 10.18),
+    "A9": ("VBUS", 5.55),
+    "B5": ("CC2", 6.25),
+    "B6": ("USB_DP", 7.25),
+    "A7": ("USB_DM", 7.75),
+    "A6": ("USB_DP", 8.25),
+    "B7": ("USB_DM", 8.75),
+    "A5": ("CC1", 9.25),
+    "A4": ("VBUS", 10.45),
 }
 
-# Where the four data contacts spread to once they are above the locks.
-J2_FAN = {"B7": 6.80, "A6": 7.60, "A7": 8.40, "B6": 9.20}
-J2_FAN_Y = -37.9
+# 0.8 mm fan. D+ lands on 6.70 / 8.30 (via pair). D- on 7.50 / 9.10.
+J2_FAN = {"B6": 6.70, "A7": 7.50, "A6": 8.30, "B7": 9.10}
+
+CC2_PAD = (3.825, -32.900)
+CC1_PAD = (11.675, -32.600)
+F1_VBUS = (15.100, -39.013)
+F1_VIA = (15.100, -38.20)
+U7_VBUS_VIA = (7.95, -31.00)
+U7_VBUS_PAD = (7.950, -30.738)
+VBUS_AROUND = 1.50
 
 
 def usb_escape(board, obstacles):
     """Hand-route everything that leaves the USB-C footprint.
 
-    A USB-C receptacle repeats D+ and D- on both rows so the plug works either
-    way up, and on this 16-pin part the row reads B7(D-) A6(D+) A7(D-) B6(D+)
-    on a 0.5 mm pitch. Each net has to skip a pad of the other net and the two
-    links have to cross, which needs a layer change, and the CC and VBUS
-    contacts on either side of them need lanes of their own past the board
-    locks. Freerouting solves none of this: it gave up on J2-B6 -> J2-A6 every
-    run, and when the data pair fanned out early it walled CC1 into its pad.
-
-    So every contact climbs straight out of its pad to y = -38.5 first, and
-    only then does anything turn:
-
-      * CC1 goes left along y = -38.5 into R2, CC2 right into R3.
-      * VBUS drops to B.Cu just above the locks and crosses under the data
-        pair to F1. Its two contacts are 4.9 mm apart with the whole data
-        pair between them, so there is no F.Cu path that joins them.
-      * D+ / D- fan to 0.8 mm, D- crosses on F.Cu and D+ ducks under it.
-
-    The VBUS climb is 0.15 mm, not the 0.3 mm POWER width: the slot between
-    the B8 contact and the board lock is 0.115 mm wide once clearance is
-    taken off, and 2.5 mm of 0.15 mm outer copper is under 10 mohm at the
-    500 mA this charger draws.
+    J2 is rotated 180, so the contact row sits at y = -35.105, already north
+    of the board-lock NPTH. VBUS dives at VBUS_VIA_Y. CC1/CC2 run out at
+    J2_LANE_TOP to R2/R3. The data pair fans to 0.8 mm; D- stays on F.Cu,
+    D+ joins on B.Cu. U7 is a tap the autorouter can still reach, not a
+    series hop in this escape.
     """
     pads = {}
     for fp in board.GetFootprints():
@@ -1169,84 +1187,68 @@ def usb_escape(board, obstacles):
 
     nets = {name: net_of(board, name)
             for name in ("VBUS", "CC1", "CC2", "USB_DP", "USB_DM")}
+    vbus, dp, dm = nets["VBUS"], nets["USB_DP"], nets["USB_DM"]
 
-    # 1. Straight up out of every pad.
     for number, (name, lane) in J2_LANES.items():
         px, py = pads[number]
+        if name == "VBUS":
+            run(vbus, [(px, py), (lane, VBUS_VIA_Y)], pcbnew.F_Cu, POWER_WIDTH)
+            drop(vbus, lane, VBUS_VIA_Y)
+            continue
         width = USB_WIDTH if name.startswith("USB_") else DEFAULT_WIDTH
-        top = -39.5 if name == "VBUS" else J2_LANE_TOP
-        run(nets[name], [(px, py), (lane, py + 0.545), (lane, top)],
-            pcbnew.F_Cu, width)
+        run(nets[name], [(px, py), (lane, J2_LANE_TOP)], pcbnew.F_Cu, width)
 
-    # 2. CC1 and CC2 run outward to their 5.11k Rd resistors.
-    run(nets["CC1"], [(J2_LANES["A5"][1], J2_LANE_TOP), (1.40, J2_LANE_TOP),
-                      (0.50, -39.10)], pcbnew.F_Cu, DEFAULT_WIDTH)
-    run(nets["CC2"], [(J2_LANES["B5"][1], J2_LANE_TOP), (15.50, J2_LANE_TOP),
-                      (15.50, -39.175)], pcbnew.F_Cu, DEFAULT_WIDTH)
+    run(nets["CC2"], [(J2_LANES["B5"][1], J2_LANE_TOP),
+                      (CC2_PAD[0], J2_LANE_TOP), CC2_PAD],
+        pcbnew.F_Cu, DEFAULT_WIDTH)
+    run(nets["CC1"], [(J2_LANES["A5"][1], J2_LANE_TOP),
+                      (CC1_PAD[0], J2_LANE_TOP), CC1_PAD],
+        pcbnew.F_Cu, DEFAULT_WIDTH)
 
-    # 3. VBUS crosses under the data pair on B.Cu and surfaces at F1.
-    vbus = nets["VBUS"]
-    run(vbus, [(5.82, -39.5), (5.55, -39.2)], pcbnew.F_Cu, DEFAULT_WIDTH)
-    run(vbus, [(10.18, -39.5), (10.45, -39.2)], pcbnew.F_Cu, DEFAULT_WIDTH)
-    for x in (5.55, 10.45, 16.50):
-        drop(vbus, x, -39.2)
-    run(vbus, [(5.55, -39.2), (16.50, -39.2)], pcbnew.B_Cu, POWER_WIDTH)
-    run(vbus, [(16.50, -39.2), (17.50, -39.212)], pcbnew.F_Cu, POWER_WIDTH)
+    vx_w, vx_e = J2_LANES["A9"][1], J2_LANES["A4"][1]
+    run(vbus, [(vx_w, VBUS_VIA_Y), (vx_e, VBUS_VIA_Y),
+               (F1_VIA[0], VBUS_VIA_Y), F1_VIA],
+        pcbnew.B_Cu, POWER_WIDTH)
+    drop(vbus, *F1_VIA)
+    run(vbus, [F1_VIA, F1_VBUS], pcbnew.F_Cu, POWER_WIDTH)
+    # West of R3, then east on B.Cu north of the D+ join, up to U7 pad 5.
+    run(vbus, [(vx_w, VBUS_VIA_Y), (VBUS_AROUND, VBUS_VIA_Y),
+               (VBUS_AROUND, U7_VBUS_VIA[1]), U7_VBUS_VIA],
+        pcbnew.B_Cu, POWER_WIDTH)
+    drop(vbus, *U7_VBUS_VIA)
+    run(vbus, [U7_VBUS_VIA, U7_VBUS_PAD], pcbnew.F_Cu, POWER_WIDTH)
 
-    # 4. Data pair: fan to 0.8 mm, D- crosses on top, D+ underneath.
     for number, x in J2_FAN.items():
         name, lane = J2_LANES[number]
         run(nets[name], [(lane, J2_LANE_TOP), (x, J2_FAN_Y)],
             pcbnew.F_Cu, USB_WIDTH)
-    dm, dp = nets["USB_DM"], nets["USB_DP"]
-    run(dm, [(J2_FAN["B7"], J2_FAN_Y), (J2_FAN["B7"], -36.0),
-             (J2_FAN["A7"], -36.0), (J2_FAN["A7"], J2_FAN_Y)],
+    run(dm, [(J2_FAN["A7"], J2_FAN_Y), (J2_FAN["A7"], DM_WEST_Y),
+             (J2_FAN["B7"], DM_WEST_Y), (J2_FAN["B7"], J2_FAN_Y)],
         pcbnew.F_Cu, USB_WIDTH)
-    link_y = -36.9
     for number in ("A6", "B6"):
         x = J2_FAN[number]
-        run(dp, [(x, J2_FAN_Y), (x, link_y)], pcbnew.F_Cu, USB_WIDTH)
-        drop(dp, x, link_y)
-    run(dp, [(J2_FAN["A6"], link_y), (J2_FAN["B6"], link_y)],
+        run(dp, [(x, J2_FAN_Y), (x, DP_LINK_Y)], pcbnew.F_Cu, USB_WIDTH)
+        drop(dp, x, DP_LINK_Y)
+    run(dp, [(J2_FAN["A6"], DP_LINK_Y), (J2_FAN["B6"], DP_LINK_Y)],
         pcbnew.B_Cu, USB_WIDTH)
 
 
-# Lanes for the long haul from the connector up to the MCU. U1's USB pads sit
-# on the module's top row, the far side of a 15.9 mm module from J2, and the
-# castellations either side leave 0.05 mm between pads, so nothing crosses the
-# footprint. The pair goes up the 3.3 mm channel between J1 and U1 instead.
+# Lanes for the long haul from the connector up to the MCU. U1's USB pads
+# sit on the module's top row. D+ stays on B.Cu until it is west of U7,
+# then both lines run F.Cu up the 4.80 / 5.20 pair and in along the row.
 USB_PAIR_PITCH = 0.40
-# Far enough west of U1's castellations to leave a 1.3 mm gap. The module's
-# corner GND pad only reaches the plane through a stitching via dropped in
-# that gap, and lanes any closer pinch the F.Cu pour into an island with
-# nowhere to put one.
 USB_DP_LANE = 4.80
 USB_DM_LANE = 5.20
 USB_DP_ROW = -9.85
 USB_DM_ROW = -10.25
-USB_BCU_LINK_Y = -36.90
-USB_F_LINK_Y = -36.00
 
 
 def usb_pair_to_mcu(board, obstacles):
     """Carry D+/D- from the connector escape to U1 as one coupled pair.
 
-    Left to itself the autorouter sent D+ on a 16.6 mm diagonal across B.Cu.
-    B.Cu is the face that lies against the phone and is otherwise a solid GND
-    pour, so that slotted the shield and put a USB line right against the
-    handset with nothing between them.
-
-    The fix is topological. Both nets already surface west of J2 on their own
-    link -- D- on F.Cu at y = -36.0, D+ on B.Cu at y = -36.9 -- so extending
-    those two links westwards drops each net into its own lane with no
-    crossing anywhere. U7 then hangs off the lanes as a short stub rather than
-    sitting in series. That costs nothing: the array is a shunt TVS, it clamps
-    to GND from the line wherever it is tapped, and 5 mm of stub is invisible
-    at full-speed edge rates.
-
-    Lanes are 0.4 mm apart, 0.05 mm wider than the netclass diff-pair gap, so
-    the corners where one lane turns and the other runs past still hold
-    clearance with margin.
+    D- westbound is north of the D+ vias, so it rides F.Cu over them. D+
+    stays on the B.Cu join until the west lane. Do not cut back under U7
+    on F.Cu at the TVS pad row: those pads hang to y = -31.40.
     """
     dp, dm = net_of(board, "USB_DP"), net_of(board, "USB_DM")
 
@@ -1255,25 +1257,43 @@ def usb_pair_to_mcu(board, obstacles):
             add_track(board, net, x0, y0, x1, y1, layer, USB_WIDTH, protect=True)
             obstacles.add_track(x0, y0, x1, y1, USB_WIDTH, net.GetNetCode(), layer)
 
-    # D+ reaches its lane on the B.Cu link it already uses to join its two
-    # connector contacts, so the only new copper below the board is 2.45 mm.
-    run(dp, [(J2_FAN["A6"], USB_BCU_LINK_Y), (USB_DP_LANE, USB_BCU_LINK_Y)],
+    run(dp, [(J2_FAN["A6"], DP_LINK_Y), (USB_DP_LANE, DP_LINK_Y)],
         pcbnew.B_Cu)
-    add_via(board, dp, USB_DP_LANE, USB_BCU_LINK_Y, protect=True)
-    obstacles.add_via(USB_DP_LANE, USB_BCU_LINK_Y, dp.GetNetCode())
-    run(dp, [(USB_DP_LANE, USB_BCU_LINK_Y), (USB_DP_LANE, USB_DP_ROW),
+    add_via(board, dp, USB_DP_LANE, DP_LINK_Y, protect=True)
+    obstacles.add_via(USB_DP_LANE, DP_LINK_Y, dp.GetNetCode())
+    run(dp, [(USB_DP_LANE, DP_LINK_Y), (USB_DP_LANE, USB_DP_ROW),
              (14.85, USB_DP_ROW), (14.85, -11.00)], pcbnew.F_Cu)
 
-    # D- stays on F.Cu the whole way.
-    run(dm, [(J2_FAN["B7"], USB_F_LINK_Y), (USB_DM_LANE, USB_F_LINK_Y),
-             (USB_DM_LANE, USB_DM_ROW), (14.00, USB_DM_ROW), (14.00, -11.00)],
-        pcbnew.F_Cu)
+    run(dm, [(J2_FAN["B7"], J2_FAN_Y), (J2_FAN["B7"], DM_WEST_Y),
+             (USB_DM_LANE, DM_WEST_Y), (USB_DM_LANE, USB_DM_ROW),
+             (14.00, USB_DM_ROW), (14.00, -11.00)], pcbnew.F_Cu)
 
-    # Tap each lane sideways into the ESD array, and bridge its two pads.
-    run(dm, [(USB_DM_LANE, -30.05), (6.862, -30.05), (9.137, -30.05)],
-        pcbnew.F_Cu)
-    run(dp, [(9.20, USB_BCU_LINK_Y), (9.20, -31.95), (6.862, -31.95)],
-        pcbnew.F_Cu)
+
+def stitch_rstat_vdd(board, obstacles):
+    """Drop Rstat's VDD33 pin onto the In2 plane.
+
+    The C1/C3 F.Cu island stops at y = -26.8. Rstat sits at y = -35.8, so
+    a via next to pin 1 is shorter than a trace up that aisle.
+    """
+    vdd = net_of(board, "VDD33")
+    pad = (24.775, -35.80)
+    via = (23.55, -35.80)
+    add_track(board, vdd, pad[0], pad[1], via[0], via[1],
+              pcbnew.F_Cu, DEFAULT_WIDTH, protect=True)
+    obstacles.add_track(pad[0], pad[1], via[0], via[1],
+                        DEFAULT_WIDTH, vdd.GetNetCode(), pcbnew.F_Cu)
+    add_via(board, vdd, via[0], via[1], protect=True)
+    obstacles.add_via(via[0], via[1], vdd.GetNetCode())
+
+
+def stitch_sw_gnd(board, obstacles):
+    """Tie F.Cu and B.Cu GND in the empty south-west corner."""
+    gnd = net_of(board, "GND")
+    x, y = -27.2, -41.0
+    if not obstacles.via_fits(x, y, gnd.GetNetCode()):
+        return
+    add_via(board, gnd, x, y, protect=True)
+    obstacles.add_via(x, y, gnd.GetNetCode())
 
 
 # ---------------------------------------------------------------------------
@@ -1427,7 +1447,7 @@ def _lock(track):
 
 
 def fanout_charger(board, obstacles, protect=False):
-    """Walk the BQ24074 pads out so the pour repair can reach them.
+    """Walk the BQ24073 pads out so the pour repair can reach them.
 
     Ties and the EP via first, then the short links to nearby passives.
     Stubs are last, and only for pads the links did not already reach. H2
@@ -1485,7 +1505,9 @@ def fanout_charger(board, obstacles, protect=False):
 
     fx, fy = mm(u3.GetPosition())
     for num, pad in pads.items():
-        if not num or num in ("4", "5", "8", "17"):
+        # 4 CE and 5 EN2 are already tied to ground. 7 is PGOOD, left open.
+        # 8 VSS and 17 the thermal pad are ground and already poured.
+        if not num or num in ("4", "5", "7", "8", "17"):
             continue
         name = pad.GetNetname()
         if not name or name in ("GND",) or name.startswith("unconnected"):
@@ -1559,8 +1581,9 @@ CHARGER_RAIL_X = (
     24.25, 24.75, 25.60, 26.30, 30.40,
 )
 CHARGER_RAIL_Y = (
-    -41.75, -41.30, -40.50, -38.56, -37.55, -37.20, -36.85, -34.00,
-    -33.70, -32.80, -32.10, -31.00, -28.50, -27.50,
+    -41.75, -41.30, -40.50, -38.56, -37.55, -37.20, -36.85, -36.30,
+    -35.50, -35.00, -34.00, -33.70, -32.80, -32.10, -31.00, -28.50,
+    -27.50,
 )
 
 
@@ -1695,7 +1718,7 @@ def hop_bcu(board, obstacles, net, start, end, via_a, via_b, protect):
 
 
 def hand_route_charger(board, obstacles, protect=False):
-    """Short links from the BQ24074 to its nearby passives.
+    """Short links from the BQ24073 to its nearby passives.
 
     U3 is rotated 180 so OUT and the programming pins face C5 and the
     resistor column. H2 still blocks the east (BAT) side. ISET stays east
@@ -1731,7 +1754,7 @@ def hand_route_charger(board, obstacles, protect=False):
         net = board.FindNet(u3_14[0].GetNetname())
         if net is not None and hop_bcu(
             board, obstacles, net, u3_14[1], r9_1[1],
-            (23.2, -36.6), (15.7, -28.5), protect,
+            (23.2, -36.6), (15.1, -29.1), protect,
         ):
             linked += 1
         else:
@@ -1838,7 +1861,7 @@ def find_freerouting():
         if os.path.isfile(path):
             return path
     raise SystemExit(
-        "freerouting not found. Install it (bash .cursor/install.sh) or set "
+        "freerouting not found. Install it (bash scripts/setup-ubuntu.sh) or set "
         "PSV_FREEROUTING to the launcher."
     )
 
@@ -1964,7 +1987,9 @@ def delete_bad_tracks(board, report):
             continue
         for item in violation.get("items", []):
             obj = index.get(item["uuid"])
-            if not isinstance(obj, pcbnew.PCB_TRACK) or isinstance(obj, pcbnew.PCB_VIA):
+            # Vias are tracks. A barrel sitting in a foreign pad (the NAND
+            # land, the oscillator) is the same kind of short as a trace.
+            if not isinstance(obj, pcbnew.PCB_TRACK):
                 continue
             if obj.IsLocked():
                 continue
@@ -2209,8 +2234,276 @@ def drop_vias_crowding_pads(board):
     return dropped
 
 
+def hide_hole_silk(board):
+    """Put Rstat's designator north of the part, off H2's silk ring.
+
+    Moving the hole silk onto Dwgs.User made the mounting-hole footprints
+    fail the library-mismatch check. Park the text instead.
+    """
+    for fp in board.GetFootprints():
+        if fp.GetReference().startswith("H"):
+            for item in fp.GraphicalItems():
+                if item.GetLayer() == pcbnew.Dwgs_User:
+                    item.SetLayer(pcbnew.F_SilkS)
+    for fp in board.GetFootprints():
+        if fp.GetReference() != "Rstat":
+            continue
+        ref = fp.Reference()
+        ref.SetPosition(vec(24.2, -34.4))
+        print("  parked Rstat silk at (24.2, -34.4)")
+    for fp in board.GetFootprints():
+        if fp.GetReference() != "U3":
+            continue
+        fp.Reference().SetPosition(vec(20.4, -42.15))
+        print("  parked U3 silk at (20.4, -42.15)")
+        return 1
+    return 0
+
+
+def _xy_near(a, b, tol=0.08):
+    return abs(a[0] - b[0]) < tol and abs(a[1] - b[1]) < tol
+
+
+def _delete_via_at(board, netname, x, y):
+    for item in list(board.GetTracks()):
+        if not isinstance(item, pcbnew.PCB_VIA):
+            continue
+        if item.GetNetname() != netname:
+            continue
+        if _xy_near(mm(item.GetPosition()), (x, y)):
+            board.Delete(item)
+            return True
+    return False
+
+
+def _delete_seg(board, netname, a, b, layer):
+    for item in list(board.GetTracks()):
+        if isinstance(item, pcbnew.PCB_VIA):
+            continue
+        if item.GetNetname() != netname or item.GetLayer() != layer:
+            continue
+        start, end = mm(item.GetStart()), mm(item.GetEnd())
+        if (_xy_near(start, a) and _xy_near(end, b)) or (
+            _xy_near(start, b) and _xy_near(end, a)
+        ):
+            board.Delete(item)
+            return True
+    return False
+
+
+def bridge_agnd(board, obstacles):
+    """Join the analog return: MK1 ring/pad 4 to Ragnd, across the pour split."""
+    agnd = net_of(board, "/Audio/AGND")
+    mk1 = pad_of(board, "MK1", "4")
+    rag = pad_of(board, "Ragnd", "1")
+    if mk1 is None or rag is None:
+        return 0
+    if route_points(board, obstacles, agnd, pad_xy(mk1), pad_xy(rag),
+                    DEFAULT_WIDTH, True):
+        print("    bridged MK1-4 to Ragnd")
+        return 1
+    return 0
+
+
+def _has_via_at(board, netname, x, y):
+    for item in board.GetTracks():
+        if not isinstance(item, pcbnew.PCB_VIA):
+            continue
+        if item.GetNetname() == netname and _xy_near(mm(item.GetPosition()), (x, y)):
+            return True
+    return False
+
+
+def stitch_agnd_codec(board):
+    """Via off U2's F.Cu island, B.Cu around I2C to the MK1/Ragnd return.
+
+    Y1 and the I2S fanout split the analog pour, so a west-of-Y1 F.Cu run
+    shorts GND and the codec pads. Stay on B.Cu east of that alley.
+    """
+    agnd = net_of(board, "/Audio/AGND")
+    for a, b in (
+        ((22.60, 19.50), (22.60, 29.80)),
+        ((23.175, 19.50), (22.60, 19.50)),
+        ((22.60, 29.80), (23.05, 29.80)),
+    ):
+        _delete_seg(board, "/Audio/AGND", a, b, pcbnew.F_Cu)
+    for a, b in (
+        ((22.40, 30.40), (22.40, 31.20)),
+        ((22.40, 31.20), (28.50, 31.20)),
+        ((28.50, 31.20), (28.50, 26.80)),
+        ((28.50, 26.80), (26.40, 26.80)),
+        ((22.40, 30.40), (26.40, 30.40)),
+        ((26.40, 30.40), (26.40, 29.00)),
+        ((26.40, 29.00), (28.60, 29.00)),
+        ((28.60, 29.00), (28.60, 26.80)),
+        ((28.60, 26.80), (26.40, 26.80)),
+        ((26.40, 26.80), (26.40, 19.70)),
+        ((26.40, 19.70), (23.175, 19.50)),
+    ):
+        _delete_seg(board, "/Audio/AGND", a, b, pcbnew.B_Cu)
+    add_track(board, agnd, 22.275, 29.80, 22.40, 30.40, pcbnew.F_Cu,
+              DEFAULT_WIDTH, protect=True)
+    if not _has_via_at(board, "/Audio/AGND", 22.40, 30.40):
+        add_via(board, agnd, 22.40, 30.40, protect=True)
+    for a, b in (
+        ((22.40, 30.40), (26.40, 30.40)),
+        ((26.40, 30.40), (26.40, 29.00)),
+        ((26.40, 29.00), (28.60, 29.00)),
+        ((28.60, 29.00), (28.60, 26.80)),
+        ((28.60, 26.80), (26.40, 26.80)),
+        ((26.40, 26.80), (26.40, 19.70)),
+        ((26.40, 19.70), (23.175, 19.50)),
+    ):
+        add_track(board, agnd, a[0], a[1], b[0], b[1], pcbnew.B_Cu,
+                  DEFAULT_WIDTH, protect=True)
+    print("    stitched U2 AGND on B.Cu east of Y1")
+    return 1
+
+
+def _delete_iterm_failed_fcu(board):
+    for a, b in (
+        ((21.85, -36.975), (21.85, -36.30)),
+        ((21.85, -36.30), (23.20, -36.30)),
+        ((23.20, -36.30), (24.00, -35.50)),
+        ((24.00, -35.50), (24.00, -35.00)),
+        ((21.85, -36.975), (21.85, -36.60)),
+        ((21.85, -36.60), (24.11, -36.60)),
+        ((24.11, -36.60), (24.11, -35.00)),
+        ((24.11, -35.00), (24.00, -35.00)),
+        ((21.85, -36.975), (21.85, -36.85)),
+        ((21.85, -36.85), (23.50, -36.85)),
+    ):
+        _delete_seg(board, "/Power/ITERM", a, b, pcbnew.F_Cu)
+
+
+def restore_tmr_hop(board):
+    """Put TMR back on the 64 mm hop that clears TS, VDD33 and VBUS_CHG."""
+    tmr = net_of(board, "/Power/TMR")
+    for x, y in (
+        (21.35, -36.60), (21.35, -36.975), (23.20, -36.00), (23.50, -36.85),
+    ):
+        _delete_via_at(board, "/Power/TMR", x, y)
+    for a, b, layer in (
+        ((21.35, -36.60), (15.10, -29.10), pcbnew.B_Cu),
+        ((21.35, -36.975), (23.20, -36.60), pcbnew.B_Cu),
+        ((23.20, -36.00), (15.10, -29.10), pcbnew.B_Cu),
+        ((21.35, -36.60), (22.40, -36.00), pcbnew.F_Cu),
+        ((22.40, -36.00), (23.20, -36.00), pcbnew.F_Cu),
+        ((21.35, -37.862), (21.35, -36.975), pcbnew.F_Cu),
+        ((21.35, -36.60), (23.20, -36.60), pcbnew.F_Cu),
+        ((23.20, -36.60), (15.10, -29.10), pcbnew.B_Cu),
+    ):
+        _delete_seg(board, "/Power/TMR", a, b, layer)
+    add_track(board, tmr, 21.35, -37.862, 21.35, -36.60, pcbnew.F_Cu,
+              DEFAULT_WIDTH, protect=True)
+    add_track(board, tmr, 21.35, -36.60, 23.20, -36.60, pcbnew.F_Cu,
+              DEFAULT_WIDTH, protect=True)
+    if not _has_via_at(board, "/Power/TMR", 23.20, -36.60):
+        add_via(board, tmr, 23.20, -36.60, protect=True)
+    add_track(board, tmr, 23.20, -36.60, 15.10, -29.10, pcbnew.B_Cu,
+              DEFAULT_WIDTH, protect=True)
+    print("    restored TMR hop")
+    return 1
+
+
+def stitch_charger_iterm(board):
+    """Leave the charger copper alone.
+
+    ITERM and TMR are routed. The old body put TMR back on the y=-36.6 hop
+    and left U3 pin 15 open, which is how this net stayed unconnected.
+    """
+    del board
+    print("    stitch_charger_iterm skipped; ITERM and TMR are already routed")
+    return 0
+
+
+def via_then_maze(board, router, obstacles, net, source, target, width):
+    """Drop vias on dangling ends, then maze. Closes F.Cu-to-B.Cu leftovers."""
+    code = net.GetNetCode()
+    pts = []
+    for obj in (source, target):
+        if isinstance(obj, pcbnew.PAD):
+            pts.append(pad_xy(obj))
+        elif isinstance(obj, pcbnew.PCB_TRACK) and not isinstance(obj, pcbnew.PCB_VIA):
+            pts.append(mm(obj.GetStart()))
+            pts.append(mm(obj.GetEnd()))
+    for x, y in pts:
+        if obstacles.via_fits(x, y, code):
+            add_via(board, net, x, y)
+            obstacles.add_via(x, y, code)
+    return router.connect(board, net, source, target, width)
+
+
+def close_leftover_opens(board, half_w, half_h, passes=5):
+    """Maze whatever finish() still has open, without ripping good copper."""
+    print("closing leftover opens")
+    stitch_agnd_codec(board)
+    hide_hole_silk(board)
+    fill_zones(board)
+    save(board)
+    for attempt in range(1, passes + 1):
+        save(board)
+        data = drc_json(PCB)
+        opens = data.get("unconnected_items", [])
+        print(f"  leftover pass {attempt}: {len(opens)} open, "
+              f"{len(data.get('violations', []))} violations")
+        if not opens:
+            return pcbnew.LoadBoard(PCB)
+        board = pcbnew.LoadBoard(PCB)
+        board.BuildListOfNets()
+        apply_board_rules(board)
+        obstacles = Obstacles(board, half_w, half_h)
+        router = MazeRouter(board, obstacles, half_w, half_h)
+        if attempt == 1:
+            bridge_agnd(board, obstacles)
+        healed, stuck = repair_unconnected(board, obstacles, router, data)
+        extra = 0
+        for net, source, target, width in stuck:
+            if via_then_maze(board, router, obstacles, net, source, target,
+                             width):
+                extra += 1
+                print(f"    via-maze {net.GetNetname()}")
+        print(f"    maze healed {healed}, via-maze {extra}, still {len(stuck) - extra}")
+        fill_zones(board)
+        save(board)
+        if not healed and not extra and attempt > 1:
+            break
+    board = pcbnew.LoadBoard(PCB)
+    board.BuildListOfNets()
+    board, trimmed = trim_drc_danglers(board)
+    return board
+
+
+def trim_drc_danglers(board):
+    """Delete leftover stubs DRC calls dangling, once the net is otherwise closed."""
+    save(board)
+    data = drc_json(PCB)
+    if data.get("unconnected_items"):
+        return board, 0
+    index = board_items_by_uuid(board)
+    doomed = []
+    for violation in data.get("violations", []):
+        if violation.get("type") not in ("track_dangling", "via_dangling"):
+            continue
+        for item in violation.get("items", []):
+            obj = index.get(item["uuid"])
+            if obj is None or obj.IsLocked():
+                continue
+            doomed.append(obj)
+    for obj in doomed:
+        board.Delete(obj)
+    if doomed:
+        print(f"  trimmed {len(doomed)} dangling stubs")
+        fill_zones(board)
+        save(board)
+        board = pcbnew.LoadBoard(PCB)
+        board.BuildListOfNets()
+    return board, len(doomed)
+
+
 def finish(board, half_w, half_h):
     """Last mile: drop stub vias, then find every designator a legible seat."""
+    hide_hole_silk(board)
     dropped = drop_dangling_vias(board)
     if dropped:
         print(f"  dropped {dropped} dangling vias")
@@ -2265,20 +2558,17 @@ ROUTED_OPEN_ITEMS = [
     "part; check polarity, volume (NS4150 on VSYS into 8 ohm, 1 W max) and "
     "the acoustic path on the first assembled board.",
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883), replacing "
-    "the top-actuated PTS645. The record button is on the left wall, so a top "
+    "the top-actuated PTS645. The record button is on the phone-left wall "
+    "(left when looking at the lid), so a top "
     "plunger would have needed a case lever; this one is pressed straight "
     "through the wall aperture. Its actuator tip sits 0.6 mm inside the board "
-    "edge and 0.9 mm from the inner wall face, so the case still needs a "
-    "short moulded nub to span that gap. Pin 1 carries BTN and pin 2 carries "
+    "edge; the case key nub spans that gap. Pin 1 carries BTN and pin 2 carries "
     "GND, the opposite of the old part: a push button's terminals are "
     "interchangeable, and pin 2 is the pad row nearest the board edge, where "
     "the F.Cu GND pour reaches it without a trace. Check the press feel on "
     "the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
-    "SW_BOOT and SW_RST are XKB TS-1187A-C-J-B top-actuated SPST (LCSC "
-    "C318885) on the east edge, outside the ring OD. They strap GPIO0 and EN "
-    "to GND for download mode: hold Boot, tap Reset, release Boot. They are "
-    "not firmware buttons. Lid-off only on this spin: the 5 mm actuators sit "
-    "1.65 mm under the outer skin, so a flush lid hole is not a button.",
+    "Download is four F.Cu pads (TP_BOOT, TP_EN, TP_GND, TP_3V3) west of the "
+    "MCU. Hold GPIO0 to GND, pulse EN. No Boot/Reset switches and no UART header.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB "
     "peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would "
     "need traces narrower than any quick-turn fab will run. The pair is "
@@ -2296,17 +2586,17 @@ ROUTED_OPEN_ITEMS = [
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
-    "USB-C is the only 5 V inlet. U3 is a BQ24074 power-path charger: OUT "
+    "The magnetic pad is the only 5 V inlet. U3 is a BQ24073 power-path charger: OUT "
     "(VSYS) stays up from USB with BT1 open, and BAT is the pouch only. Do "
     "not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no "
     "pack protector. Playback now runs the NS4150 from VSYS (~4.4 V on USB, "
     "cell voltage on pouch), still under the speaker's 1 W ceiling.",
-    "kicad-cli pcb drc --schematic-parity still reports 28 notes, and all of "
-    "them are expected: 24 are module pads with no schematic pin (spare "
-    "ESP32-S3 GPIO castellations, NC pins, the USB-C SBU pair, BQ24074 "
-    "PGOOD, IM73A135 OUT- left open), and 4 are the H1-H4 mounting holes, "
-    "have no symbol. Copper DRC, unconnected count and footprint/library "
-    "parity are all zero.",
+    "kicad-cli pcb drc --schematic-parity reports 32 notes, and all of them "
+    "are expected: spare ESP32-S3 castellations and NC pins (including the "
+    "unused speaker outputs and PA_EN), four mounting holes, and three "
+    "footprint fields the sheet leaves blank (BT1's description, J2's "
+    "datasheet, J3's description). Copper DRC is clean. TD, TMR, and the "
+    "magnetic-pad nets are routed.",
 ]
 
 
@@ -2332,19 +2622,18 @@ def usb_summary(board):
         f"{USB_WIDTH} mm traces on a {USB_PAIR_PITCH} mm pitch, F.Cu over the "
         "solid In1 GND plane, not impedance controlled (full-speed only)"
     )
-    # Say what the number is. USB_DP and USB_DM each run J2 to U7 to U1, and
-    # J2 is a reversible USB-C receptacle, so both halves of its flip pair sit
-    # on the net. copper_mm is therefore all copper on the net, which is longer
+    # Say what the number is. USB_DP and USB_DM run from the magnetic pad
+    # through U7 to U1. copper_mm is all copper on the net, which is longer
     # than the signal path, and is not comparable to a point-to-point length.
     out["measures"] = (
-        "total copper on each net, including the second half of the USB-C "
-        "flip pair and the U7 ESD array pads; not a point-to-point length"
+        "total copper on each net, including the U7 ESD array; not a "
+        "point-to-point length"
     )
     return out
 
 
 def update_placement_open_items(board, unconnected, violations):
-    """Rewrite the gap list in placement.json so it matches the board on disk."""
+    """Refresh routing counts in placement.json from the board on disk."""
     if not os.path.isfile(PLACEMENT):
         return
     with open(PLACEMENT, encoding="utf-8") as fh:
@@ -2371,7 +2660,9 @@ def update_placement_open_items(board, unconnected, violations):
         "usb": usb_summary(board),
         "note": "Re-run: python3 hardware/kicad/recorder/route_pcb.py",
     }
-    data["open_items"] = list(ROUTED_OPEN_ITEMS)
+    # Leave open_items alone. The list in this file is the pogo / NAND /
+    # pouch board. ROUTED_OPEN_ITEMS still describes the old USB-C spin,
+    # and copying it would wipe the notes the next route is supposed to keep.
     data["_comment"] = (
         "Generated by hardware/kicad/recorder/generate_pcb.py; the routing "
         "and open_items blocks are refreshed by route_pcb.py. Footprint XY "
@@ -2454,6 +2745,8 @@ def stage_planes(dsn_path):
     print("hand-routing the USB-C D+/D- escape")
     usb_escape(board, obstacles)
     usb_pair_to_mcu(board, obstacles)
+    stitch_rstat_vdd(board, obstacles)
+    stitch_sw_gnd(board, obstacles)
     stubs, vias = fanout_fine_pitch(board, obstacles)
     print(f"fine-pitch fanout: {stubs} stubs, {vias} vias")
     fanout_charger(board, obstacles, protect=True)
@@ -2642,6 +2935,23 @@ def main():
         report(board)
         return
 
+    if "--repair-only" in argv:
+        board, half_w, half_h = load()
+        board = close_leftover_opens(board, half_w, half_h)
+        board, _ = finish(board, half_w, half_h)
+        data = drc_json(PCB)
+        update_placement_open_items(board,
+                                    len(data.get("unconnected_items", [])),
+                                    len(data.get("violations", [])))
+        report(board)
+        print(f"kicad-cli pcb drc: {len(data.get('violations', []))} violations, "
+              f"{len(data.get('unconnected_items', []))} open connections")
+        if data.get("violations") or data.get("unconnected_items"):
+            print("not fab clean yet - fix the board, then re-run")
+            raise SystemExit(2)
+        print(f"wrote {PCB}")
+        return
+
     if "--export-dsn" in argv:
         stage_planes(argv[argv.index("--export-dsn") + 1])
         return
@@ -2659,6 +2969,10 @@ def main():
     run_freerouting(dsn, ses)
     board = stage_session(ses)
     params = json.load(open(PARAMS, encoding="utf-8"))
+    board, _ = finish(board, params["pcb"]["width_mm"] / 2.0,
+                      params["pcb"]["height_mm"] / 2.0)
+    board = close_leftover_opens(board, params["pcb"]["width_mm"] / 2.0,
+                                 params["pcb"]["height_mm"] / 2.0)
     board, _ = finish(board, params["pcb"]["width_mm"] / 2.0,
                       params["pcb"]["height_mm"] / 2.0)
     patch_title(True)

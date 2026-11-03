@@ -8,6 +8,7 @@
 #include "button.h"
 #include "clock_rtc.h"
 #include "config.h"
+#include "download_mode.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -15,21 +16,51 @@
 #include "nvs_flash.h"
 #include "power.h"
 #include "recorder.h"
+#include "sdkconfig.h"
 #include "storage_sd.h"
 #include "usb_msc.h"
+#include "wifi_share.h"
 
 static const char *TAG = "psv";
 
 /*
  * Buttons (one tactile on the custom board; Korvo ladder = any key):
- *   short press  — start / stop recording
- *   double press — play last file
+ *   short press  — start / stop recording (stops Wi-Fi share first)
+ *   double press — Wi-Fi share on the custom board; play last file on
+ *                  Korvo / ESP-BOX unless CONFIG_PSV_WIFI_SHARE_DOUBLE
  *   long press   — deep sleep (wake on the same button)
+ *   hold 5 s from power-up or wake, cable in a computer — restart into ROM
+ *                  download mode to reflash (custom board; see download_mode.h)
  *
- * USB attach always wins: record and play stop, TinyUSB MSC owns the card.
+ * USB attach always wins: record, play, and Wi-Fi stop; TinyUSB MSC owns the card.
  */
 
 static uint8_t s_pcm[4096];
+
+static void stop_share(void)
+{
+    wifi_share_stop();
+    recorder_on_share_stop();
+}
+
+#if CONFIG_PSV_WIFI_SHARE
+static void start_share(void)
+{
+    if (usb_msc_host_present()) {
+        return;
+    }
+    (void)audio_stop();
+    recorder_on_share_start();
+    if (recorder_state() != RECORDER_WIFI_SHARE) {
+        return;
+    }
+    if (wifi_share_start() != ESP_OK) {
+        recorder_on_share_stop();
+        led_set(PSV_LED_ERROR);
+        ESP_LOGE(TAG, "wifi share start failed");
+    }
+}
+#endif
 
 static void led_from_state(void)
 {
@@ -39,6 +70,9 @@ static void led_from_state(void)
         break;
     case RECORDER_PLAYING:
         led_set(PSV_LED_PLAY);
+        break;
+    case RECORDER_WIFI_SHARE:
+        led_set(PSV_LED_SHARE);
         break;
     case RECORDER_ERROR:
         led_set(PSV_LED_ERROR);
@@ -54,6 +88,9 @@ static void led_from_state(void)
 
 static void toggle_record(void)
 {
+    if (wifi_share_active() || recorder_state() == RECORDER_WIFI_SHARE) {
+        stop_share();
+    }
     if (recorder_state() == RECORDER_RECORDING) {
         (void)recorder_stop();
         (void)audio_stop();
@@ -73,6 +110,7 @@ static void toggle_record(void)
     ESP_LOGI(TAG, "recording %s", recorder_last_path());
 }
 
+#if PSV_HAS_PLAYBACK
 static int newest_recording(char *out, size_t n)
 {
     char dirpath[256];
@@ -130,6 +168,20 @@ static void play_last(void)
     }
     ESP_LOGI(TAG, "playing %s", recorder_last_path());
 }
+#endif
+
+static void on_double_press(void)
+{
+    if (wifi_share_active() || recorder_state() == RECORDER_WIFI_SHARE) {
+        stop_share();
+        return;
+    }
+#if PSV_HAS_PLAYBACK && !CONFIG_PSV_WIFI_SHARE_DOUBLE
+    play_last();
+#elif CONFIG_PSV_WIFI_SHARE
+    start_share();
+#endif
+}
 
 void app_main(void)
 {
@@ -144,12 +196,12 @@ void app_main(void)
     ESP_ERROR_CHECK(power_init());
     ESP_ERROR_CHECK(led_init());
     ESP_ERROR_CHECK(button_init());
+    /* Before SD and TinyUSB, so a broken recorder path cannot block a reflash. */
+    download_mode_check();
 
     err = storage_sd_mount();
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "SD not mounted — recording will fail until a card is present");
-    } else {
-        (void)clock_try_set_from_volume();
     }
 
     err = audio_init();
@@ -158,13 +210,17 @@ void app_main(void)
         led_set(PSV_LED_ERROR);
     }
 
-    (void)usb_msc_init();
     recorder_init();
+    (void)usb_msc_init();
+    if (storage_sd_card()) {
+        (void)clock_try_set_from_volume();
+    }
 
     int usb_was = 0;
     for (;;) {
         int usb = usb_msc_host_present();
         if (usb && !usb_was) {
+            wifi_share_stop();
             (void)audio_stop();
             led_set(PSV_LED_CHARGE);
         } else if (!usb && usb_was) {
@@ -177,8 +233,9 @@ void app_main(void)
             if (ev == PSV_BTN_SHORT) {
                 toggle_record();
             } else if (ev == PSV_BTN_DOUBLE) {
-                play_last();
+                on_double_press();
             } else if (ev == PSV_BTN_LONG) {
+                stop_share();
                 (void)recorder_stop();
                 (void)recorder_play_stop();
                 (void)audio_stop();

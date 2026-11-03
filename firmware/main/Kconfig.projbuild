@@ -22,8 +22,49 @@ menu "Pixel Snap Voice"
             SD card is exposed as a drive. Phase 0 can disable this and use
             an SD reader instead.
 
+    config PSV_BOOT_DOWNLOAD_HOLD
+        bool "Hold the button through boot to reflash over USB"
+        default y if PSV_BOARD_CUSTOM
+        default n
+        help
+            Once TinyUSB MSC owns native USB, esptool can no longer reset the
+            S3 into download mode by itself. With this on, holding the record
+            button for 5 s from power-up or wake, with the cable in a computer,
+            restarts the S3 into ROM download mode (USB-Serial/JTAG), so a
+            reflash needs no TP_BOOT / TP_EN pads and no open case. Without a
+            USB host the LED flashes fast and the board boots normally.
+            Off on Korvo-2 / ESP-BOX: ladder button, and native USB is reserved.
+
     config PSV_SD_MOUNT_POINT
         string "SD VFS mount point"
         default "/sdcard"
+
+    config PSV_WIFI_SHARE
+        bool "Wi-Fi SoftAP file share"
+        default y
+        help
+            Recorder makes its own WPA2 network and serves /recordings over
+            HTTP (browser play/download) and read-only WebDAV. The radio
+            stays off until the share gesture. Bluetooth stays off.
+
+    config PSV_WIFI_SSID
+        string "SoftAP SSID"
+        default "PixelSnapVoice"
+        depends on PSV_WIFI_SHARE
+
+    config PSV_WIFI_PASS
+        string "SoftAP WPA2 password (8+ characters)"
+        default "voicenote1"
+        depends on PSV_WIFI_SHARE
+
+    config PSV_WIFI_SHARE_DOUBLE
+        bool "Double-press toggles Wi-Fi share"
+        default y if PSV_BOARD_CUSTOM
+        default n
+        depends on PSV_WIFI_SHARE
+        help
+            On the custom board this is the default (no on-device play).
+            Enable on Korvo-2 to prove the file page on that board's antenna.
+            Copy-paste overlay: firmware/sdkconfig.korvo_wifi_share (MSC off).
 
 endmenu

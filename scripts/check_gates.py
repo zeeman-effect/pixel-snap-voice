@@ -56,7 +56,7 @@ def drc_counts(kicad: Path, extra: list[str]) -> dict:
     return json.loads(out.read_text(encoding="utf-8"))
 
 
-# kicad-cli pcb drc --schematic-parity reports these 28 notes and every one is
+# kicad-cli pcb drc --schematic-parity reports these notes and every one is
 # expected. Counting them is not a check: a new extra footprint, or a pad that
 # quietly lost its net, lands in the same list and the old gate still plotted.
 # Each key is (violation type, reference, pad or field name). Add a key only
@@ -70,6 +70,23 @@ EXPECTED_PARITY.update({
     for ref in ("H1", "H2", "H3", "H4")
 })
 EXPECTED_PARITY.update({
+    ("net_conflict", "U1", "12"): "PA_EN castellation; the speaker amp is gone",
+    ("net_conflict", "U2", "12"): "ES8311 AOUTP left open; v1 has no speaker",
+    ("net_conflict", "U2", "13"): "ES8311 AOUTN left open; v1 has no speaker",
+    ("footprint_symbol_field_mismatch", "BT1", "Description"):
+        "Device:Battery symbol vs PSV pigtail land; no housing on the board",
+    ("footprint_symbol_field_mismatch", "J2", "Datasheet"):
+        "sheet instance has no datasheet; the LCSC page is on the footprint",
+    ("footprint_symbol_field_mismatch", "J3", "Description"):
+        "sheet instance has no description; the NAND text is on the footprint",
+})
+
+# Pads that are open on purpose: no net on the board, an `unconnected-` net in
+# the schematic. KiCad 10.0.7 stopped reporting that pair; older 10.0 builds
+# still do. So these may be present or absent, but only while the board pad
+# really has no net. A pad that picks up a net still fails the gate.
+OPEN_PADS: dict[tuple[str, str, str], str] = {}
+OPEN_PADS.update({
     # The module breaks out far more GPIO than v1 uses. The schematic only
     # draws the castellations that go somewhere; the rest are left floating on
     # purpose so a v2 can pick them up.
@@ -77,17 +94,15 @@ EXPECTED_PARITY.update({
     for pad in ("7", "25", "26", "27", "28", "29", "30", "31", "32", "33",
                 "34", "35", "36", "37", "38", "41", "44")
 })
-EXPECTED_PARITY.update({
-    ("net_conflict", "J2", "A8"): "USB-C SBU1: v1 is a 5 V sink, no alt mode",
-    ("net_conflict", "J2", "B8"): "USB-C SBU2: v1 is a 5 V sink, no alt mode",
-    ("net_conflict", "U3", "8"): "BQ24074 PGOOD left open; charge status is STAT",
+OPEN_PADS.update({
+    ("net_conflict", "U3", "7"): "BQ24073 PGOOD left open; charge status is STAT",
     ("net_conflict", "U4", "4"): "AP2112K-3.3 pin 4 is NC",
     ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
     ("net_conflict", "U8", "4"): "LP5907 pin 4 is NC",
     ("net_conflict", "MK1", "3"): "IM73A135 pin 3 is OUT−, left open for single-ended",
 })
 
-_PAD = re.compile(r"^Pad (\S+) \[.*\] of (\w+) on ")
+_PAD = re.compile(r"^Pad (\S+) \[(.*)\] of (\w+) on ")
 _FOOTPRINT = re.compile(r"^Footprint (\w+)$")
 _FIELD = re.compile(r"^Field '([^']+)' differs")
 
@@ -100,7 +115,7 @@ def parity_key(note: dict) -> tuple[str, str, str]:
         text = item.get("description", "")
         pad = _PAD.match(text)
         if pad:
-            subject, ref = pad.group(1), pad.group(2)
+            subject, ref = pad.group(1), pad.group(3)
             break
         fp = _FOOTPRINT.match(text)
         if fp:
@@ -116,6 +131,16 @@ def parity_key(note: dict) -> tuple[str, str, str]:
         else:
             subject = "Footprint"
     return kind, ref, subject
+
+
+def pad_has_net(note: dict) -> bool:
+    """True when a parity note names a board pad that carries a real net."""
+    for item in note.get("items", []):
+        pad = _PAD.match(item.get("description", ""))
+        if pad:
+            net = pad.group(2).strip()
+            return bool(net) and not net.startswith("<")
+    return False
 
 
 def drc_gate(kicad: Path) -> None:
@@ -162,7 +187,14 @@ def drc_gate(kicad: Path) -> None:
     if unconnected:
         problems.append(f"  {len(unconnected)} unconnected items")
 
-    seen = collections.Counter(parity_key(note) for note in parity)
+    for note in parity:
+        key = parity_key(note)
+        if key in OPEN_PADS and pad_has_net(note):
+            problems.append(
+                f"  {key[1]} pad {key[2]} should be open ({OPEN_PADS[key]}) "
+                f"but has a net on the board")
+    seen = collections.Counter(
+        key for key in map(parity_key, parity) if key not in OPEN_PADS)
     for key, count in sorted(seen.items()):
         if key not in EXPECTED_PARITY:
             kind, ref, subject = key

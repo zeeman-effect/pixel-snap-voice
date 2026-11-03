@@ -1,0 +1,230 @@
+(footprint "YZ103915020T_4P"
+	(version 20260206)
+	(generator "psv-hand-edit")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Xinyangze YZ103915020T-04025-02 / LCSC C6276862. Vendor drawing (datasheet p.3) and LCSC EasyEDA land CONN-SMD_YZ103915020T-04025-01: 22.30 x 7.70 mm stadium, 2.00 mm tall, 4 pins at 2.54 mm. Ends are full-radius (r=3.85). Recommended land is four 2.30 mm circular pads. Pin 1 VBUS at -X. Cable male YZP0048-20048-04025-03 / C5126845.")
+	(tags "magnetic pogo receptacle 4P SMT Xinyangze stadium")
+	(property "Reference" "REF**"
+		(at 0 -5.0 0)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000001")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "YZ103915020T_4P"
+		(at 0 5.0 0)
+		(layer "F.Fab")
+		(uuid "a6276862-0001-4000-8000-000000000002")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.lcsc.com/product-detail/C6276862.html"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a6276862-0001-4000-8000-000000000003")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "4-pin magnetic pad, 22.30 x 7.70 x 2.0 mm stadium, LCSC C6276862"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a6276862-0001-4000-8000-000000000004")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_text user "1"
+		(at -12.6 0 0)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000005")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_line
+		(start -7.3 3.85)
+		(end 7.3 3.85)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a6276862-0001-4000-8000-000000000010")
+	)
+	(fp_line
+		(start 7.3 -3.85)
+		(end -7.3 -3.85)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a6276862-0001-4000-8000-000000000011")
+	)
+	(fp_arc
+		(start 7.3 3.85)
+		(mid 11.15 0)
+		(end 7.3 -3.85)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a6276862-0001-4000-8000-000000000012")
+	)
+	(fp_arc
+		(start -7.3 -3.85)
+		(mid -11.15 0)
+		(end -7.3 3.85)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a6276862-0001-4000-8000-000000000013")
+	)
+	(fp_line
+		(start -7.3 4.0)
+		(end 7.3 4.0)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000020")
+	)
+	(fp_line
+		(start 7.3 -4.0)
+		(end -7.3 -4.0)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000021")
+	)
+	(fp_arc
+		(start 7.3 4.0)
+		(mid 11.3 0)
+		(end 7.3 -4.0)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000022")
+	)
+	(fp_arc
+		(start -7.3 -4.0)
+		(mid -11.3 0)
+		(end -7.3 4.0)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a6276862-0001-4000-8000-000000000023")
+	)
+	(fp_line
+		(start -7.3 4.25)
+		(end 7.3 4.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a6276862-0001-4000-8000-000000000030")
+	)
+	(fp_line
+		(start 7.3 -4.25)
+		(end -7.3 -4.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a6276862-0001-4000-8000-000000000031")
+	)
+	(fp_arc
+		(start 7.3 4.25)
+		(mid 11.55 0)
+		(end 7.3 -4.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a6276862-0001-4000-8000-000000000032")
+	)
+	(fp_arc
+		(start -7.3 -4.25)
+		(mid -11.55 0)
+		(end -7.3 4.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a6276862-0001-4000-8000-000000000033")
+	)
+	(pad "1" smd circle
+		(at -3.81 0)
+		(size 2.3 2.3)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a6276862-0001-4000-8000-000000000041")
+	)
+	(pad "2" smd circle
+		(at -1.27 0)
+		(size 2.3 2.3)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a6276862-0001-4000-8000-000000000042")
+	)
+	(pad "3" smd circle
+		(at 1.27 0)
+		(size 2.3 2.3)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a6276862-0001-4000-8000-000000000043")
+	)
+	(pad "4" smd circle
+		(at 3.81 0)
+		(size 2.3 2.3)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a6276862-0001-4000-8000-000000000044")
+	)
+	(model "${KIPRJMOD}/PSV.pretty/YZ103915020T_4P.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(embedded_fonts no)
+)

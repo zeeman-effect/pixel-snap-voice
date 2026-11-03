@@ -47,6 +47,10 @@ void led_tick(void)
     case PSV_LED_CHARGE:
         on = (ms / 500) % 2;
         break;
+    case PSV_LED_SHARE:
+        /* Two short flashes, then a pause. Distinct from play and charge. */
+        on = ((ms / 120) % 8) < 2;
+        break;
     case PSV_LED_ERROR:
         on = (ms / 80) % 2;
         break;
