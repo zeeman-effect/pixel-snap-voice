@@ -48,8 +48,10 @@ ROOT_UUID = "a1b0c3d4-e5f6-4789-a012-3456789abcde"
 STUB_MM = 7.62
 
 NETS_REQUIRED = {
-    "USB_DP": ["U1.24", "U7.1", "J2.3"],
-    "USB_DM": ["U1.23", "U7.3", "J2.2"],
+    "USB_DP": ["U1.24", "U7.1", "J2.A6", "J2.B6"],
+    "USB_DM": ["U1.23", "U7.3", "J2.A7", "J2.B7"],
+    "CC1": ["J2.A5", "R2.1"],
+    "CC2": ["J2.B5", "R3.1"],
     "I2C_SDA": ["U1.8", "U2.19"],
     "I2C_SCL": ["U1.9", "U2.1"],
     "I2S_MCLK": ["U1.18", "U2.2", "Y1.3"],
@@ -57,13 +59,13 @@ NETS_REQUIRED = {
     "I2S_WS": ["U1.16", "U2.8"],
     "I2S_DIN": ["U1.14", "U2.7"],
     "I2S_DOUT": ["U1.15", "U2.9"],
-    "VBUS": ["J2.1", "F1.1"],
+    "VBUS": ["J2.A4", "J2.B4", "F1.1"],
     "VBUS_CHG": ["F1.2", "U3.13", "U3.6"],
     "VBAT": ["U3.2", "BT1.1", "C21.1"],
     "VSYS": ["U3.10", "U4.1", "U8.1"],
     "VDD33": ["U5.1", "U1.3", "TP_3V3.1", "J3.8"],
     "3V3A": ["U8.5", "U2.11"],
-    "GND": ["U1.1", "J2.4", "BT1.2", "TP_GND.1", "U3.8", "J3.4"],
+    "GND": ["U1.1", "J2.A1", "J2.SH", "R2.2", "R3.2", "BT1.2", "TP_GND.1", "U3.8", "J3.4"],
     "BTN": ["U1.5", "SW1.1"],
     "BOOT": ["U1.4", "Rboot.2", "TP_BOOT.1"],
     "EN": ["U1.45", "R1.2", "C2.1", "TP_EN.1"],
@@ -475,7 +477,7 @@ def build() -> None:
     device_fuse, fuse_pins, _ = load_lib(KICAD_SYM / "Device.kicad_sym", "Fuse")
     device_bat, bat_pins, _ = load_lib(KICAD_SYM / "Device.kicad_sym", "Battery")
     sw_blk, sw_pins, _ = load_lib(KICAD_SYM / "Switch.kicad_sym", "SW_Push")
-    pogo_blk, pogo_pins, pogo_id = load_lib(HERE / "PSV.kicad_sym", "YZ103915020T_4P")
+    usb_blk, usb_pins, usb_id = load_lib(KICAD_SYM / "Connector.kicad_sym", "USB_C_Receptacle_USB2.0_16P")
     sd_blk, sd_pins, sd_id = load_lib(HERE / "PSV.kicad_sym", "ZDSD32GLGEAG")
     mcu_blk, mcu_pins, mcu_id = load_lib(KICAD_SYM / "RF_Module.kicad_sym", "ESP32-S3-MINI-1")
     chg_blk, chg_pins, chg_id = load_lib(HERE / "PSV.kicad_sym", "BQ24073RGT")
@@ -497,7 +499,7 @@ def build() -> None:
     tp_blk, tp_pins, tp_id = load_lib(HERE / "PSV.kicad_sym", "TestPoint")
 
     mcu = Sch("Recorder — MCU / USB")
-    for b in (mcu_blk, pogo_blk, esd_blk, device_r, device_c, tp_blk, gnd_blk, vdd33_blk, vbus_blk):
+    for b in (mcu_blk, usb_blk, esd_blk, device_r, device_c, tp_blk, gnd_blk, vdd33_blk, vbus_blk):
         mcu.add_lib(b)
     ux, uy = 95.25, 114.30
     mcu.add(inst(mcu_id, "U1", "ESP32-S3-MINI-1U-N8", ux, uy, mcu_pins, "PSV:ESP32-S3-MINI-1U"))
@@ -589,13 +591,41 @@ def build() -> None:
     stub(mcu, 110, 55, c_pins, "2", "GND", "c3-g")
 
     jx, jy = 250, 90
-    # 4-pin magnetic pad on the lid face. No CC pins: the cable is USB-A.
-    mcu.add(inst(pogo_id, "J2", "YZ103915020T", jx, jy, pogo_pins, "PSV:YZ103915020T_4P"))
-    stub(mcu, jx, jy, pogo_pins, "1", "VBUS", "j2-vbus")
-    stub(mcu, jx, jy, pogo_pins, "2", "USB_DM", "j2-dm")
-    stub(mcu, jx, jy, pogo_pins, "3", "USB_DP", "j2-dp")
-    stub(mcu, jx, jy, pogo_pins, "4", "GND", "j2-gnd")
-    mcu.add(text("J2 magnetic pad. Pin 1 VBUS, 2 D-, 3 D+, 4 GND. Cable male C5126845.", 200, 55, "j2-note"))
+    # Dev / USB-C variant: HRO TYPE-C-31-M-13C mid-mount receptacle on the
+    # phone-bottom edge. UFP (sink): CC1 / CC2 each get their own 5.1 k Rd to
+    # GND, both D+ and both D- contacts are tied so either plug face works,
+    # SBU1 / SBU2 are open, and the shell tabs go to GND (cable braid return).
+    mcu.add(inst(usb_id, "J2", "USB_C_16P", jx, jy, usb_pins, "PSV:USB_C_Receptacle_HRO_TYPE-C-31-M-13C"))
+    j2_used = set()
+    for num, net, ident in (
+        ("A4", "VBUS", "j2-a4"),
+        ("A9", "VBUS", "j2-a9"),
+        ("B4", "VBUS", "j2-b4"),
+        ("B9", "VBUS", "j2-b9"),
+        ("A5", "CC1", "j2-cc1"),
+        ("B5", "CC2", "j2-cc2"),
+        ("A6", "USB_DP", "j2-a6"),
+        ("B6", "USB_DP", "j2-b6"),
+        ("A7", "USB_DM", "j2-a7"),
+        ("B7", "USB_DM", "j2-b7"),
+        ("A1", "GND", "j2-a1"),
+        ("A12", "GND", "j2-a12"),
+        ("B1", "GND", "j2-b1"),
+        ("B12", "GND", "j2-b12"),
+        ("SH", "GND", "j2-sh"),
+    ):
+        if num in usb_pins:
+            stub(mcu, jx, jy, usb_pins, num, net, ident)
+            j2_used.add(num)
+    nc_unused(mcu, jx, jy, usb_pins, j2_used, "j2-nc-")
+    mcu.add(text("J2 USB-C (dev variant), UFP sink: 5.1k Rd on CC1 and CC2. SBU open. No PD.", 200, 55, "j2-note"))
+
+    mcu.add(inst("Device:R", "R2", "5.1k", 250, 140, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    mcu.add(inst("Device:R", "R3", "5.1k", 270, 140, r_pins, "Resistor_SMD:R_0603_1608Metric"))
+    stub(mcu, 250, 140, r_pins, "1", "CC1", "r2-cc")
+    stub(mcu, 250, 140, r_pins, "2", "GND", "r2-g")
+    stub(mcu, 270, 140, r_pins, "1", "CC2", "r3-cc")
+    stub(mcu, 270, 140, r_pins, "2", "GND", "r3-g")
 
     ex, ey = 190, 70
     mcu.add(inst(esd_id, "U7", "USBLC6-2SC6", ex, ey, esd_pins, "Package_TO_SOT_SMD:SOT-23-6"))
@@ -727,8 +757,8 @@ def build() -> None:
         a3v3_blk,
     ):
         pwr_s.add_lib(b)
-    pwr_s.add(text("Magnetic pad 5V -> PTC -> BQ24073 IN. OUT is VSYS (loads). BAT is the pouch only.", 20, 12, "pwr-h"))
-    pwr_s.add(text("USB on the 4-pin pogo runs the board with BT1 open. Do not strap VSYS to VBAT.", 20, 18, "pwr-h2"))
+    pwr_s.add(text("USB-C 5V -> PTC -> BQ24073 IN. OUT is VSYS (loads). BAT is the pouch only.", 20, 12, "pwr-h"))
+    pwr_s.add(text("USB-C power runs the board with BT1 open. Do not strap VSYS to VBAT.", 20, 18, "pwr-h2"))
     fx, fy = 50, 50
     cx, cy = 80, 70
     u3x, u3y = 145, 95

@@ -36,7 +36,7 @@
     "shell_back_mm": 1.2,
     "lid_material": "plastic",
     "lid_finish": "natural translucent PETG",
-    "size_note": "Compact-final spin: 62 x 88 x 10.65 mm. Speaker and USB-C are gone. The 59.6 x 85.6 board fills the case to one 1.2 mm wall per side. Lid is always natural translucent PETG so D1 and D2 read through it. Tray is PETG first, then 6061. The phone face is closed: 0.85 mm skin, then blind wells for the 1.5 mm N52 ring and the clocking magnet. Four M1.6 posts. The 3.3 mm Jauch pouch is taped to the board underside. Tray is 6.85 mm and the lid is 3.80 mm. The extra 0.10 mm over the old 10.55 mm shell is the DigiKey pack's 3.3 mm max vs the previous 3.2 mm cell."
+    "size_note": "Compact-final spin: 62 x 88 x 10.65 mm. Speaker is gone. Dev / USB-C variant (branch revert-to-usb-c): J2 is a mid-mount USB-C on the phone-bottom edge; the magnetic pad is gone. The 59.6 x 85.6 board fills the case to one 1.2 mm wall per side. Lid is always natural translucent PETG so D1 and D2 read through it. Tray is PETG first, then 6061. The phone face is closed: 0.85 mm skin, then blind wells for the 1.5 mm N52 ring and the clocking magnet. Four M1.6 posts. The 3.3 mm Jauch pouch is taped to the board underside. Tray is 6.85 mm and the lid is 3.80 mm. The extra 0.10 mm over the old 10.55 mm shell is the DigiKey pack's 3.3 mm max vs the previous 3.2 mm cell."
   },
   "pcb": {
     "thickness_mm": 0.8,
@@ -58,6 +58,67 @@
     "pogo_proud_mm": 0.15,
     "pogo_dish_rim_mm": 2.0,
     "pogo_note": "J2 is Xinyangze YZ103915020T-04025-02 (LCSC C6276862) at (0, 36), the phone-top / camera end, opposite the 6 o'clock clocking magnet in the tray. Vendor drawing and LCSC EasyEDA land: 22.30 x 7.70 x 2.00 mm stadium (full-radius ends), 4 pins at 2.54 mm. The lid dishes down over the pad so the gold is 0.15 mm proud of that local face. The rest of the lid stays tall for the 2.4 mm MCU. Cable male is YZP0048-20048-04025-03 (C5126845). Footprint rot 0, so pin 1 VBUS is on the phone-left side of the pad. Pin order is 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise. No USB-C and no wall mouth.",
+    "pogo_obsolete_note": "OBSOLETE on this branch (revert-to-usb-c, dev / USB-C variant). J2 is no longer the magnetic pad, so every pogo_* key above describes a part that is not on the board. Kept only until the case agent removes the pogo dish / well from case.scad. Use the usbc_* keys. check_placement.py reads usbc_x_mm / usbc_y_mm, not pogo_x_mm / pogo_y_mm.",
+    "usbc_part": "HRO TYPE-C-31-M-13C, LCSC C2848620, 16-pin USB 2.0 Type-C receptacle, mid-mount (sink board)",
+    "usbc_x_mm": 7.0,
+    "usbc_y_mm": -38.1,
+    "usbc_rot_deg": 180,
+    "usbc_edge": "bottom",
+    "usbc_edge_note": "Phone-bottom short edge (-Y, the board edge at y = -42.8), mouth pointing -Y. usbc_x_mm / usbc_y_mm are the KiCad footprint origin (twin of placement.json J2); the mouth centre line is x = usbc_x_mm. It is 7.0 mm phone-right of the magnet axis, not centred, because the BQ24073 / LDO / load-switch row owns the rest of that edge.",
+    "usbc_front_y_mm": -42.8,
+    "usbc_front_from_edge_mm": 0.0,
+    "usbc_front_note": "Shell front face is flush with the board edge (HRO drawing: 2.10 mm from the PCB edge to the front shell legs; LCSC 3D model ends on the slot mouth). Positive would mean proud of the board edge. The 0.3 mm pcb_clear rebate plus the wall sit in front of it, so the plug crosses about 1.2 mm of case before it meets the shell.",
+    "usbc_shell_w_mm": 8.94,
+    "usbc_shell_h_mm": 3.16,
+    "usbc_mouth_w_mm": 8.34,
+    "usbc_mouth_h_mm": 2.56,
+    "usbc_body_depth_mm": 6.5,
+    "usbc_above_top_mm": 1.6,
+    "usbc_below_top_mm": 1.56,
+    "usbc_below_bottom_mm": 0.76,
+    "usbc_mouth_z_mm": 0.02,
+    "usbc_height_note": "Heights are from the HRO drawing, measured from the board top surface (F.Cu). Shell top is 1.60 above F.Cu; total shell height is 3.16, so the shell bottom is 1.56 below F.Cu, i.e. 0.76 below B.Cu on this 0.8 mm board. Mouth centre is 0.02 above F.Cu (usbc_mouth_z_mm). With the board top at z = 6.85 mm (tray_h), the shell spans z = 5.29 .. 8.45 above the phone face and the mouth centre is at z = 6.87, right on the tray / lid seam. The lid cavity ceiling is 9.45, so 1.0 mm over the shell. Under the board, the shell and its four legs sit in the slot / outside the pouch (pouch ends at y = -33.0), above the 2.35 mm tray floor.",
+    "usbc_slot_mm": [
+      [
+        2.38,
+        -42.8
+      ],
+      [
+        11.62,
+        -42.8
+      ],
+      [
+        11.62,
+        -36.26
+      ],
+      [
+        2.38,
+        -36.26
+      ]
+    ],
+    "usbc_slot_note": "Board cutout (Edge.Cuts, carried in the J2 footprint): 9.24 mm wide, 6.54 mm deep, open on the y = -42.8 edge. Mill corners will round to the router radius (about 0.5 mm) at the two back corners. Nothing in the tray may rise into this rectangle above z = 5.2.",
+    "usbc_leg_xy_mm": [
+      [
+        1.38,
+        -36.7
+      ],
+      [
+        12.62,
+        -36.7
+      ],
+      [
+        1.38,
+        -40.7
+      ],
+      [
+        12.62,
+        -40.7
+      ]
+    ],
+    "usbc_max_below_bottom_mm": 0.8,
+    "usbc_plug_overmold_w_mm": 12.35,
+    "usbc_plug_overmold_h_mm": 6.5,
+    "usbc_plug_note": "USB-IF maximum plug overmold is 12.35 x 6.5 mm. Centred on the mouth (z = 6.87) it spans z = 3.62 .. 10.12: 3.6 mm clear of the phone back and 0.53 mm under the 10.65 mm lid top, so it hits neither. The overmold will butt the outside of the case wall. A Type-C plug needs the overmold within roughly 0.5-1 mm of the receptacle face to latch fully, so give the wall an overmold relief (about 12.8 x 7.0 mm, local wall thinned to <= 0.5 mm, or an open pocket) around a shell clearance mouth of about 9.5 x 3.7 mm. The relief straddles the tray / lid seam.",
     "mic_edge": "right",
     "mic_y_mm": 17.0,
     "mic_npth_x_mm": 27.5,

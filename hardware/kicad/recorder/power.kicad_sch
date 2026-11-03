@@ -2014,13 +2014,13 @@
 		)
 	)
 	)
-	(text "Magnetic pad 5V -> PTC -> BQ24073 IN. OUT is VSYS (loads). BAT is the pouch only."
+	(text "USB-C 5V -> PTC -> BQ24073 IN. OUT is VSYS (loads). BAT is the pouch only."
 		(exclude_from_sim no)
 		(at 20.00 12.00 0)
 		(effects (font (size 2.0 2.0)) (justify left bottom))
 		(uuid "3598aee4-b193-50c5-825e-3c84337efbae")
 	)
-	(text "USB on the 4-pin pogo runs the board with BT1 open. Do not strap VSYS to VBAT."
+	(text "USB-C power runs the board with BT1 open. Do not strap VSYS to VBAT."
 		(exclude_from_sim no)
 		(at 20.00 18.00 0)
 		(effects (font (size 2.0 2.0)) (justify left bottom))

@@ -64,9 +64,13 @@ EXTRA_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_extra.csv")
 # our pad 1 and pin-1 triangle), 1 Nov 2026. 270 is a quarter turn clockwise.
 # Add a part here only from that preview, never by guessing a package rule.
 # Not listed: U1 and U3 (correct at plain KiCad angles; earlier +180 tries
-# did not show in the preview), J3 (flipped land; dot top-left matches),
-# J2 (JLC has no model to check; use "Confirm Parts Placement"). Y1 needs
-# none: YXC C5203546 shows its dot on pad 1 at our 180.
+# did not show in the preview), J3 (flipped land; dot top-left matches).
+# Y1 needs none: YXC C5203546 shows its dot on pad 1 at our 180. J2 (HRO
+# TYPE-C-31-M-13C, C2848620, dev / USB-C variant) has no entry because the
+# PSV land is the LCSC EasyEDA land copied 1:1, same origin and same zero
+# angle (mouth toward +Y), so KiCad's 180 should be JLC's 180. That is not
+# yet read off the preview: check the mouth lands on the board edge before
+# paying, and add an offset here if it does not.
 JLC_ROTATION_OFFSET = {
     "U2": 270,   # ES8311 C962342: dot top-left, pin 1 top-right
     "MK1": 90,   # IM73A135 C3171831: quarter turn counter-clockwise

@@ -10,7 +10,7 @@ Checks, in order:
   2. no two courtyards overlap
   3. nothing collides with a mounting hole keepout
   4. the analog chain stays clear of the magnet ring (centres)
-  5. J2 XY matches the CAD pogo well in params.json
+  5. J2 XY matches the CAD USB-C mouth (usbc_x/y) in params.json
   6. every pad that the netlist gives a net actually carries that net
   7. placement.json still describes the board it claims to describe
 
@@ -42,7 +42,7 @@ PARAMS = os.path.abspath(
 
 ANALOG = ["MK1", "U2", "U8", "Y1", "C15", "C16"]
 HOLE_KEEPOUT_R = 2.1
-# J2 is the lid-face magnetic pad. No courtyard may hang off the board.
+# J2 (mid-mount USB-C) ends flush on the -Y edge. No courtyard may hang off the board.
 USB_EDGE_LIP = {}
 
 
@@ -199,12 +199,12 @@ def main():
     else:
         jx = round(pcbnew.ToMM(j2.GetPosition().x), 3)
         jy = round(pcbnew.ToMM(j2.GetPosition().y), 3)
-        cx = params["connectors"]["pogo_x_mm"]
-        cy = params["connectors"]["pogo_y_mm"]
+        cx = params["connectors"]["usbc_x_mm"]
+        cy = params["connectors"]["usbc_y_mm"]
         if abs(jx - cx) > 0.01 or abs(jy - cy) > 0.01:
             problems.append(
-                f"CAD        J2 board ({jx},{jy}) != params.json pogo "
-                f"({cx},{cy}) — lid well would miss the pad"
+                f"CAD        J2 board ({jx},{jy}) != params.json usbc "
+                f"({cx},{cy}) — the wall mouth would miss the receptacle"
             )
 
     unnetted = []

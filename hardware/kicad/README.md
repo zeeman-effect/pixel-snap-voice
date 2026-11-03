@@ -24,7 +24,7 @@ python scripts/check_gates.py
 
 Sheets: `mcu_usb`, `audio`, `power`, `io` (global labels join them). Pin map: [`pinmap.md`](pinmap.md).
 
-Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. J2 is the C6276862 stadium land in `PSV.pretty` (22.30 × 7.70 mm, vendor drawing).
+Before a fab upload, land patterns must be datasheet footprints, `kicad-cli pcb drc` must be clean, and `kicad-cli` must write `fab/` from `recorder.kicad_pcb`. `check_gates.py` now does the last two itself. J2 (dev / USB-C variant) is `PSV:USB_C_Receptacle_HRO_TYPE-C-31-M-13C`, the LCSC EasyEDA land for C2848620 copied 1:1 with the contact heels trimmed to 0.20 mm off its own board slot, which the footprint carries on Edge.Cuts.
 
 ## Design rules
 
@@ -58,14 +58,14 @@ Hole-to-copper is held at 0.3 mm rather than JLC's 0.2 mm because non-plated hol
 
 USB pair: 0.20 mm traces on a 0.40 mm pitch, F.Cu over the solid In1 GND plane. **Not impedance controlled, and no controlled-impedance option needs ordering.** The ESP32-S3 USB peripheral is full speed only (12 Mbps, no high-speed PHY), and 90 Ω on this 0.1 mm top prepreg would need roughly 0.06 mm traces, half what a quick-turn fab will run. The geometry above lands near 75 Ω differential by first-order microstrip, which is fine at full-speed edge rates. If a later revision ever needs high-speed USB, thicken the top prepreg first.
 
-The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit on the module's top row, the far side of a 15.9 mm module from J2, and the castellations leave 0.05 mm between pads, so the pair has to go around the module rather than under it. It runs up the 3.3 mm channel between J1 and U1. The millimetres used to be typed here too. They are measured off the board by `route_pcb.py` and written to [`recorder/placement.json`](recorder/placement.json) under `routing.usb`; read them there, because a copy in prose goes stale the first time anyone reroutes.
+The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit on the module's top row, the far side of a 15.9 mm module from J2 on the phone-bottom edge, and the castellations leave 0.05 mm between pads, so the pair has to go around the module rather than under it. The millimetres used to be typed here too. They are measured off the board by `route_pcb.py` and written to [`recorder/placement.json`](recorder/placement.json) under `routing.usb`; read them there, because a copy in prose goes stale the first time anyone reroutes.
 
 ## Keepouts
 
 - No tall parts on B.Cu except the taped pouch and the BT1 pads (phone / shunt side)
 - Mic on the phone-right long edge
-- Magnetic pad (**J2**) at (0, 36) on F.Cu, rot 0, phone-top / camera end, land `PSV:YZ103915020T_4P`
-- Battery pads (**BT1**) on B.Cu at (−17, 35), land `PSV:Battery_Pigtail_2P`. The magnetic pad is the only 5 V inlet
+- USB-C (**J2**, dev variant) at (7.0, −38.1) on F.Cu, rot 180, mouth flush with the phone-bottom edge, in a 9.24 × 6.54 mm slot. R2 / R3 (CC Rd) and U7 sit just north of its contact row
+- Battery pads (**BT1**) on B.Cu at (−17, 35), land `PSV:Battery_Pigtail_2P`. USB-C J2 is the only 5 V inlet
 - **J3** is MK MKDV4GCL-ABB (512 MB) on land `PSV:ZDSD32GLGEAG` at (−22, −18) on F.Cu. Not a card socket. Pins 3 CLK, 4 ground, 5 CMD, 8 power.
 - Analog island (U2, U8, MK1, Y1) off **VDD33**
 - Analog footprint centres off the magnet circle (`check_placement.py`)

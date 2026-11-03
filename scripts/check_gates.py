@@ -76,7 +76,7 @@ EXPECTED_PARITY.update({
     ("footprint_symbol_field_mismatch", "BT1", "Description"):
         "Device:Battery symbol vs PSV pigtail land; no housing on the board",
     ("footprint_symbol_field_mismatch", "J2", "Datasheet"):
-        "sheet instance has no datasheet; the LCSC page is on the footprint",
+        "sheet instance has no datasheet; the LCSC C2848620 page is on the footprint",
     ("footprint_symbol_field_mismatch", "J3", "Description"):
         "sheet instance has no description; the NAND text is on the footprint",
 })
@@ -100,6 +100,10 @@ OPEN_PADS.update({
     ("net_conflict", "U5", "3"): "AP22804AW5 fault flag, not read by firmware",
     ("net_conflict", "U8", "4"): "LP5907 pin 4 is NC",
     ("net_conflict", "MK1", "3"): "IM73A135 pin 3 is OUT−, left open for single-ended",
+    # USB-C sideband use pins. A USB 2.0 sink has nothing to put on them, and
+    # the Type-C spec has them float when unused.
+    ("net_conflict", "J2", "A8"): "USB-C SBU1, open on a USB 2.0 sink",
+    ("net_conflict", "J2", "B8"): "USB-C SBU2, open on a USB 2.0 sink",
 })
 
 _PAD = re.compile(r"^Pad (\S+) \[(.*)\] of (\w+) on ")

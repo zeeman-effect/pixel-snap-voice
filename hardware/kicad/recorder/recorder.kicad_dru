@@ -27,3 +27,14 @@
 (rule "JLC non-plated hole minimum size"
 	(constraint hole_size (min 0.5mm))
 	(condition "A.Pad_Type == 'NPTH, mechanical'"))
+
+# J2 (HRO TYPE-C-31-M-13C, mid-mount) sits in its own 9.24 mm board slot. The
+# vendor land puts the 16 contact heels 0.16 mm from the slot's back wall; the
+# PSV land trims them to 0.20 mm, JLC's published copper-to-routed-edge floor,
+# and keeps 0.36 mm of each foot on copper. The global 0.3 mm (which adds
+# JLC's routing tolerance) cannot be met without cutting the feet off the
+# pads, so the exception is held to J2's pads and to that published floor.
+# Tracks and vias still get the 0.3 mm global rule everywhere, slot included.
+(rule "J2 USB-C contacts to its slot"
+	(constraint edge_clearance (min 0.2mm))
+	(condition "A.Type == 'Pad' && A.memberOfFootprint('J2')"))

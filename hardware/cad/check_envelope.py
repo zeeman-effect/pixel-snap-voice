@@ -29,6 +29,10 @@ MIN_SKIN_MM = 0.6
 MIN_DISH_LID_MM = 1.2
 # Pad may sit this far above the dish. More than that snags.
 MAX_POGO_PROUD_MM = 0.3
+# Air the lid cavity must keep over the mid-mount USB-C shell (dev variant).
+USBC_LID_AIR_MM = 0.3
+# Air between the USB-C board slot and the pouch outline under the board.
+USBC_POUCH_AIR_MM = 1.0
 # Clearance from MK1's NPTH to the steel shunt edge.
 SHUNT_PORT_MM = 1.0
 # Air between the 51.5 x 66 mm cell outline and a 5 mm tray post.
@@ -660,6 +664,32 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
         errors.append("pogo dish cuts into the bottom lid wall")
     if pogo.closest_r() < mag["od_mm"] / 2:
         errors.append("pogo body intersects the magnet ring")
+    # Dev / USB-C variant: J2 is a mid-mount receptacle on the -Y edge.
+    if "usbc_x_mm" in con:
+        ceiling = acc["thickness_mm"] - acc["shell_back_mm"]
+        shell_top = st["tray"] + con["usbc_above_top_mm"]
+        if shell_top > ceiling - USBC_LID_AIR_MM + 1e-6:
+            errors.append(
+                f"USB-C shell top {shell_top:.2f} mm leaves under {USBC_LID_AIR_MM} mm "
+                f"to the {ceiling:.2f} mm lid ceiling"
+            )
+        shell_bottom = st["tray"] - con["usbc_below_top_mm"]
+        if shell_bottom < st["floor"] + 1e-6:
+            errors.append(
+                f"USB-C shell bottom {shell_bottom:.2f} mm is into the "
+                f"{st['floor']:.2f} mm tray floor"
+            )
+        xs = [q[0] for q in con["usbc_slot_mm"]]
+        ys = [q[1] for q in con["usbc_slot_mm"]]
+        slot = Rect(min(xs), min(ys), max(xs), max(ys))
+        if slot.gap(pouch) < USBC_POUCH_AIR_MM:
+            errors.append(
+                f"USB-C board slot is {slot.gap(pouch):.2f} mm from the pouch; "
+                f"need {USBC_POUCH_AIR_MM} mm"
+            )
+        mouth_z = st["tray"] + con["usbc_mouth_z_mm"]
+        if mouth_z - con["usbc_plug_overmold_h_mm"] / 2 < 0.0:
+            errors.append("USB-C plug overmold would hit the phone back")
     for cx, cy, pr in post_centres(p):
         gap = circle_rect_clearance(cx, cy, pr, pouch)
         if gap < MIN_POST_CLEAR_MM:
@@ -751,13 +781,13 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
     if placement is not None:
         j2 = part_xy(placement, "J2")
         if j2 is None:
-            errors.append("placement.json has no J2; the lid pogo well has nothing to twin")
+            errors.append("placement.json has no J2; the USB-C wall mouth has nothing to twin")
         else:
             jx, jy = j2
-            if abs(jx - con["pogo_x_mm"]) > 0.01 or abs(jy - con["pogo_y_mm"]) > 0.01:
+            if abs(jx - con["usbc_x_mm"]) > 0.01 or abs(jy - con["usbc_y_mm"]) > 0.01:
                 errors.append(
-                    f"CAD pogo ({con['pogo_x_mm']}, {con['pogo_y_mm']}) "
-                    f"!= placement.json J2 ({jx}, {jy}) — lid well would miss the pad"
+                    f"CAD usbc ({con['usbc_x_mm']}, {con['usbc_y_mm']}) "
+                    f"!= placement.json J2 ({jx}, {jy}) — wall mouth would miss the receptacle"
                 )
         bt1 = part_xy(placement, "BT1")
         if bt1 is None:
@@ -899,7 +929,7 @@ def fit_report(p: dict, placement: dict | None = None) -> str:
         f"({p['antenna']['fpc_x_mm']:.1f}, {p['antenna']['fpc_y_mm']:.1f})",
         "  PETG checklist (physical, after print):",
         "    [ ] camera bar not covered when snapped",
-        "    [ ] magnetic cable seats on the lid pad and the plug misses the phone body",
+        "    [ ] a USB-C cable latches through the phone-bottom wall mouth and the plug misses the phone body",
         f"    [ ] mic port on the phone-{con['mic_edge']} long edge, not against glass",
         "    [ ] TPU pill clicks SW1 and springs back",
         "    [ ] side ridges give enough grip to slide it off the ring",

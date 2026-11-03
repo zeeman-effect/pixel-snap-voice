@@ -12,7 +12,7 @@ Pixel 10 (Pixelsnap / Qi2 magnets)
   analog MEMS --> ES8311 ADC --I2S--> ESP32-S3 --FAT--> SD NAND
                          USB 2.0 device              USB MSC
                                 |                      Wi-Fi SoftAP
-                 4-pin magnetic pad (VBUS / D- / D+ / GND)
+                 USB-C receptacle J2 (VBUS / D- / D+ / CC Rd / GND)
                                                    browser + WebDAV
                                 |
                          BQ24073 power-path
@@ -41,12 +41,12 @@ When USB is plugged in: stop recording, turn Wi-Fi off, expose `/recordings` as 
 | Mic | Analog MEMS: IM73A135 (~73 dBA) | Pin 3 is OUT−, left open; C15 couples OUT+. VDD 2.8 V. Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
 | Playback | None on the custom board | Dump WAVs over USB. Korvo / ESP-BOX / host sim still play. ES8311 AOUT is open |
 | Storage | MK MKDV4GCL-ABB 512 MB SD NAND (FAT) | LGA-8, 8.0 × 6.0 mm, LCSC C7500178. Pin order is CLK on 3, VSS on 4, CMD on 5, VDD on 8; CS and Zetta parts use the same order and fit the same land. Firmware formats FAT if the chip is blank. Prototype capacity, picked on cost |
-| Charge + USB | C6276862 4-pin magnetic pad (J2) | 2.0 mm female. Lid dishes over the pad so the gold is 0.15 mm proud of that local face. Pins 1 VBUS, 2 D−, 3 D+, 4 GND. Cable male C5126845. No CC / Rd. No USB-PD |
+| Charge + USB | USB-C receptacle (J2), HRO TYPE-C-31-M-13C, C2848620 | Dev / USB-C variant. Mid-mount in a board slot on the phone-bottom edge: 1.60 mm above the board, 0.76 mm below. 5.1 kΩ Rd on CC1 / CC2 (R2 / R3), USB 2.0 only, SBU open. No USB-PD. Any USB-C cable |
 | Charge | BQ24073RGTR, USB500 ~500 mA (EN1/EN2, ISET 1.8 kΩ) | Power-path: **VSYS** = OUT at 4.4 V, **VBAT** = pouch only. Pin 8 is ground. Pin 15 TD is held low. Charge LED on STAT. No fuel gauge |
 | 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | U4 VIN from **VSYS**. Keep the regulator and any later switching node away from the mic |
 | Battery | Jauch LP305166JH pack, pigtail soldered to B.Cu BT1 pads | DigiKey `LP305166JH-PCM-2-WIRES-70MM` (13278052): 66 × 51.5 × 3.3 mm, 3.7 V, 1200 mAh min / 1220 mAh typ, PCM and 70 mm leads. Taped to the board underside at (0, 0), kapton-wrapped. Four tray posts carry the board. The pack has a PCM; this board has no second protector |
 | Controls | 1 user tactile (SW1): short = record, double = Wi-Fi share on the custom board (play on Korvo), long = sleep. Download is TP_BOOT / TP_EN / GND / 3V3 pads | 1 LED: record / share / charge / error |
-| RF | MINI-1U IPEX + lid FPC | W.FL / I-PEX MHF III pigtail (Inventek B24P-W) into a lid well over U1. Adhesive 2.4 GHz 30 × 5 mm patch on the PETG ceiling, phone-bottom end, away from J2. Tape mark is 30 × 5 mm at (−2, −33); do not enlarge the 7 mm well. Keep the PCB-antenna MINI-1 off this board. SoftAP, WPA2, TX capped near 10 dBm. Bluetooth stays off. |
+| RF | MINI-1U IPEX + lid FPC | W.FL / I-PEX MHF III pigtail (Inventek B24P-W) into a lid well over U1. Adhesive 2.4 GHz 30 × 5 mm patch on the PETG ceiling, phone-bottom end, beside (not over) the USB-C shell. Tape mark is 30 × 5 mm at (−2, −33); do not enlarge the 7 mm well. Keep the PCB-antenna MINI-1 off this board. SoftAP, WPA2, TX capped near 10 dBm. Bluetooth stays off. |
 
 ### Audio format
 
@@ -61,13 +61,14 @@ When USB is plugged in: stop recording, turn Wi-Fi off, expose `/recordings` as 
 
 MCU-only 126 mA was optimistic. With codec and SD the working number is about 160 mA from the cell. Current pouch is the Jauch **1200 mAh** pack taped to B.Cu (~7.5 h). Wi-Fi share adds transmit peaks of a few hundred milliamps on U4 (AP2112, 600 mA). Firmware caps TX near 10 dBm and turns the codec off while sharing. Re-measure on the SMT board. Idle deep-sleep is dominated by the charger IC and any always-on LDOs. Keep a true load switch on the 3.3 V rail. The buck already preferred on this 3.3 V rail is the follow-up if share browns out on a low cell.
 
-### Magnetic pad
+### USB-C (dev variant)
 
-- J2 is C6276862 (YZ103915020T-04025-02), a 22.30 × 7.70 × 2.00 mm stadium, 4 pins. No CC resistors: the cable is USB-A.
-- VBUS to charger IN through a PTC. The pad is the only 5 V inlet.
-- **BT1** is two SMT pads on **B.Cu** at (−17, 35) for a 1S pouch pigtail on VBAT, west of J2. Pad 1 is the west land. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT. C21 (10 µF) sits on VBAT next to U3 so BAT has local ceramic when the pouch is off.
+- J2 is HRO TYPE-C-31-M-13C (C2848620), a 16-pin USB 2.0 mid-mount receptacle at (7.0, −38.1), rot 180. Its mouth is flush with the phone-bottom board edge; the plug comes in through the case wall. The 4-pin magnetic pad (C6276862) is still on `compact-final`.
+- CC1 and CC2 each have a 5.1 kΩ Rd to GND (R2, R3), so a C-to-C cable turns VBUS on. Both D+ and both D− contacts are tied, SBU is open, the shell is GND.
+- VBUS to charger IN through a PTC. J2 is the only 5 V inlet.
+- **BT1** is two SMT pads on **B.Cu** at (−17, 35) for a 1S pouch pigtail on VBAT, north of the cell. Pad 1 is the west land. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT. C21 (10 µF) sits on VBAT next to U3 so BAT has local ceramic when the pouch is off.
 - D+/D− to ESP32-S3 USB PHY through U7
-- Click-test C5126845 before freezing the pinout. Do not implement PD sink for v1
+- Do not implement PD sink for v1. 5 V at default USB current is all the BQ24073 needs
 
 ## Mechanical — Pixel 10 + Pixelsnap
 
@@ -90,13 +91,13 @@ Sources: GSMArena / Google store for body size; WPC Qi2 / MagSafe accessory prac
 1. 0.85 mm non-ferrous skin, closed. The magnets sit in blind wells behind it
 2. N52 ring (steel plate already glued on) and the clocking magnet, glued steel-face up
 3. ~0.15 mm air, then the kapton-wrapped pouch taped to B.Cu
-4. PCB on four 5.0 mm M1.6 posts (MCU, codec, mic, magnetic pad, SD NAND)
-5. Natural translucent PETG lid over the F.Cu parts; TPU pill in the phone-left wall when snapped on. IPEX well over U1; FPC taped to the inner ceiling toward the phone-bottom end (J2 is the camera end)
+4. PCB on four 5.0 mm M1.6 posts (MCU, codec, mic, USB-C, SD NAND)
+5. Natural translucent PETG lid over the F.Cu parts; TPU pill in the phone-left wall when snapped on. IPEX well over U1; FPC taped to the inner ceiling toward the phone-bottom end, beside J2
 
 ### Keepouts (enforced by `hardware/cad/check_envelope.py`)
 
 - Accessory outline must **not overlap the camera bar** in the XY plane when snapped.
-- Magnetic pad on the **lid face**; the cable must miss the phone body.
+- USB-C mouth on the **phone-bottom wall**; the plug overmold (centred 6.87 mm above the phone back) must miss the phone body.
 - Mic acoustic port on a **free long edge**, not into the glass, or recordings go muffled.
 - Magnet ring must stay inside the accessory outline.
 - Analog codec island and mic bias stay off **VDD33**.
