@@ -15,7 +15,8 @@ Who owns which number:
   * Coordinates, rotation and side come from `hardware/kicad/fab/
     recorder-pos.csv`, which `kicad-cli pcb export pos` writes. Rotation and
     the Y sign flip are easy to get subtly wrong by hand, so they stay with
-    the tool that already knows the convention.
+    the tool that already knows the convention. The one exception is
+    JLC_ROTATION_OFFSET below: per-part turns for JLC's own footprints.
   * Which parts appear at all comes from the board's own KiCad attributes.
     A part is in the pick-and-place file unless it is flagged
     `exclude_from_pos_files`, and on the assembly BOM unless it is flagged
@@ -55,6 +56,25 @@ BOM_DOC = os.path.join(REPO, "docs", "bom.md")
 BOM_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_bom.csv")
 CPL_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_cpl.csv")
 EXTRA_CSV = os.path.join(REPO, "hardware", "kicad", "jlcpcb_extra.csv")
+
+# JLCPCB places each part with its own library footprint, and that footprint's
+# zero angle is not always KiCad's. These degrees (CCW) are added to the KiCad
+# rotation in jlcpcb_cpl.csv so JLC's pin-1 lands on our pad 1. Each entry was
+# read off JLC's assembly preview of the un-corrected CPL (pink pin-1 dot vs
+# our pad 1 and pin-1 triangle), 1 Nov 2026. 270 is a quarter turn clockwise.
+# Add a part here only from that preview, never by guessing a package rule.
+# Not listed: U1 and U3 (correct at plain KiCad angles; earlier +180 tries
+# did not show in the preview), J3 (flipped land; dot top-left matches),
+# J2 (JLC has no model to check; use "Confirm Parts Placement"). Y1 needs
+# none: YXC C5203546 shows its dot on pad 1 at our 180.
+JLC_ROTATION_OFFSET = {
+    "U2": 270,   # ES8311 C962342: dot top-left, pin 1 top-right
+    "MK1": 90,   # IM73A135 C3171831: quarter turn counter-clockwise
+    "U4": 270,   # AP2112K C51118: JLC body lies flat, our land stands up
+    "U5": 270,   # AP22804 C3001659: same as U4
+    "U7": 270,   # USBLC6-2SC6 C7519: same as U4
+    "U8": 270,   # LP5907 C186700: same as U4
+}
 
 _LCSC = re.compile(r"^C\d{4,}$")
 _REF = re.compile(r"^([^\d]+)(\d*)$")
@@ -141,9 +161,9 @@ def write_cpl(board, placed):
         out.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
         for ref in sorted(placed, key=ref_key):
             row = placed[ref]
-            # Same angle, written the way JLC's uploader expects to read it:
             # kicad-cli emits -90 for a quarter turn and the form wants 270.
-            rot = float(row["Rot"]) % 360.0
+            # Then turn JLC's footprint so its pin 1 meets ours.
+            rot = (float(row["Rot"]) + JLC_ROTATION_OFFSET.get(ref, 0)) % 360.0
             out.writerow([ref, row["PosX"], row["PosY"], row["Side"],
                           f"{rot:.6f}"])
     return len(placed)
@@ -203,7 +223,8 @@ def main():
     placed = write_cpl(board, read_pos())
     lines = write_bom(board)
     extra = write_extra(board)
-    print(f"jlcpcb_cpl.csv: {placed} placements")
+    print(f"jlcpcb_cpl.csv: {placed} placements, JLC rotation fixes: "
+          + ", ".join(f"{r} +{d}" for r, d in sorted(JLC_ROTATION_OFFSET.items())))
     print(f"jlcpcb_bom.csv: {lines} parts")
     print(f"jlcpcb_extra.csv: {extra} parts (order, do not assemble)")
     return 0

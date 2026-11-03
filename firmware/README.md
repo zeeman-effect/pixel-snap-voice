@@ -6,7 +6,7 @@ Portable recorder core in `core/` plus an ESP-IDF app that runs on:
 | --- | --- | --- | --- | --- |
 | ESP32-S3-Korvo-2 | ES7210 mics | ES8311 + NS4150 | 1-bit SDMMC | Phase 0 default. I2S clocks follow Espressif (S3 master). |
 | ESP-BOX / BOX-3 | ES7210 | ES8311 + PA | none on the main unit | Use Korvo if you need on-board SD. |
-| Custom PCB | ES8311 ADC | none (USB or Wi-Fi dump) | 4-bit SDMMC (soldered 4 GB NAND) | Codec is I2S master (12.288 MHz oscillator → MCLK). Formats FAT if the chip is blank. Double-press toggles Wi-Fi share. Pin map: `hardware/kicad/pinmap.md`. |
+| Custom PCB | ES8311 ADC | none (USB or Wi-Fi dump) | 4-bit SDMMC (soldered 512 MB NAND) | Codec is I2S master (12.288 MHz oscillator → MCLK). Formats FAT if the chip is blank. Double-press toggles Wi-Fi share. Pin map: `hardware/kicad/pinmap.md`. |
 
 ## Buttons
 
@@ -39,6 +39,8 @@ idf.py menuconfig   # Pixel Snap Voice → board
 idf.py build
 idf.py -p COMx flash monitor
 ```
+
+On the custom board, the first flash needs nothing pressed. After that, TinyUSB owns native USB, so put the recorder in download mode first: with the cable in the computer, long-press to sleep, then press and hold the record button 5 s until the LED goes solid, and let go (`CONFIG_PSV_BOOT_DOWNLOAD_HOLD`, `hal/download_mode.c`). The TP_BOOT / TP_EN pads are the fallback. Full steps: [`docs/bringup-custom.md`](../docs/bringup-custom.md#flash).
 
 Disable `CONFIG_PSV_USB_MSC` if you only want an SD reader for Phase 0.
 

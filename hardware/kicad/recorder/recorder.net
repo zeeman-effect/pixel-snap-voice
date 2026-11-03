@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/zachr/repos/pixel-snap-voice/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-10-25T14:23:06")
+		(date "2026-11-01T10:43:25")
 		(tool "Eeschema 10.0.7-10.0.7~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -3146,7 +3146,7 @@
 		)
 		(comp
 			(ref "J3")
-			(value "CSNP32GCR01-AOW")
+			(value "MKDV4GCL-ABB")
 			(footprint "PSV:ZDSD32GLGEAG")
 			(datasheet "~")
 			(fields
@@ -3161,7 +3161,7 @@
 			(libsource
 				(lib "PSV")
 				(part "ZDSD32GLGEAG")
-				(description "32 Gbit SD NAND, LGA-8 8.0 x 6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order CSNP32GCR01-AOW (C2841139); Zetta ZDSD32GLGEAG is the same land when it is back in stock.")
+				(description "SD NAND, LGA-8 8.0 x 6.0/6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order MK MKDV4GCL-ABB (C7500178) on the prototype; CS CSNP*GCR01 and Zetta ZDSD*LGEAG fit the same land.")
 			)
 			(property
 				(name "Sheetname")
@@ -4156,7 +4156,7 @@
 		(libpart
 			(lib "PSV")
 			(part "ZDSD32GLGEAG")
-			(description "32 Gbit SD NAND, LGA-8 8.0 x 6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order CSNP32GCR01-AOW (C2841139); Zetta ZDSD32GLGEAG is the same land when it is back in stock.")
+			(description "SD NAND, LGA-8 8.0 x 6.0/6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order MK MKDV4GCL-ABB (C7500178) on the prototype; CS CSNP*GCR01 and Zetta ZDSD*LGEAG fit the same land.")
 			(docs "http://en.zettadevice.com/uploads/files/SD%20NAND/32%E5%92%8C64/1645752795ab7e012c7c6a815d.pdf")
 			(fields
 				(field
@@ -4168,7 +4168,7 @@
 				(field
 					(name "Datasheet") "http://en.zettadevice.com/uploads/files/SD%20NAND/32%E5%92%8C64/1645752795ab7e012c7c6a815d.pdf")
 				(field
-					(name "Description") "32 Gbit SD NAND, LGA-8 8.0 x 6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order CSNP32GCR01-AOW (C2841139); Zetta ZDSD32GLGEAG is the same land when it is back in stock.")
+					(name "Description") "SD NAND, LGA-8 8.0 x 6.0/6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order MK MKDV4GCL-ABB (C7500178) on the prototype; CS CSNP*GCR01 and Zetta ZDSD*LGEAG fit the same land.")
 			)
 			(pins
 				(pin

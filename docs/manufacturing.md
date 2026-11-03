@@ -9,7 +9,7 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Fab | JLCPCB (PCBWay is the backup) |
 | Layers | 4 (F.Cu, In1.Cu, In2.Cu, B.Cu) |
 | Thickness | 0.8 mm (`params.json`). 1.6 mm only if a later envelope check still passes |
-| Finish | ENIG (fine pitch + the magnetic pad) |
+| Finish | OSP, the cheapest flat finish. Not HASL: its solder domes are risky under U2's 0.4 mm pitch and the bottom-pad parts (U1, J3, MK1). ENIG also works but buys shelf life this one-off does not need; J2's gold is on the part, not the board. OSP lasts ~6 months bare and weakens after reflow, so JLC assembles at once; solder the BT1 pigtail within a few weeks, with flux |
 | Impedance | None. Do not order the controlled-impedance option. USB is full speed only, so D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch over In1 GND (~75 Ω). Reasoning in `hardware/kicad/README.md` |
 | Min trace / space | 0.15 mm. Inside standard capability, so no fine-line surcharge |
 | Via | 0.6 mm pad on a 0.3 mm drill, one size everywhere. 0.3 mm is JLC's preferred hole, so no small-via surcharge — do not let a re-route drop below it |
@@ -17,7 +17,7 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Assembly | JLCPCB SMT for every surface-mount part. BT1 is pads only (no wave solder). No UART header |
 | Panel | Single board is fine for a one-off |
 
-Mic: keep the acoustic port on the board edge, away from U4/U5. Storage is a soldered 4 GB SD NAND (J3, C2841139), not a card socket.
+Mic: keep the acoustic port on the board edge, away from U4/U5. Storage is a soldered 512 MB SD NAND (J3, MK MKDV4GCL-ABB, C7500178), not a card socket.
 
 See [`hardware/kicad/README.md`](../hardware/kicad/README.md) for stackup and keepouts.
 
@@ -107,7 +107,7 @@ Do not pay Amazon for a lookalike. Do not put the female pad on either cable end
 2. `python scripts/check_gates.py` (envelope, `recorder_test`, schematic ERC, outline/holes, MCU SKU, pins). Official copper DRC is `kicad-cli pcb drc`. A clean run writes the whole upload package in one pass: `hardware/kicad/fab/` from `kicad-cli`, and `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` + `jlcpcb_extra.csv` from `generate_jlc.py`. Send them only if that run just happened. If gates or DRC fail, edit the board. Do not stop at the report.
 3. Optional: ngspice `sim/spice/power_path.cir`
 4. Human glance in KiCad 10: USB length/impedance, courtyard collisions, 3D vs case. Footprint XY: `hardware/kicad/recorder/placement.json`.
-5. Upload `hardware/kicad/fab/` Gerbers + `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` from **this** `compact-final` board (59.6 × 85.6 mm). Do not upload the 64 × 86 mm files on `main`. Step 2 writes those from `recorder.kicad_pcb`, so upload the files that run just produced. Do not hand-edit the CSVs: LCSC order codes come from the tables in [`docs/bom.md`](bom.md), and which parts the machine places comes from the board's own `exclude_from_pos_files` / `exclude_from_bom` flags. A missing LCSC on an assembly-BOM part fails the generator. BT1 and the download pads are copper only. **J2** is C6276862; the land is the vendor stadium (22.30 × 7.70 mm). Confirm it in the assembly preview. ITERM and the magnetic-pad nets are routed; a clean `check_gates` is the go-ahead for this folder.
+5. Upload `hardware/kicad/fab/recorder-jlc.zip` (the Gerbers; not the loose files) + `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` from **this** `compact-final` board (59.6 × 85.6 mm). Set **0.8 mm** thickness and **OSP**; JLC defaults to 1.6 mm HASL. Tick **Confirm Parts Placement**: J2 has no 3D model in JLC's preview, and a 180° error swaps 5 V and ground. In the preview, every pink pin-1 dot must sit on our pad 1. Fix a wrong one in `JLC_ROTATION_OFFSET` in `generate_jlc.py` and re-run step 2, not on the order page. Do not upload the 64 × 86 mm files on `main`. Step 2 writes those from `recorder.kicad_pcb`, so upload the files that run just produced. Do not hand-edit the CSVs: LCSC order codes come from the tables in [`docs/bom.md`](bom.md), and which parts the machine places comes from the board's own `exclude_from_pos_files` / `exclude_from_bom` flags. A missing LCSC on an assembly-BOM part fails the generator. BT1 and the download pads are copper only. **J2** is C6276862; the land is the vendor stadium (22.30 × 7.70 mm). Confirm it in the assembly preview. ITERM and the magnetic-pad nets are routed; a clean `check_gates` is the go-ahead for this folder.
 6. Order magnet ring and LiPo **before** locking CNC metal
 7. Order the magnetic USB-A lead from LCSC (2 custom sets + 3 extra `C6276862` pads). Clicks are in **Magnetic USB-A lead** above. Do not buy an Amazon lookalike.
 8. SMT board: follow [`docs/bringup-custom.md`](bringup-custom.md)

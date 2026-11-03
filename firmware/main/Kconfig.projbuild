@@ -22,6 +22,19 @@ menu "Pixel Snap Voice"
             SD card is exposed as a drive. Phase 0 can disable this and use
             an SD reader instead.
 
+    config PSV_BOOT_DOWNLOAD_HOLD
+        bool "Hold the button through boot to reflash over USB"
+        default y if PSV_BOARD_CUSTOM
+        default n
+        help
+            Once TinyUSB MSC owns native USB, esptool can no longer reset the
+            S3 into download mode by itself. With this on, holding the record
+            button for 5 s from power-up or wake, with the cable in a computer,
+            restarts the S3 into ROM download mode (USB-Serial/JTAG), so a
+            reflash needs no TP_BOOT / TP_EN pads and no open case. Without a
+            USB host the LED flashes fast and the board boots normally.
+            Off on Korvo-2 / ESP-BOX: ladder button, and native USB is reserved.
+
     config PSV_SD_MOUNT_POINT
         string "SD VFS mount point"
         default "/sdcard"

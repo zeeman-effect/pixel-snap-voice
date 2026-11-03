@@ -1,5 +1,5 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-10-25T14:23:20 **
+** Created on 2026-11-01T10:43:38 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
@@ -22,7 +22,7 @@
 [footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: '1S pouch pigtail solder pads, no connector', Schematic: '')
     Local override; warning
     @(-17.0000 mm, 35.0000 mm): Footprint BT1
-[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: 'CS 32 Gbit (4 GB) SD NAND, LGA-8 8.0 x 6.2 mm. SD 2.0 1-bit and 4-bit. JLCPCB C2841139. Pins 3 CLK, 4 VSS, 5 CMD, 8 VDD.', Schematic: '')
+[footprint_symbol_field_mismatch]: Field 'Description' differs (PCB: 'MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8 8.0 x 6.0 mm. SD 2.0 1-bit and 4-bit. JLCPCB C7500178. Pins 3 CLK, 4 VSS, 5 CMD, 8 VDD.', Schematic: '')
     Local override; warning
     @(-22.0000 mm, -18.0000 mm): Footprint J3
 [extra_footprint]: Extra footprint

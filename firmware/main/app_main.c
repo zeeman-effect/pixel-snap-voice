@@ -8,6 +8,7 @@
 #include "button.h"
 #include "clock_rtc.h"
 #include "config.h"
+#include "download_mode.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -28,6 +29,8 @@ static const char *TAG = "psv";
  *   double press — Wi-Fi share on the custom board; play last file on
  *                  Korvo / ESP-BOX unless CONFIG_PSV_WIFI_SHARE_DOUBLE
  *   long press   — deep sleep (wake on the same button)
+ *   hold 5 s from power-up or wake, cable in a computer — restart into ROM
+ *                  download mode to reflash (custom board; see download_mode.h)
  *
  * USB attach always wins: record, play, and Wi-Fi stop; TinyUSB MSC owns the card.
  */
@@ -193,6 +196,8 @@ void app_main(void)
     ESP_ERROR_CHECK(power_init());
     ESP_ERROR_CHECK(led_init());
     ESP_ERROR_CHECK(button_init());
+    /* Before SD and TinyUSB, so a broken recorder path cannot block a reflash. */
+    download_mode_check();
 
     err = storage_sd_mount();
     if (err != ESP_OK) {

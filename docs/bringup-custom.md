@@ -6,14 +6,40 @@ Gerbers + JLC BOM/CPL: `hardware/kicad/fab/`, `hardware/kicad/jlcpcb_bom.csv`, `
 
 ## Flash
 
-The magnetic cable is the first-flash path (ESP32-S3 USB-Serial/JTAG). After TinyUSB MSC takes the port, use the F.Cu pads:
+Every flash goes over the magnetic cable to a computer. What changes is how the S3 gets into download mode.
 
-1. Hold **TP_BOOT** to **TP_GND** (GPIO0).
+**First flash (blank chip).** Nothing to press. A blank S3 shows up as its built-in USB-Serial/JTAG port and esptool resets it into download mode itself: `idf.py -p COMx flash monitor`.
+
+**Reflash, case closed (normal path).** Once our firmware runs, TinyUSB MSC owns native USB and esptool can no longer reset the chip by itself. The firmware has a button gesture for this (`CONFIG_PSV_BOOT_DOWNLOAD_HOLD`, on for the custom board; `firmware/hal/download_mode.c`):
+
+1. Plug the magnetic cable into the computer.
+2. Put the recorder to sleep: hold the record button about 1.5 s, until it goes dark, and let go.
+3. Press the record button again and **keep holding**. The recorder wakes; after **5 s** the LED goes **solid**.
+4. Let go. The S3 restarts into ROM download mode and the USB-Serial/JTAG port appears (the LED is off from here).
+5. `idf.py -p COMx flash monitor`. esptool's reset at the end starts the new firmware.
+
+LED during that hold:
+
+| LED | Meaning |
+| --- | --- |
+| off, then solid at 5 s | download mode next; let go |
+| fast flashing at 5 s | no computer on the cable (no USB frames seen). Let go; the recorder boots normally. Check the cable is in a computer, not a charger |
+| still off, or the recorder went back to sleep | you let go before 5 s, or pressed after it had already started. Start again from step 2 |
+
+Unplugging the computer from the magnetic cable does not reboot the recorder while a pouch is connected, which is why step 2 puts it to sleep first. With no pouch, plugging the cable in while holding the button works too.
+
+If download mode is entered and you change your mind, pulse **TP_EN** to GND or remove every power source (cable and pouch). The ROM clears the force-download flag on its own, so the next boot is normal.
+
+**Reflash by the pads (fallback).** Use these if the firmware is too broken to reach the gesture (a crash before `download_mode_check()`, or a build with the option off). The pads are on F.Cu, so this needs the lid off:
+
+1. Hold **TP_BOOT** to **TP_GND** (GPIO0). TP_EN sits between them; use a short wire rather than tweezers across EN.
 2. Pulse **TP_EN** to GND, then release EN.
 3. Release TP_BOOT.
 4. `idf.py -p COMx flash` over the magnetic USB.
 
-There is no Boot/Reset switch and no UART header. Do not wire GPIO0 as a firmware button. SW1 stays the record control.
+Never touch **TP_3V3** to **TP_GND**: that shorts the 3.3 V rail. TP_3V3 is for measuring the rail or feeding it from a bench supply.
+
+There is no Boot/Reset switch and no UART header. Do not wire GPIO0 as a firmware button. SW1 stays the record control, and the download hold is a firmware gesture on it, not a strap.
 
 ## Order of tests
 
@@ -25,7 +51,7 @@ There is no Boot/Reset switch and no UART header. Do not wire GPIO0 as a firmwar
 6. **SD** — 4-bit SDMMC. Logs `SD card ready (VFS via TinyUSB)` then `SD mounted at /sdcard (TinyUSB)`. Blank NAND is formatted on that first TinyUSB mount.
 7. **No speaker** — dump WAVs over USB or Wi-Fi share and play them on the computer or phone.
 8. **Charger** — 5 V on the magnetic pad into BQ24073 IN. STAT / **CHG_STAT** low while charging, ~500 mA. Board runs from VSYS with BT1 open. No brownout while recording. Click-test C6276862 against C5126845 before you trust the pinout.
-9. **TinyUSB MSC** — plug into a PC. Recording stops and the WAV is closed; Wi-Fi turns off; TinyUSB takes the NAND exclusively (recorder VFS unmounts); the volume appears on the PC; unplug remounts VFS and returns to idle. Drop `set_time.txt` to set the RTC. This board has no VBUS-detect GPIO — if the recorder does not get the NAND back after unplug, power-cycle. After MSC owns native USB, later flashes use the TP_BOOT / TP_EN pads.
+9. **TinyUSB MSC** — plug into a PC. Recording stops and the WAV is closed; Wi-Fi turns off; TinyUSB takes the NAND exclusively (recorder VFS unmounts); the volume appears on the PC; unplug remounts VFS and returns to idle. Drop `set_time.txt` to set the RTC. This board has no VBUS-detect GPIO — if the recorder does not get the NAND back after unplug, power-cycle. After MSC owns native USB, reflash with the 5 s button hold (see **Flash**); the TP_BOOT / TP_EN pads are the fallback.
 10. **Wi-Fi share** — mate the W.FL / MHF III pigtail first (human step; there is no IPEX-detect GPIO). Double-press starts a WPA2 network **PixelSnapVoice** / **voicenote1**. Join from a phone or computer, then open `http://192.168.4.1`. Play or download a WAV in the browser. iOS Files, macOS Finder, or a Windows network location can also copy the folder over WebDAV when that OS allows it. The LED double-blips. Double-press again to stop. Do not start share with the IPEX open. If VDD33 sags on a low cell, stop share and note it — the buck already preferred on this rail is the follow-up.
 11. **Sleep** — long press; current should drop (U5 off, radio off). Wake on the record button.
 

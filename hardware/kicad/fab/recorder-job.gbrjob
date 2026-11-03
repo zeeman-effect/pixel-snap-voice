@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "10.0.7-10.0.7~ubuntu24.04.1"
     },
-    "CreationDate": "2026-10-25T14:23:22-05:00"
+    "CreationDate": "2026-11-01T10:43:39-06:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -19,7 +19,7 @@
     },
     "LayerNumber": 4,
     "BoardThickness": 0.8,
-    "Finish": "ENIG"
+    "Finish": "OSP"
   },
   "DesignRules": [
     {

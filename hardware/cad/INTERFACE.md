@@ -51,7 +51,7 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | Record pill (wall) | −31.0 (phone-left long wall) | +12.0 | Captive TPU 95A in the lid. Flush 10 × 3.2 mm rounded bezel, 0.65 mm proud press pad. Left side when the accessory is snapped on the phone. Install from inside |
 | Button (SW1) | −27.1 | +12.0 | Side-actuated Panasonic EVQP7C01P, rot 270° so the actuator faces the phone-left wall. Tip at x = −29.2, 0.6 mm inside the board edge. The switch is the spring |
 | LED (D1, D2) | ≈ −29 / phone-left wall | +18.0 / charger is the phone-bottom end | Face the lid. No side windows. Lid is natural translucent PETG |
-| SD NAND (J3) | −22.0 | −18.0 | CSNP32GCR01-AOW, 8.0 × 6.2 mm LGA-8 on F.Cu. No wall slot |
+| SD NAND (J3) | −22.0 | −18.0 | MKDV4GCL-ABB, 8.0 × 6.0 mm LGA-8 on F.Cu. No wall slot |
 | Side ridges | ±31.0 (both long walls, tray and lid) | skip pill and mic | 0.35 mm × 0.6 mm flutes at 1.6 mm pitch, tilted 18° from vertical. Same cut on both halves so they read as one strip when closed |
 | Lid wave art | ±18.0 | 0.0 | Two foci, concentric rings that run off the lid. 0.35 mm into `shell_back`. Clipped off the pogo dish, the IPEX well, and the four boss footprints |
 | IPEX well | +17.9 | −13.0 | 7.0 mm well, 0.85 mm into the 1.2 mm lid skin over U1’s W.FL / MHF III jack. Leaves 0.35 mm of PETG. Print the lid outer-face down so that skin is the first layer |
@@ -73,7 +73,7 @@ These are the recorder project names. Do not keep the old generated-board map.
 | Ref | What |
 | --- | --- |
 | J2 | 4-pin magnetic pad (C6276862) |
-| J3 | CSNP32GCR01-AOW 4 GB SD NAND |
+| J3 | MKDV4GCL-ABB 512 MB SD NAND |
 | U8 | analog LDO (codec / mic) |
 | VDD33 | MCU 3.3 V rail |
 | U1 | ESP32-S3-MINI-1U |

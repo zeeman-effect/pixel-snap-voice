@@ -40,7 +40,7 @@ When USB is plugged in: stop recording, turn Wi-Fi off, expose `/recordings` as 
 | Codec | Everest ES8311, I2S master, 12.288 MHz oscillator → MCLK | PGA/ALC/ADC + DAC + HP. Dedicated analog LDO (U8). No XI/XO on this codec. |
 | Mic | Analog MEMS: IM73A135 (~73 dBA) | Pin 3 is OUT−, left open; C15 couples OUT+. VDD 2.8 V. Fallback: ICS-43434 I2S (65 dBA). **INMP441 is EOL.** |
 | Playback | None on the custom board | Dump WAVs over USB. Korvo / ESP-BOX / host sim still play. ES8311 AOUT is open |
-| Storage | CS CSNP32GCR01-AOW 4 GB SD NAND (FAT32) | LGA-8, 8.0 × 6.2 mm, LCSC C2841139. Pin order is CLK on 3, VSS on 4, CMD on 5, VDD on 8. Zetta ZDSD32GLGEAG uses that same order. Firmware formats FAT if the chip is blank. Do not drop to the 8 Gbit grade |
+| Storage | MK MKDV4GCL-ABB 512 MB SD NAND (FAT) | LGA-8, 8.0 × 6.0 mm, LCSC C7500178. Pin order is CLK on 3, VSS on 4, CMD on 5, VDD on 8; CS and Zetta parts use the same order and fit the same land. Firmware formats FAT if the chip is blank. Prototype capacity, picked on cost |
 | Charge + USB | C6276862 4-pin magnetic pad (J2) | 2.0 mm female. Lid dishes over the pad so the gold is 0.15 mm proud of that local face. Pins 1 VBUS, 2 D−, 3 D+, 4 GND. Cable male C5126845. No CC / Rd. No USB-PD |
 | Charge | BQ24073RGTR, USB500 ~500 mA (EN1/EN2, ISET 1.8 kΩ) | Power-path: **VSYS** = OUT at 4.4 V, **VBAT** = pouch only. Pin 8 is ground. Pin 15 TD is held low. Charge LED on STAT. No fuel gauge |
 | 3.3 V | Buck preferred (efficiency); LDO this spin (U4 AP2112 + U5 AP22804 → **VDD33**) | U4 VIN from **VSYS**. Keep the regulator and any later switching node away from the mic |
@@ -54,7 +54,7 @@ When USB is plugged in: stop recording, turn Wi-Fi off, expose `/recordings` as 
 - Encoding: PCM, 16-bit signed little-endian
 - Rate / channels: **48 kHz**, mono (16 kHz sounds telephone-narrow on playback; codecs expect 48 k)
 - Path: `/recordings/YYYYMMDD-HHMMSS.wav`
-- Size: 48000 × 2 bytes/s = **96 kB/s ≈ 5.5 MB/min**. A full pouch (~7.5 h) is about 2.5 GB. The 4 GB NAND holds that with room; an 8 Gbit / 512 MB part would fill first.
+- Size: 48000 × 2 bytes/s = **96 kB/s ≈ 5.5 MB/min**. A full pouch (~7.5 h) is about 2.5 GB. The prototype's 4 Gbit / 512 MB NAND holds about 1.4 h, so it fills before the pouch empties; a final product wants 32 Gbit / 4 GB.
 - Do not store 24-bit files; 16-bit already exceeds a 65–74 dBA capsule. Keep 24-bit on the I2S wire if the mic provides it.
 
 ### Power budget (v1 estimate)

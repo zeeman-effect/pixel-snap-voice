@@ -26,7 +26,7 @@ echo "== apt: base packages =="
 $SUDO env DEBIAN_FRONTEND=noninteractive apt-get update -qq
 $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
   software-properties-common ca-certificates build-essential cmake ngspice \
-  curl unzip
+  curl unzip python3-numpy
 
 # KiCad 10 is newer than the Ubuntu 24.04 archive (which ships KiCad 7), so pull
 # it from the official KiCad releases PPA. add-apt-repository is a no-op if the

@@ -858,8 +858,8 @@ def build() -> None:
     io = Sch("Recorder — IO")
     for b in (sd_blk, sw_blk, device_r, device_led, gnd_blk, vdd33_blk):
         io.add_lib(b)
-    io.add(text("Soldered 4 GB SD NAND, 4-bit SDMMC, side-fire button, status LED. Pull-ups on CMD/DAT.", 20, 18, "io-h"))
-    io.add(inst(sd_id, "J3", "CSNP32GCR01-AOW", 80, 80, sd_pins, "PSV:ZDSD32GLGEAG"))
+    io.add(text("Soldered 512 MB SD NAND, 4-bit SDMMC, side-fire button, status LED. Pull-ups on CMD/DAT.", 20, 18, "io-h"))
+    io.add(inst(sd_id, "J3", "MKDV4GCL-ABB", 80, 80, sd_pins, "PSV:ZDSD32GLGEAG"))
     stub(io, 80, 80, sd_pins, "1", "SD_D2", "sd-d2")
     stub(io, 80, 80, sd_pins, "2", "SD_D3", "sd-d3")
     stub(io, 80, 80, sd_pins, "3", "SD_CLK", "sd-clk")

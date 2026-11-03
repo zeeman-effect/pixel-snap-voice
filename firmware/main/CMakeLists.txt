@@ -12,6 +12,7 @@ idf_component_register(
         "../hal/usb_msc.c"
         "../hal/wifi_share.c"
         "../hal/power.c"
+        "../hal/download_mode.c"
     INCLUDE_DIRS
         "."
         "../core"

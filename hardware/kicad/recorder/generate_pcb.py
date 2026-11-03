@@ -235,7 +235,7 @@ PLACEMENT = {
     "TP_GND": (27.6, 0.2, 0, "GND test pad"),
     "TP_3V3": (27.6, 4.0, 0, "VDD33 test pad"),
     # --- Soldered SD NAND (old socket seat, no wall slot) ---
-    "J3": (-22.0, -18.0, 0, "CSNP32GCR01-AOW 4 GB SD NAND, LGA-8"),
+    "J3": (-22.0, -18.0, 0, "MKDV4GCL-ABB 512 MB SD NAND, LGA-8"),
     "Rsd0": (-11.0, -25.0, 0, "SD_CMD pull-up"),
     "Rsd1": (-11.0, -22.5, 0, "SD_D0 pull-up"),
     "Rsd2": (-11.0, -20.0, 0, "SD_D1 pull-up"),
@@ -331,7 +331,7 @@ STACKUP = """\t\t(stackup
 \t\t\t(layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
 \t\t\t(layer "B.Paste" (type "Bottom Solder Paste"))
 \t\t\t(layer "B.SilkS" (type "Bottom Silk Screen"))
-\t\t\t(copper_finish "ENIG")
+\t\t\t(copper_finish "OSP")
 \t\t\t(dielectric_constraints no)
 \t\t)
 """
@@ -846,7 +846,7 @@ def patch_saved_board(pcb):
     header = (
         '\t(title_block\n'
         '\t\t(title "pixel-snap-voice recorder")\n'
-        '\t\t(comment 1 "4-layer 0.8 mm ENIG. Origin = Pixelsnap magnet centre.")\n'
+        '\t\t(comment 1 "4-layer 0.8 mm OSP. Origin = Pixelsnap magnet centre.")\n'
         f'\t\t(comment 2 "USB D+/D- is a tight pair, not impedance controlled: {pcb["usb_signalling"]}.")\n'
         '\t\t(comment 3 "First-pass placement from generate_pcb.py. Not routed.")\n'
         '\t)\n'

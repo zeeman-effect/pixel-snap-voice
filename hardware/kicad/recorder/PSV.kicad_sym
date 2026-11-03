@@ -376,7 +376,7 @@
 			(effects (font (size 1.27 1.27)) hide))
 		(property "Datasheet" "http://en.zettadevice.com/uploads/files/SD%20NAND/32%E5%92%8C64/1645752795ab7e012c7c6a815d.pdf" (at 0 0 0)
 			(effects (font (size 1.27 1.27)) hide))
-		(property "Description" "32 Gbit SD NAND, LGA-8 8.0 x 6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order CSNP32GCR01-AOW (C2841139); Zetta ZDSD32GLGEAG is the same land when it is back in stock." (at 0 0 0)
+		(property "Description" "SD NAND, LGA-8 8.0 x 6.0/6.2 mm. Pins are the Zetta/CS order, not a microSD socket: 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Order MK MKDV4GCL-ABB (C7500178) on the prototype; CS CSNP*GCR01 and Zetta ZDSD*LGEAG fit the same land." (at 0 0 0)
 			(effects (font (size 1.27 1.27)) hide))
 		(property "ki_keywords" "SD NAND LGA storage" (at 0 0 0)
 			(effects (font (size 1.27 1.27)) hide))

@@ -1,0 +1,34 @@
+# Python packages for this repo's scripts. Install into a virtual environment
+# that can still see KiCad's pcbnew module:
+#
+#   python3 -m venv --system-site-packages .venv     # Ubuntu: apt install python3-venv
+#   .venv/bin/pip install -r requirements.txt
+#
+# With uv, name the system interpreter. KiCad's pcbnew is built for Ubuntu's
+# Python 3.12, and a uv-managed 3.13 venv cannot import it at all:
+#   uv venv --python /usr/bin/python3 --system-site-packages .venv
+#   uv pip install -r requirements.txt
+#
+# Most scripts need nothing beyond the standard library
+# (check_envelope.py, check_gates.py, sync_renders.py, software/transcribe.py).
+
+# route_pcb.py (maze repair router) and export_metal_step.py.
+# Ubuntu alternative: apt install python3-numpy (scripts/setup-ubuntu.sh does).
+numpy>=1.24
+
+# export_metal_step.py only: B-rep STEP of the 6061 tray for a CNC quote.
+# Large download (OpenCascade); skip it if you are not quoting the metal tray.
+cadquery>=2.4
+
+# Not on PyPI. These come with the programs that run the scripts:
+#   pcbnew, wx     KiCad 10. Every hardware/kicad script and check_gates.py.
+#                  Linux: system python3 from the KiCad PPA.
+#                  Windows: KiCad's bundled python.exe.
+#   bpy, bmesh, bpy_extras, mathutils
+#                  Blender 5.2. Run render scripts with
+#                  `blender --background --python <script>`.
+#
+# Command-line tools, also not pip packages:
+#   kicad-cli (KiCad 10), openscad, blender, freerouting, ngspice, cmake +
+#   a C compiler, ESP-IDF (firmware), whisper.cpp `whisper-cli` (transcribe).
+#   scripts/setup-ubuntu.sh installs the Linux toolchain; see README.

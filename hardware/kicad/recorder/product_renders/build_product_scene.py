@@ -86,10 +86,10 @@ FALLBACKS = [
         "x": -22.0,
         "y": -18.0,
         "rot": 0.0,
-        "sx": 6.2,
-        "sy": 8.0,
+        "sx": 8.0,
+        "sy": 6.0,
         "sz": 0.75,
-        "note": "CS CSNP32GCR01-AOW 4 GB SD NAND, LGA-8; no vendor STEP",
+        "note": "MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8; no vendor STEP",
     },
     {
         "ref": "U3",

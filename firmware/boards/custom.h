@@ -6,10 +6,11 @@
  * Custom slim PCB (hardware/kicad/pinmap.md; matches recorder/ refs).
  * ES8311 is I2S master (12.288 MHz oscillator into MCLK). S3 is I2S slave.
  * Analog MEMS into ES8311 ADC. No PA or speaker: dump WAVs over USB or Wi-Fi share.
- * J3 is a soldered 4 GB SD NAND; format FAT on first mount if the chip is blank.
+ * J3 is a soldered SD NAND (512 MB MK MKDV4GCL-ABB on the prototype); format FAT on first mount if the chip is blank.
  *
  * Strapping pins GPIO0 / GPIO45 / GPIO46 are left alone.
- * Download is TP_BOOT (GPIO0) and TP_EN plus GND / 3V3 pads, not firmware GPIOs.
+ * Reflash: hold the record button 5 s from wake with USB in a computer
+ * (hal/download_mode.c). Fallback is TP_BOOT (GPIO0) and TP_EN plus GND / 3V3 pads.
  */
 
 #define PSV_BOARD_NAME "custom"

@@ -51,6 +51,8 @@ It installs build-essential, CMake, ngspice, KiCad 10 from the official KiCad PP
 - [ngspice](https://ngspice.sourceforge.io/), only for the power-path sim.
 - [freerouting](https://github.com/freerouting/freerouting/releases), only for `route_pcb.py`. Put it on `PATH`, unpack it to `~/.local/opt/freerouting/`, or set `PSV_FREEROUTING` to the launcher.
 
+Python packages are in [`requirements.txt`](requirements.txt): `numpy` (for `route_pcb.py`) and `cadquery` (only for the metal tray STEP). Install them into a virtual environment made with `--system-site-packages`, so KiCad's `pcbnew` stays importable. The file also lists what comes with KiCad and Blender instead of pip.
+
 Firmware needs ESP-IDF on top of this. See [`firmware/README.md`](firmware/README.md).
 
 ## Simulate first

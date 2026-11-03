@@ -10,7 +10,7 @@
       "In2.Cu (VDD33)",
       "B.Cu"
     ],
-    "finish": "ENIG",
+    "finish": "OSP",
     "usb_diff_ohm": null,
     "usb_signalling": "USB 2.0 full speed, 12 Mbps",
     "usb_diff_note": "Not impedance controlled, on purpose. The ESP32-S3 USB-OTG peripheral is full speed only (12 Mbps, no high-speed PHY: Espressif's USB overview table marks ESP32-S3 'USB OTG High-Speed = X'). F.Cu sits 0.1 mm above the In1 GND plane in this stackup, where a 90 ohm differential pair would need roughly 0.06 mm traces, well under the 0.127 mm any quick-turn fab will run. Rather than thicken the prepreg for a requirement the silicon does not have, D+/D- run as a 0.2 mm pair on a 0.4 mm pitch over solid In1 GND, which is near 75 ohm differential by first-order microstrip. The run is long for a USB pair because U1's USB pads are on the module's top row, the far side of a 15.9 mm module from the connector, and its castellations leave 0.05 mm between pads so nothing crosses the footprint. At full-speed edge rates it is still electrically short. Measured copper is in hardware/kicad/recorder/placement.json under routing.usb, written by route_pcb.py from the board itself. Do not re-type those millimetres into this sentence: this note and the one in placement.json each carried their own hand-typed lengths and both went stale at the first reroute.",
@@ -63,14 +63,16 @@
   "footprint_substitutions": {},
   "open_items": [
     "SW1 is a side-actuated Panasonic EVQP7C01P (JLCPCB C388883). The record button is on the phone-left wall when the accessory is snapped on the phone. Its actuator tip sits 0.6 mm inside the board edge; the TPU pill nub spans that gap. Pin 1 carries BTN and pin 2 carries GND. Check the press feel on the first assembled board: 2.2 N is firmer than the 1.6 N alternatives.",
-    "Download is four F.Cu pads (TP_BOOT, TP_EN, TP_GND, TP_3V3) beside the MCU. Hold GPIO0 to GND, pulse EN. No Boot/Reset switches and no UART header.",
+    "Download fallback is four F.Cu pads (TP_BOOT, TP_EN, TP_GND, TP_3V3) beside the MCU: hold GPIO0 to GND, pulse EN. Normal reflash needs no pads: hold the record button 5 s from wake with the cable in a computer (firmware/hal/download_mode.c). No Boot/Reset switches and no UART header.",
     "USB D+/D- are not impedance controlled, on purpose: the ESP32-S3 USB peripheral is full speed only, and 90 ohm on this 0.1 mm prepreg would need traces narrower than any quick-turn fab will run. The pair is 0.2 mm wide on a 0.4 mm pitch over solid In1 GND, near 75 ohm differential by first-order microstrip.",
     "MK1's land pattern is a locally adapted copy in PSV.pretty, not the drawing in the Infineon datasheet. The ring pad and its stencil aperture were moved out to 0.95 mm so copper clears the 0.8 mm sound port by 0.32 mm. Check the acoustic seal on the first assembled board.",
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are published defaults. Caliper a real phone and a real magnet ring before cutting metal.",
     "kicad-cli pcb drc --schematic-parity reports notes on spare ESP32-S3 castellations and NC pins, four mounting holes, and three footprint fields the sheet leaves blank (BT1's description, J2's datasheet, J3's description). Copper DRC is clean.",
+    "J3 (PSV:ZDSD32GLGEAG) had two land errors, both fixed 1 Nov 2026. It was mirrored (pin 1 bottom-left counting up; the datasheet top view has pin 1 top-left counting down), and its pad columns were 5.4 mm apart along the long sides. Every LGA-8 SD NAND checked (CS CSNP*GCR01, Zetta ZDSD*LGEAG, MK MKDV*) is 8 mm wide with the columns on the short ends, 6.85-7.25 mm apart, so the old pads would have missed the chip. The land now has columns at +/-3.5 mm with 1.15 x 0.75 pads, which covers all three, and J3 was re-routed with route_pcb.py --repair-only. CPL rotation 0: JLC draws the chip landscape with its dot top-left, on pad 1.",
+    "JLCPCB rotation: jlcpcb_cpl.csv adds JLC_ROTATION_OFFSET (generate_jlc.py): U2, U4, U5, U7, U8 +270 (a quarter turn clockwise) and MK1 +90, read off JLC's preview on 1 Nov 2026. U1 and U3 are right at KiCad's own angle. Y1 is YXC C5203546, whose preview dot sits top-right on pad 1 at 180. J2 has no JLC model to check, and a 180 error swaps 5 V and ground: order with Confirm Parts Placement.",
     "J2 is Xinyangze YZ103915020T-04025-02 (LCSC C6276862) at (0, 36), rot 0, on the phone-top / camera end. The tray clocking magnet stays at 6 o'clock. Vendor drawing is a 22.30 x 7.70 x 2.00 mm stadium. Cable male is YZP0048-20048-04025-03 / C5126845. Pin 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise. No Type-C Rd.",
     "The Jauch LP305166JH-PCM-2-WIRES-70MM pack (66 x 51.5 x 3.3 mm, 1200 mAh min) is taped to B.Cu at (0, 0) and wrapped in kapton. About 0.15 mm of air under the wrapped cell so the pouch is not a spacer. BT1 is B.Cu at (-17, 35), west of J2 and just north of the cell, pad 1 VBAT on the west land. Four 5.0 mm posts carry the board.",
-    "J3 is CS CSNP32GCR01-AOW (LCSC C2841139) 32 Gbit / 4 GB SD NAND, LGA-8 8.0 x 6.2 mm at (-22, -18). Pin order is 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Firmware formats FAT on first mount if the chip is blank."
+    "J3 is MK MKDV4GCL-ABB (LCSC C7500178) 4 Gbit / 512 MB SD NAND, LGA-8 8.0 x 6.0 mm at (-22, -18), about 1.4 h of recording; a prototype pick on cost. Pin order is 1 DAT2, 2 DAT3, 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Firmware formats FAT on first mount if the chip is blank."
   ],
   "parts": [
     {
@@ -426,7 +428,7 @@
     },
     {
       "ref": "J3",
-      "value": "CSNP32GCR01-AOW",
+      "value": "MKDV4GCL-ABB",
       "sheet": "IO",
       "x_mm": -22.0,
       "y_mm": -18.0,
@@ -435,7 +437,7 @@
       "footprint": "PSV:ZDSD32GLGEAG",
       "footprint_in_schematic": "PSV:ZDSD32GLGEAG",
       "substitution_reason": null,
-      "note": "CS 4 GB SD NAND, LGA-8 8.0 x 6.2 mm, C2841139. Same land as Zetta ZDSD32GLGEAG"
+      "note": "MK 512 MB SD NAND, LGA-8 8.0 x 6.0 mm, C7500178. Land also fits CS CSNP*GCR01 and Zetta ZDSD*LGEAG"
     },
     {
       "ref": "MK1",

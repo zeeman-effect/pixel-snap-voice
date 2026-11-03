@@ -18,7 +18,9 @@ BOM_DOC = REPO / "docs" / "bom.md"
 BOM_CSV = REPO / "hardware" / "kicad" / "jlcpcb_bom.csv"
 
 _LCSC = re.compile(r"^C\d{4,}$")
-ORDERED = {"F1": "C883095", "U7": "C7519", "Y1": "C49207908"}
+# Y1 moved from JLYE C49207908 (no preview model, pin 1 unverifiable) to YXC
+# C5203546, whose pin-1 dot JLC's preview shows.
+ORDERED = {"F1": "C883095", "U7": "C7519", "Y1": "C5203546"}
 DEAD = {"F1": "C37010", "U7": "C8678", "Y1": "C1857159"}
 BANNED_BACKUP = "C5917271"
 
@@ -58,7 +60,7 @@ class OrderCodes(unittest.TestCase):
             line for line in BOM_DOC.read_text(encoding="utf-8").splitlines()
             if line.startswith("| Y1 ")
         )
-        self.assertIn("C49207908", y1_row)
+        self.assertIn("C5203546", y1_row)
         self.assertNotIn("Backup", y1_row)
         self.assertIn(BANNED_BACKUP, y1_row)
         self.assertIn("not", y1_row.lower())

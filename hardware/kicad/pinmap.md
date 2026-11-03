@@ -20,10 +20,10 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | GPIO10 | I2S_DIN | input | U2 ASDOUT |
 | GPIO11 | I2S_DOUT | output | U2 DSDIN |
 | GPIO8 | — | unused | No PA on this spin |
-| GPIO15 | SD_CLK | output | **J3** pin 3 (CSNP32GCR01-AOW) |
+| GPIO15 | SD_CLK | output | **J3** pin 3 (MKDV4GCL-ABB) |
 | GPIO7 | SD_CMD | bidirectional | **J3** pin 5 |
 | GPIO6 / 16 / 17 / 18 | SD_D0–D3 | bidirectional | **J3** 4-bit SDMMC |
-| GPIO0 | BOOT | strapping, pull-up | Rboot 10k plus **TP_BOOT**. Ground this pad and pulse EN to enter download if USB MSC owns the port |
+| GPIO0 | BOOT | strapping, pull-up | Rboot 10k plus **TP_BOOT**. Ground this pad and pulse EN to enter download if USB MSC owns the port and the firmware's 5 s button hold cannot run |
 | GPIO1 | BTN | input, pull-up | SW1 to GND |
 | GPIO2 | LED | output | D1 |
 | GPIO9 | CHG_STAT | input | U3 STAT (D2 charge LED on this net) |
@@ -37,8 +37,8 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | J2 | C6276862 magnetic pad. 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND. No CC |
 | **VDD33** | U4 AP2112 → U5 AP22804. MCU digital rail |
 | 3V3A | U8 LP5907-2.8 from **VSYS** (~2.8 V); star return to AGND; no digital return through MK1. Named 3V3A; it is not 3.3 V |
-| J3 | CS CSNP32GCR01-AOW 4 GB SD NAND, LGA-8. Pins: 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Format FAT if blank |
+| J3 | MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8. Pins: 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Format FAT if blank |
 | VBAT | LiPo pouch pigtail on B.Cu BT1 pads at (−17, 35); U3 BQ24073 BAT plus C21 at the QFN. Do not strap to VSYS |
-| TP_BOOT / TP_EN / TP_GND / TP_3V3 | F.Cu pads for download after MSC owns the magnetic USB |
+| TP_BOOT / TP_EN / TP_GND / TP_3V3 | F.Cu pads: fallback download path. Normal reflash is the 5 s record-button hold (`firmware/hal/download_mode.c`) |
 | VSYS | U3 OUT. USB or cell, whichever is up. Feeds U4, U8 |
 | RF | MINI-1U IPEX. Lid W.FL / MHF III pigtail + FPC (Inventek B24P-W). Not a PCB-antenna module |

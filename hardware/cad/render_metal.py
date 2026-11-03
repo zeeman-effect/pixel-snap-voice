@@ -55,7 +55,7 @@ PARAMS = REPO / "hardware" / "cad" / "params.json"
 BOARD_FALLBACKS = (
     {"ref": "U1", "x": 14.0, "y": -18.0, "sx": 15.4, "sy": 15.4, "sz": 2.4, "rot": 0.0, "kind": "module"},
     {"ref": "J2", "x": 0.0, "y": 36.0, "sx": 22.3, "sy": 7.7, "sz": 2.0, "rot": 0.0, "kind": "pogo"},
-    {"ref": "J3", "x": -22.0, "y": -18.0, "sx": 6.2, "sy": 8.0, "sz": 0.8, "rot": 0.0, "kind": "sd"},
+    {"ref": "J3", "x": -22.0, "y": -18.0, "sx": 8.0, "sy": 6.0, "sz": 0.8, "rot": 0.0, "kind": "sd"},
     {"ref": "MK1", "x": 27.5, "y": 17.0, "sx": 4.0, "sy": 3.0, "sz": 1.2, "rot": 90.0, "kind": "mic"},
     {"ref": "Y1", "x": 27.2, "y": 23.0, "sx": 3.2, "sy": 2.5, "sz": 0.9, "rot": 180.0, "kind": "osc"},
 )

@@ -1,6 +1,6 @@
 # KiCad — custom slim PCB
 
-4-layer **0.8 mm**, ENIG. Origin = magnet-ring center (same as CAD). USB is full speed and deliberately **not** impedance controlled — see [Stackup](#stackup-jlc-4-layer-08-mm).
+4-layer **0.8 mm**, OSP. Origin = magnet-ring center (same as CAD). USB is full speed and deliberately **not** impedance controlled — see [Stackup](#stackup-jlc-4-layer-08-mm).
 
 Two trees only:
 
@@ -66,7 +66,7 @@ The pair is long for USB. That is placement, not sloppiness: U1's USB pads sit o
 - Mic on the phone-right long edge
 - Magnetic pad (**J2**) at (0, 36) on F.Cu, rot 0, phone-top / camera end, land `PSV:YZ103915020T_4P`
 - Battery pads (**BT1**) on B.Cu at (−17, 35), land `PSV:Battery_Pigtail_2P`. The magnetic pad is the only 5 V inlet
-- **J3** is CSNP32GCR01-AOW on land `PSV:ZDSD32GLGEAG` at (−22, −18) on F.Cu. Not a card socket. Pins 3 CLK, 4 ground, 5 CMD, 8 power.
+- **J3** is MK MKDV4GCL-ABB (512 MB) on land `PSV:ZDSD32GLGEAG` at (−22, −18) on F.Cu. Not a card socket. Pins 3 CLK, 4 ground, 5 CMD, 8 power.
 - Analog island (U2, U8, MK1, Y1) off **VDD33**
 - Analog footprint centres off the magnet circle (`check_placement.py`)
 - Nothing taller than ~0.5 mm under the 51.5 × 66 mm pouch tape at (0, 0)
