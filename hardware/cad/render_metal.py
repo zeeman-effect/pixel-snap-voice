@@ -8,8 +8,9 @@ module, builds only the parts it needs, and writes one PNG:
 
 The lid is natural translucent PETG so D1 and D2, the tray, and the
 cavity read through it. The tray stays bead-blasted 6061. The board is
-the KiCad GLB, seated on the four posts. J2 is the C6276862 stadium
-(black PA46, four gold faces). Other parts with no vendor STEP get a sized box.
+the KiCad GLB, seated on the four posts. J2 is the mid-mount USB-C, which
+KiCad exports with its own STEP; it faces the mouth in the -Y end wall.
+Other parts with no vendor STEP get a sized box.
 
 OpenSCAD millimetres become Blender metres. Does not touch the print STLs
 in hardware/cad/export/.
@@ -33,7 +34,6 @@ REPO = Path(os.environ.get("PSV_REPO", Path(__file__).resolve().parents[2]))
 _CAD = str(REPO / "hardware" / "cad")
 if _CAD not in sys.path:
     sys.path.insert(0, _CAD)
-import pogo_model
 from check_envelope import stacks
 SRC = REPO / "build" / "case-renders"
 OUT = SRC
@@ -51,10 +51,10 @@ PARAMS = REPO / "hardware" / "cad" / "params.json"
 
 # KiCad 10 has no STEP for these. Boxes use board-file XY so they sit
 # with the Y-flipped GLB. Heights are the datasheet / params.json bodies.
-# Live after the lid/board 180° spin: J2 at phone-top, MK1 phone-right.
+# Live after the lid/board 180° spin: MK1 phone-right. J2 (USB-C) has a
+# KiCad STEP, so it needs no box.
 BOARD_FALLBACKS = (
     {"ref": "U1", "x": 14.0, "y": -18.0, "sx": 15.4, "sy": 15.4, "sz": 2.4, "rot": 0.0, "kind": "module"},
-    {"ref": "J2", "x": 0.0, "y": 36.0, "sx": 22.3, "sy": 7.7, "sz": 2.0, "rot": 0.0, "kind": "pogo"},
     {"ref": "J3", "x": -22.0, "y": -18.0, "sx": 8.0, "sy": 6.0, "sz": 0.8, "rot": 0.0, "kind": "sd"},
     {"ref": "MK1", "x": 27.5, "y": 17.0, "sx": 4.0, "sy": 3.0, "sz": 1.2, "rot": 90.0, "kind": "mic"},
     {"ref": "Y1", "x": 27.2, "y": 23.0, "sx": 3.2, "sy": 2.5, "sz": 0.9, "rot": 180.0, "kind": "osc"},
@@ -316,25 +316,6 @@ def mat_module():
     set_input(principled, "Metallic", 0.0)
     set_input(principled, "Roughness", 0.45)
     principled.inputs["Base Color"].default_value = (0.08, 0.09, 0.1, 1.0)
-    return mat
-
-
-def mat_pogo():
-    """Black PA46 housing. Matches the LCSC C6276862 photo."""
-    mat, principled, _tree = new_mat("PSV_Pogo")
-    set_input(principled, "Metallic", 0.0)
-    set_input(principled, "Roughness", 0.22)
-    set_input(principled, "Specular IOR Level", 0.45)
-    set_input(principled, "Specular", 0.45)
-    principled.inputs["Base Color"].default_value = (0.025, 0.025, 0.028, 1.0)
-    return mat
-
-
-def mat_pogo_gold():
-    mat, principled, _tree = new_mat("PSV_PogoGold")
-    set_input(principled, "Metallic", 1.0)
-    set_input(principled, "Roughness", 0.18)
-    principled.inputs["Base Color"].default_value = (0.86, 0.68, 0.28, 1.0)
     return mat
 
 
@@ -712,46 +693,6 @@ def add_screws(lid):
     return joined
 
 
-def add_pogo_body(root, spec, housing_mat, gold_mat):
-    """Stadium housing + four gold faces. Not a cube."""
-    length = spec["sx"]
-    width = spec["sy"]
-    height = spec["sz"]
-    body = extrude_loop_mm(
-        f"FB_{spec['ref']}",
-        pogo_model.stadium_loop_mm(length, width),
-        -height / 2.0,
-        height / 2.0,
-    )
-    assign_all(body, housing_mat)
-    body.parent = root
-    body.location = (
-        mm(spec["x"]),
-        mm(spec["y"]),
-        0.0008 + mm(height / 2.0),
-    )
-    body.rotation_euler.z = math.radians(spec.get("rot", 0.0))
-    contact_r = pogo_model.POGO_CONTACT_D / 2.0
-    proud = pogo_model.POGO_CONTACT_PROUD
-    for i, px in enumerate(pogo_model.POGO_PINS_X, 1):
-        bpy.ops.mesh.primitive_cylinder_add(
-            radius=mm(contact_r),
-            depth=mm(0.12),
-            vertices=24,
-        )
-        pin = bpy.context.active_object
-        pin.name = f"FB_{spec['ref']}_P{i}"
-        assign_all(pin, gold_mat)
-        pin.parent = body
-        pin.location = (mm(px), 0.0, mm(height / 2.0 + proud))
-    print(
-        f"  fallback {spec['ref']}: {length}x{width}x{height} mm stadium "
-        f"at ({spec['x']}, {spec['y']})",
-        flush=True,
-    )
-    return body
-
-
 def apply_board_materials():
     mats = {
         "mask": mat_soldermask(),
@@ -781,22 +722,6 @@ def apply_board_materials():
     return mats
 
 
-def pogo_glb_meshes(root):
-    return [
-        obj
-        for obj in walk_meshes(root)
-        if "yz103915020t" in data_name(obj).lower()
-        or "yz103915020t" in obj.name.lower()
-    ]
-
-
-def mesh_span_mm(objs):
-    if not objs:
-        return 0.0
-    mn, mx = world_bbox(objs)
-    return max(mx.x - mn.x, mx.y - mn.y, mx.z - mn.z) * 1000.0
-
-
 def add_board_fallbacks(root, mats):
     """Boxes for footprints KiCad exported without a body.
 
@@ -806,37 +731,13 @@ def add_board_fallbacks(root, mats):
     """
     kinds = {
         "module": mat_module(),
-        "pogo": mat_pogo(),
         "sd": mats["chip"],
         "mic": mats["chip"],
         "osc": mats["chip"],
         "qfn": mats["chip"],
     }
-    pogo_gold = mat_pogo_gold()
     fcu = 0.0008
     for spec in BOARD_FALLBACKS:
-        if spec.get("kind") == "pogo":
-            found = pogo_glb_meshes(root)
-            span = mesh_span_mm(found)
-            if found and span >= 15.0:
-                print(
-                    f"  skip fallback {spec['ref']}: GLB stadium is {span:.1f} mm",
-                    flush=True,
-                )
-                continue
-            if found:
-                print(
-                    f"  drop GLB {spec['ref']}: span {span:.2f} mm, want "
-                    f"{spec['sx']:.1f} x {spec['sy']:.1f}",
-                    flush=True,
-                )
-                for obj in found:
-                    mesh = obj.data
-                    bpy.data.objects.remove(obj, do_unlink=True)
-                    if mesh is not None and mesh.users == 0:
-                        bpy.data.meshes.remove(mesh)
-            add_pogo_body(root, spec, kinds["pogo"], pogo_gold)
-            continue
         bpy.ops.mesh.primitive_cube_add(size=1.0)
         obj = bpy.context.active_object
         obj.name = f"FB_{spec['ref']}"
@@ -1344,7 +1245,7 @@ def camera_grille(mn, mx):
 
 def camera_exploded(parts, elev_deg=42.0, az_deg=322.0, dist=0.32):
     """3/4 from phone-left / phone-bottom so the tray and ring are in
-    the foreground and J2 sits at the top of the frame.
+    the foreground and the USB-C end wall faces the camera.
 
     322° (−38°) stands on (−X, −Y). The older 218° seat was on the pad
     corner, which put the tray at the far edge and cropped the base.
@@ -1386,7 +1287,7 @@ def flip_png_vertical(path):
     img.file_format = "PNG"
     img.save()
     bpy.data.images.remove(img)
-    print(f"  flipped {path.name} so J2 sits at the bottom", flush=True)
+    print(f"  flipped {path.name} so +Y sits at the top", flush=True)
 
 
 def resolve_board_glb():

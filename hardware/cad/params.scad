@@ -33,14 +33,11 @@ pcb_t = 0.8;
 pcb_w = 59.6;
 pcb_h = 85.6;
 
-pogo_x = 0.0;
-pogo_y = 36.0;
-pogo_body_x = 22.3;
-pogo_body_y = 7.7;
-pogo_h = 2.0;
-pogo_well_clear = 0.4;
-pogo_proud = 0.15;
-pogo_dish_rim = 2.0;
+usbc_x = 7.0;
+usbc_front_y = -42.8;
+usbc_mouth_z = 0.02;
+usbc_shell_w = 8.94;
+usbc_shell_h = 3.16;
 
 mic_y = 17.0;
 mic_npth_x = 27.5;

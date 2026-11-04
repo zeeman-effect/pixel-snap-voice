@@ -63,7 +63,7 @@ MCU-only 126 mA was optimistic. With codec and SD the working number is about 16
 
 ### USB-C (dev variant)
 
-- J2 is HRO TYPE-C-31-M-13C (C2848620), a 16-pin USB 2.0 mid-mount receptacle at (7.0, −38.1), rot 180. Its mouth is flush with the phone-bottom board edge; the plug comes in through the case wall. The 4-pin magnetic pad (C6276862) is still on `compact-final`.
+- J2 is HRO TYPE-C-31-M-13C (C2848620), a 16-pin USB 2.0 mid-mount receptacle at (7.0, −38.1), rot 180. Its mouth is flush with the phone-bottom board edge; the plug comes in through a 9.5 × 3.7 mm mouth in the −Y case wall, inside a 12.8 × 6.7 mm overmold relief that leaves a 0.5 mm web so the plug can latch (`hardware/cad/case.scad`). The 4-pin magnetic pad (C6276862) is still on `compact-final`.
 - CC1 and CC2 each have a 5.1 kΩ Rd to GND (R2, R3), so a C-to-C cable turns VBUS on. Both D+ and both D− contacts are tied, SBU is open, the shell is GND.
 - VBUS to charger IN through a PTC. J2 is the only 5 V inlet.
 - **BT1** is two SMT pads on **B.Cu** at (−17, 35) for a 1S pouch pigtail on VBAT, north of the cell. Pad 1 is the west land. Do not put 5 V on BT1. Do not strap **VSYS** (charger OUT) to VBAT. C21 (10 µF) sits on VBAT next to U3 so BAT has local ceramic when the pouch is off.

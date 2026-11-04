@@ -2,11 +2,13 @@
 // tray is the PETG fit print. -D variant="metal" is a 6061 tray only: closed
 // phone face, 0.85 mm skin, blind wells for the N52 ring and the clocking
 // magnet, four M1.6 posts, no 0.45 mm skirt. The pouch is taped to the board
-// underside and wrapped in kapton; the posts carry the board. Over J2 the lid
-// dishes so the 2.0 mm pad is pogo_proud proud of that local face. A local
-// well over U1's IPEX swallows the mated W.FL / MHF III plug; an FPC tape mark sits
-// on the inner ceiling toward the phone-bottom end (J2 is the camera end). No USB-C mouth, no speaker
-// grille, no side LED windows.
+// underside and wrapped in kapton; the posts carry the board. Dev / USB-C
+// variant: J2 is a mid-mount USB-C on the phone-bottom (-Y) edge. Its mouth
+// is cut through the -Y end wall, split across tray and lid, inside a shallow
+// outer relief so a plug overmold can get close enough to latch. The lid top
+// is flat. A local well over U1's IPEX swallows the mated W.FL / MHF III
+// plug; an FPC tape mark sits on the inner ceiling toward the phone-bottom
+// end. No speaker grille, no side LED windows.
 //
 // World XY origin is the magnet center. +Z is away from the phone glass.
 // All cutouts use that map. Do not wrap lid features in an extra +tray_h.
@@ -44,9 +46,6 @@ parts_z = pcb_z + pcb_t;
 tray_h = parts_z;
 lid_h = acc_t - tray_h;
 cavity_top = acc_t - shell_back;
-// Local outer face over J2. The pad is pogo_proud proud of this dish.
-pogo_face_z = tray_h + pogo_h;
-pogo_outer_z = pogo_face_z - pogo_proud;
 
 // Print-fit only. Not locked in params.json.
 // clock_rib is the aluminum left between the ring well and the clocking well
@@ -121,6 +120,22 @@ ridge_pitch = 1.6;
 ridge_tilt = 18.0;
 
 boss_d = 4.0;
+
+// USB-C mouth (J2, HRO TYPE-C-31-M-13C). The shell face is flush with the
+// board edge, which is the inner wall face, so the plug crosses the end wall.
+// The mouth clears the 8.94 x 3.16 mm shell by 0.28 mm a side (board slop in
+// the 0.3 mm rebate). Round ends, like the plug. The relief is the overmold
+// seat: USB-IF max overmold is 12.35 x 6.5 mm, and a plug is 6.65 mm from
+// overmold to tip against a 6.20 mm receptacle, so the overmold must land
+// within about 0.45-0.5 mm of the shell face: wall - usbc_recess_d is what is
+// left of the wall in the relief. Both straddle the tray / lid seam at z = tray_h + 0.02.
+usbc_mouth_w = 9.5;
+usbc_mouth_h = 3.7;
+usbc_recess_w = 12.8;
+usbc_recess_h = 6.7;
+usbc_recess_r = 1.0;
+usbc_recess_d = 0.7;
+usbc_zc = tray_h + usbc_mouth_z;
 
 // M1.6 from the lid: lid is clearance plus a shallow CSK so the head sits
 // in the PETG. Tray posts get a 1.35 mm tap drill 2.5 mm deep that dies
@@ -447,31 +462,36 @@ module lid_inner() {
         );
 }
 
-function pogo_dish_w() = pogo_body_x + 2 * (pogo_well_clear + pogo_dish_rim);
-function pogo_dish_d() = pogo_body_y + 2 * (pogo_well_clear + pogo_dish_rim);
-
-// Solid plug so the dish floor is not the hollow MCU cavity.
-module pogo_fill() {
-    w = pogo_dish_w();
-    h = pogo_dish_d();
-    translate([pogo_x, pogo_y, tray_h])
-        rounded_box(w, h, pogo_outer_z - tray_h, h / 2);
+// Rounded rectangle in the XZ plane, extruded along -Y from y1 to y1 - len.
+module rounded_along_y(y1, len, cx, cz, wx, wz, r) {
+    translate([cx, y1, cz])
+        rotate([90, 0, 0])
+            rounded_box(wx, wz, len, r);
 }
 
-// Recess the outer face down to the pad. Gold sits pogo_proud proud of this.
-module pogo_dish() {
-    w = pogo_dish_w();
-    h = pogo_dish_d();
-    translate([pogo_x, pogo_y, pogo_outer_z])
-        rounded_box(w, h, acc_t - pogo_outer_z + eps, h / 2);
-}
-
-// Through-well so the 2.0 mm magnetic pad face can take the cable.
-module pogo_well() {
-    w = pogo_body_x + 2 * pogo_well_clear;
-    h = pogo_body_y + 2 * pogo_well_clear;
-    translate([pogo_x, pogo_y, tray_h - eps])
-        rounded_box(w, h, lid_h + 2 * eps, h / 2);
+// Same cut in tray and lid, so the halves line up when closed. The relief
+// takes the 0.45 mm lid skirt with it and leaves the tray lip as thin as the wall web.
+module usbc_cut() {
+    y_out = -acc_h / 2;
+    rounded_along_y(
+        y_out + usbc_recess_d,
+        usbc_recess_d + 1.0,
+        usbc_x,
+        usbc_zc,
+        usbc_recess_w,
+        usbc_recess_h,
+        usbc_recess_r
+    );
+    // Through the wall and the lip, a hair past the board edge.
+    rounded_along_y(
+        usbc_front_y + 0.3,
+        wall + 1.3,
+        usbc_x,
+        usbc_zc,
+        usbc_mouth_w,
+        usbc_mouth_h,
+        usbc_mouth_h / 2 - 0.01
+    );
 }
 
 function dist_to_rect(px, py, x0, y0, x1, y1) =
@@ -576,6 +596,7 @@ module tray() {
         }
         magnet_wells();
         pcb_rebate();
+        usbc_cut();
         mic_port_cut();
         tray_screws();
         side_ridges();
@@ -605,11 +626,6 @@ module wave_rings_2d() {
 }
 
 module wave_keepouts_2d() {
-    translate([pogo_x, pogo_y])
-        square([
-            pogo_dish_w() + 0.8,
-            pogo_dish_d() + 0.8
-        ], center = true);
     for (p = hole_xy())
         translate(p)
             circle(d = boss_d + 1.0);
@@ -665,11 +681,9 @@ module lid() {
                 side_ridges();
             }
             boss_solids();
-            pogo_fill();
         }
         lid_screws();
-        pogo_dish();
-        pogo_well();
+        usbc_cut();
         ipex_recess();
         antenna_tape_mark();
         wave_art();

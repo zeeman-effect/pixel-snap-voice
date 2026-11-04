@@ -25,11 +25,13 @@ The KiCad board origin matches. Edge.Cuts is the 59.6 × 85.6 mm PCB, not the 62
 | PCB | 6.05–6.85 | 0.8 mm; **B.Cu** faces the pouch and the magnet backs. BT1 is on B.Cu west of J2, just north of the cell |
 | Tray / lid split | 6.85 | `tray_h` is 6.85 mm. `lid_h` stays 3.80 mm |
 | Joint | 6.85–8.20 | PETG: 0.6 mm tray lip inside a 0.45 mm lid skirt. Metal tray has no lip; screws locate the plastic lid |
-| Tall parts | 6.85–9.25 | Module 2.4 mm, magnetic pad 2.0 mm, 0.8 mm SD NAND on **F.Cu**. In the lid |
-| Magnetic pad (J2) | 6.85–8.85 | 2.0 mm C6276862 stadium (22.30 × 7.70) on F.Cu at (0, 36), rot 0, phone-top / camera end. Lid dishes to 8.70 mm over the pad so the gold is 0.15 mm proud. Well is through that dish |
-| Back shell | 9.45–10.65 | 1.2 mm natural translucent PETG (`shell_back`). Wave engraving into the skin, clipped off the pogo dish. D1 and D2 read through this lid |
+| Tall parts | 6.85–9.25 | Module 2.4 mm, 0.8 mm SD NAND on **F.Cu**. In the lid |
+| USB-C (J2) | 5.29–8.45 | HRO TYPE-C-31-M-13C, mid-mount in a 9.24 × 6.54 mm board slot: shell 1.60 above F.Cu, 0.76 below B.Cu. Mouth centre z = 6.87, on the tray / lid seam. 1.0 mm under the lid ceiling |
+| USB-C wall mouth | 5.02–8.72 | 9.5 × 3.7 mm round-ended, through the −Y end wall, split across tray and lid |
+| USB-C overmold relief | 3.52–10.22 | 12.8 × 6.7 mm, r 1.0, 0.7 mm deep into the 1.2 mm wall: 0.5 mm web, 0.43 mm ledge under the lid top |
+| Back shell | 9.45–10.65 | 1.2 mm natural translucent PETG (`shell_back`). Flat top. Wave engraving into the skin, clipped off the IPEX well and bosses. D1 and D2 read through this lid |
 
-Envelope budget is **10.65 mm**. The DigiKey pack is 0.1 mm thicker than the old 3.2 mm cell, so the tray grew with it. Pogo face is 8.85 mm. The lid cavity over the board is still 2.60 mm.
+Envelope budget is **10.65 mm**. The DigiKey pack is 0.1 mm thicker than the old 3.2 mm cell, so the tray grew with it. The lid cavity over the board is still 2.60 mm.
 
 The tray floor is 2.35 mm, with wells milled from the inside down to the 0.85 mm skin. The outer wall is 1.2 mm up to the lid split, and four 5.0 mm M1.6 posts stand at the hole centres. There is no pouch pocket, no pigtail channel, and no lid clip. Glue holds the magnets. A clamp plate would sit in the 0.15 mm air under the pouch.
 
@@ -45,7 +47,7 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 
 | Feature | X (mm) | Y (mm) | Max Z above PCB / notes |
 | --- | --- | --- | --- |
-| Magnetic pad (J2) | 0.0 | +36.0 | 22.30 × 7.70 × 2.0 mm stadium (F.Cu), rot 0°. Lid dish + through-well. Cable male C5126845. Phone-top / camera end, opposite the tray clocking magnet |
+| USB-C (J2) | +7.0 | −38.1 (face on −42.8) | HRO TYPE-C-31-M-13C (C2848620), rot 180°, mouth −Y. Shell 8.94 × 3.16 mm, face flush with the board edge = inner wall face. Wall mouth 9.5 × 3.7 mm (x 2.25–11.75) in a 12.8 × 6.7 mm overmold relief (x 0.6–13.4), 0.5 mm web. USB-IF max overmold 12.35 × 6.5 mm; a plug is ~6.65 mm overmold-to-tip against a 6.20 mm shell, so the overmold must land within ~0.5 mm of the face. Nothing in the tray under the slot |
 | Mic port (wall) | +31.0 (phone-right long wall) | +16.32 | Three 0.60 mm holes at 1.10 mm pitch, in a 4.2 × 1.8 mm recess. Foam land and mesh pocket are inside the tray, below the seam |
 | Mic capsule (MK1) | +27.5 | +17.0 | IM73A135 on **F.Cu**, rot 90°. Bottom-port NPTH is at (27.50, 16.32) on **B.Cu**. Port must not face glass |
 | Record pill (wall) | −31.0 (phone-left long wall) | +12.0 | Captive TPU 95A in the lid. Flush 10 × 3.2 mm rounded bezel, 0.65 mm proud press pad. Left side when the accessory is snapped on the phone. Install from inside |
@@ -53,7 +55,7 @@ The table below is the CAD wall-cut contract from `params.json`. Change the case
 | LED (D1, D2) | ≈ −29 / phone-left wall | +18.0 / charger is the phone-bottom end | Face the lid. No side windows. Lid is natural translucent PETG |
 | SD NAND (J3) | −22.0 | −18.0 | MKDV4GCL-ABB, 8.0 × 6.0 mm LGA-8 on F.Cu. No wall slot |
 | Side ridges | ±31.0 (both long walls, tray and lid) | skip pill and mic | 0.35 mm × 0.6 mm flutes at 1.6 mm pitch, tilted 18° from vertical. Same cut on both halves so they read as one strip when closed |
-| Lid wave art | ±18.0 | 0.0 | Two foci, concentric rings that run off the lid. 0.35 mm into `shell_back`. Clipped off the pogo dish, the IPEX well, and the four boss footprints |
+| Lid wave art | ±18.0 | 0.0 | Two foci, concentric rings that run off the lid. 0.35 mm into `shell_back`. Clipped off the IPEX well and the four boss footprints |
 | IPEX well | +17.9 | −13.0 | 7.0 mm well, 0.85 mm into the 1.2 mm lid skin over U1’s W.FL / MHF III jack. Leaves 0.35 mm of PETG. Print the lid outer-face down so that skin is the first layer |
 | Antenna tape | −2.0 | −33.0 | 30 × 5 mm mark, 0.2 mm into the inner ceiling, phone-bottom end, long axis along +X. Matches Inventek B24P-W. Do not enlarge the IPEX well. Clear of U1, J2, the button, and the bosses |
 | Battery pads (BT1) | −17.0 | +35.0 | Two flat **B.Cu** pads for the pouch pigtail, west of J2 and just north of the cell. Pad 1 VBAT (west), pad 2 GND. Tape the cell on and kapton the joints |
@@ -72,7 +74,7 @@ These are the recorder project names. Do not keep the old generated-board map.
 
 | Ref | What |
 | --- | --- |
-| J2 | 4-pin magnetic pad (C6276862) |
+| J2 | USB-C receptacle (HRO TYPE-C-31-M-13C, C2848620) |
 | J3 | MKDV4GCL-ABB 512 MB SD NAND |
 | U8 | analog LDO (codec / mic) |
 | VDD33 | MCU 3.3 V rail |
@@ -115,9 +117,8 @@ python ../../hardware/kicad/recorder/product_renders/export_board_3d.py
 # python -m http.server 8765 --directory ../../build/case-renders
 # open http://127.0.0.1:8765/case-6061.html
 # Lid in those shots is natural translucent PETG; the tray stays 6061.
-# The board sits on the four posts. J2 is the C6276862 stadium (black
-# PA46 + four gold faces). U1 / J3 / MK1 / Y1 are boxes when KiCad has
-# no STEP.
+# The board sits on the four posts. J2 is KiCad's USB-C STEP, facing
+# the −Y wall mouth. U1 / J3 / MK1 / Y1 are boxes when KiCad has no STEP.
 ```
 
 1. Print the tray and lid in PETG. Print the record pill in TPU 95A. The tray sits phone-face down. The lid sits outer-face down, with the cavity up. Printing the lid mating-face down makes the back skin one 57 × 83 mm bridge.
@@ -126,7 +127,7 @@ python ../../hardware/kicad/recorder/product_renders/export_board_3d.py
 4. Drop the TPU pill into the lid from the inside before the board goes in. Solder the pigtail to B.Cu BT1, tape the cell to the board underside, wrap it in kapton including the face toward the magnets. Seat a dummy PCB (or the first fab) on the four posts. Confirm about 0.15 mm of air under the wrapped cell and that the lid closes flat.
 5. Snap to the Pixel. Confirm:
    - camera bar not covered
-   - magnetic cable seats and its overmold misses the phone
+   - a USB-C cable latches through the −Y wall mouth (try a slim and a fat overmold) and the plug misses the phone
    - mic port is three holes in a recess on the phone-right long edge, not against glass
    - the TPU pill clicks SW1 and the switch pushes it back out
    - the side ridges give enough grip to slide it off the ring

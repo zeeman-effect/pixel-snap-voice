@@ -49,16 +49,6 @@
     "usb_diff_note": "Not impedance controlled, on purpose. The ESP32-S3 USB-OTG peripheral is full speed only (12 Mbps, no high-speed PHY: Espressif's USB overview table marks ESP32-S3 'USB OTG High-Speed = X'). F.Cu sits 0.1 mm above the In1 GND plane in this stackup, where a 90 ohm differential pair would need roughly 0.06 mm traces, well under the 0.127 mm any quick-turn fab will run. Rather than thicken the prepreg for a requirement the silicon does not have, D+/D- run as a 0.2 mm pair on a 0.4 mm pitch over solid In1 GND, which is near 75 ohm differential by first-order microstrip. The run is long for a USB pair because U1's USB pads are on the module's top row, the far side of a 15.9 mm module from the connector, and its castellations leave 0.05 mm between pads so nothing crosses the footprint. At full-speed edge rates it is still electrically short. Measured copper is in hardware/kicad/recorder/placement.json under routing.usb, written by route_pcb.py from the board itself. Do not re-type those millimetres into this sentence: this note and the one in placement.json each carried their own hand-typed lengths and both went stale at the first reroute."
   },
   "connectors": {
-    "pogo_x_mm": 0.0,
-    "pogo_y_mm": 36.0,
-    "pogo_body_x_mm": 22.3,
-    "pogo_body_y_mm": 7.7,
-    "pogo_height_mm": 2.0,
-    "pogo_well_clear_mm": 0.4,
-    "pogo_proud_mm": 0.15,
-    "pogo_dish_rim_mm": 2.0,
-    "pogo_note": "J2 is Xinyangze YZ103915020T-04025-02 (LCSC C6276862) at (0, 36), the phone-top / camera end, opposite the 6 o'clock clocking magnet in the tray. Vendor drawing and LCSC EasyEDA land: 22.30 x 7.70 x 2.00 mm stadium (full-radius ends), 4 pins at 2.54 mm. The lid dishes down over the pad so the gold is 0.15 mm proud of that local face. The rest of the lid stays tall for the 2.4 mm MCU. Cable male is YZP0048-20048-04025-03 (C5126845). Footprint rot 0, so pin 1 VBUS is on the phone-left side of the pad. Pin order is 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise. No USB-C and no wall mouth.",
-    "pogo_obsolete_note": "OBSOLETE on this branch (revert-to-usb-c, dev / USB-C variant). J2 is no longer the magnetic pad, so every pogo_* key above describes a part that is not on the board. Kept only until the case agent removes the pogo dish / well from case.scad. Use the usbc_* keys. check_placement.py reads usbc_x_mm / usbc_y_mm, not pogo_x_mm / pogo_y_mm.",
     "usbc_part": "HRO TYPE-C-31-M-13C, LCSC C2848620, 16-pin USB 2.0 Type-C receptacle, mid-mount (sink board)",
     "usbc_x_mm": 7.0,
     "usbc_y_mm": -38.1,
@@ -118,7 +108,7 @@
     "usbc_max_below_bottom_mm": 0.8,
     "usbc_plug_overmold_w_mm": 12.35,
     "usbc_plug_overmold_h_mm": 6.5,
-    "usbc_plug_note": "USB-IF maximum plug overmold is 12.35 x 6.5 mm. Centred on the mouth (z = 6.87) it spans z = 3.62 .. 10.12: 3.6 mm clear of the phone back and 0.53 mm under the 10.65 mm lid top, so it hits neither. The overmold will butt the outside of the case wall. A Type-C plug needs the overmold within roughly 0.5-1 mm of the receptacle face to latch fully, so give the wall an overmold relief (about 12.8 x 7.0 mm, local wall thinned to <= 0.5 mm, or an open pocket) around a shell clearance mouth of about 9.5 x 3.7 mm. The relief straddles the tray / lid seam.",
+    "usbc_plug_note": "USB-IF maximum plug overmold is 12.35 x 6.5 mm. Centred on the mouth (z = 6.87) it spans z = 3.62 .. 10.12: 3.6 mm clear of the phone back and 0.53 mm under the 10.65 mm lid top. A plug is about 6.65 mm from overmold to tip and the receptacle shell is 6.20 mm deep, so the overmold has to land within about 0.45-0.5 mm of the shell face for the latches to seat. case.scad cuts a 9.5 x 3.7 mm round-ended mouth through the end wall and a 12.8 x 6.7 mm (r 1.0) relief 0.7 mm deep around it, leaving a 0.5 mm web; both straddle the tray / lid seam. Mouth and relief sizes are print-fit numbers in case.scad (usbc_mouth_*, usbc_recess_*); check_envelope.py and check_dfm.py read them there.",
     "mic_edge": "right",
     "mic_y_mm": 17.0,
     "mic_npth_x_mm": 27.5,
@@ -135,7 +125,7 @@
     "batt_pad_x_mm": -17.0,
     "batt_pad_y_mm": 35.0,
     "batt_pad_zone_mm": 6.0,
-    "batt_pad_note": "BT1 is two solder pads for the pouch pigtail on B.Cu at (-17, 35), west of J2 and just north of the cell (ends at y = 33). Rot 0 puts pad 1 VBAT on the west land. The 66 mm pack is still centred at (0, 0); J2's courtyard fills the centreline under the pad, so the joints sit in the aisle west of the magnetic pad. Tape the cell on and kapton the joints. Twin to placement.json BT1."
+    "batt_pad_note": "BT1 is two solder pads for the pouch pigtail on B.Cu at (-17, 35), west of J2 and just north of the cell (ends at y = 33). Rot 0 puts pad 1 VBAT on the west land. The 66 mm pack is still centred at (0, 0), so the joints sit just past its +Y end. Tape the cell on and kapton the joints. Twin to placement.json BT1."
   },
   "battery": {
     "max_thickness_mm": 3.3,

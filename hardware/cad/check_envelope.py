@@ -23,16 +23,22 @@ MCU_LID_AIR_MM = 0.2
 # A LiPo pouch swells with age. The hanging-cell stack already includes swell_mm;
 # this is leftover lid budget if the cell grows past the locked thickness.
 POUCH_AIR_MM = 0.3
-# Thinnest PETG the lid well may leave beside the pogo body.
-MIN_SKIN_MM = 0.6
-# Leftover lid over J2 after the dish. Under this the rim prints as foil.
-MIN_DISH_LID_MM = 1.2
-# Pad may sit this far above the dish. More than that snags.
-MAX_POGO_PROUD_MM = 0.3
 # Air the lid cavity must keep over the mid-mount USB-C shell (dev variant).
 USBC_LID_AIR_MM = 0.3
 # Air between the USB-C board slot and the pouch outline under the board.
 USBC_POUCH_AIR_MM = 1.0
+# Mouth clearance over the receptacle shell, per side (board slop in the rebate).
+USBC_MOUTH_CLEAR_MM = 0.2
+# Relief clearance over the USB-IF maximum overmold, per side.
+USBC_OVERMOLD_CLEAR_MM = 0.05
+# A plug is ~6.65 mm overmold-to-tip against a 6.20 mm receptacle shell, so the
+# overmold must land this close to the shell face for the latches to seat.
+USBC_MAX_REACH_MM = 0.5
+# Thinnest web the relief may leave (JLCCNC's absolute metal wall, one FDM line).
+USBC_MIN_WEB_MM = 0.5
+# Lid-top ledge over the relief, and wall left between relief and mouth.
+USBC_MIN_LEDGE_MM = 0.4
+USBC_MIN_FRAME_MM = 1.0
 # Clearance from MK1's NPTH to the steel shunt edge.
 SHUNT_PORT_MM = 1.0
 # Air between the 51.5 x 66 mm cell outline and a 5 mm tray post.
@@ -86,14 +92,11 @@ SCAD_KEYS = {
     "pcb_t": ("pcb", "thickness_mm"),
     "pcb_w": ("pcb", "width_mm"),
     "pcb_h": ("pcb", "height_mm"),
-    "pogo_x": ("connectors", "pogo_x_mm"),
-    "pogo_y": ("connectors", "pogo_y_mm"),
-    "pogo_body_x": ("connectors", "pogo_body_x_mm"),
-    "pogo_body_y": ("connectors", "pogo_body_y_mm"),
-    "pogo_h": ("connectors", "pogo_height_mm"),
-    "pogo_well_clear": ("connectors", "pogo_well_clear_mm"),
-    "pogo_proud": ("connectors", "pogo_proud_mm"),
-    "pogo_dish_rim": ("connectors", "pogo_dish_rim_mm"),
+    "usbc_x": ("connectors", "usbc_x_mm"),
+    "usbc_front_y": ("connectors", "usbc_front_y_mm"),
+    "usbc_mouth_z": ("connectors", "usbc_mouth_z_mm"),
+    "usbc_shell_w": ("connectors", "usbc_shell_w_mm"),
+    "usbc_shell_h": ("connectors", "usbc_shell_h_mm"),
     "mic_y": ("connectors", "mic_y_mm"),
     "mic_npth_x": ("connectors", "mic_npth_x_mm"),
     "mic_npth_y": ("connectors", "mic_npth_y_mm"),
@@ -155,6 +158,12 @@ CASE_KEYS = (
     "csk_d",
     "csk_h",
     "ridge_depth",
+    "corner_r",
+    "usbc_mouth_w",
+    "usbc_mouth_h",
+    "usbc_recess_w",
+    "usbc_recess_h",
+    "usbc_recess_d",
 )
 # Side ridges must leave this much of the 1.2 mm wall.
 MIN_RIDGE_WALL_MM = 0.85
@@ -290,33 +299,41 @@ def inner_rect(p: dict) -> Rect:
     return centred(0.0, 0.0, acc["width_mm"] / 2 - acc["wall_mm"], acc["height_mm"] / 2 - acc["wall_mm"])
 
 
-def pogo_rect(con: dict) -> Rect:
-    return centred(
-        con["pogo_x_mm"],
-        con["pogo_y_mm"],
-        con["pogo_body_x_mm"] / 2,
-        con["pogo_body_y_mm"] / 2,
+def usbc_body_rect(con: dict) -> Rect:
+    """Receptacle shell footprint in XY: front face on the board edge, body inboard."""
+    y0 = con["usbc_front_y_mm"]
+    return Rect(
+        con["usbc_x_mm"] - con["usbc_shell_w_mm"] / 2,
+        y0,
+        con["usbc_x_mm"] + con["usbc_shell_w_mm"] / 2,
+        y0 + con["usbc_body_depth_mm"],
     )
 
 
-def pogo_well_rect(con: dict) -> Rect:
-    extra = con["pogo_well_clear_mm"]
-    return centred(
-        con["pogo_x_mm"],
-        con["pogo_y_mm"],
-        con["pogo_body_x_mm"] / 2 + extra,
-        con["pogo_body_y_mm"] / 2 + extra,
-    )
-
-
-def pogo_dish_rect(con: dict) -> Rect:
-    extra = con["pogo_well_clear_mm"] + con["pogo_dish_rim_mm"]
-    return centred(
-        con["pogo_x_mm"],
-        con["pogo_y_mm"],
-        con["pogo_body_x_mm"] / 2 + extra,
-        con["pogo_body_y_mm"] / 2 + extra,
-    )
+def usbc_wall(p: dict, fit: dict[str, float]) -> dict[str, float]:
+    """USB-C mouth and overmold relief in the -Y end wall, world Z."""
+    con = p["connectors"]
+    acc = p["accessory"]
+    st = stacks(p)
+    zc = st["tray"] + con["usbc_mouth_z_mm"]
+    return {
+        "zc": zc,
+        "mouth_x0": con["usbc_x_mm"] - fit["usbc_mouth_w"] / 2,
+        "mouth_x1": con["usbc_x_mm"] + fit["usbc_mouth_w"] / 2,
+        "mouth_z0": zc - fit["usbc_mouth_h"] / 2,
+        "mouth_z1": zc + fit["usbc_mouth_h"] / 2,
+        "recess_x0": con["usbc_x_mm"] - fit["usbc_recess_w"] / 2,
+        "recess_x1": con["usbc_x_mm"] + fit["usbc_recess_w"] / 2,
+        "recess_z0": zc - fit["usbc_recess_h"] / 2,
+        "recess_z1": zc + fit["usbc_recess_h"] / 2,
+        "web": acc["wall_mm"] - fit["usbc_recess_d"],
+        # Overmold face to shell face: the web plus any setback of the shell
+        # behind the inner wall face (the board edge).
+        "reach": acc["wall_mm"]
+        - fit["usbc_recess_d"]
+        + (acc["height_mm"] / 2 - acc["wall_mm"] + con["usbc_front_y_mm"]),
+        "ledge": acc["thickness_mm"] - (zc + fit["usbc_recess_h"] / 2),
+    }
 
 
 def pouch_rect(p: dict) -> Rect:
@@ -415,8 +432,6 @@ def stacks(p: dict) -> dict[str, float]:
     )
     tray = pouch_top + p["pcb"]["thickness_mm"]
     back = acc["shell_back_mm"]
-    proud = con["pogo_proud_mm"]
-    pogo = tray + con["pogo_height_mm"]
     return {
         "skin": mag["skin_mm"],
         "floor": floor,
@@ -425,10 +440,6 @@ def stacks(p: dict) -> dict[str, float]:
         "pouch_z0": pouch_z0,
         "tray": tray,
         "cavity": acc["thickness_mm"] - back - tray,
-        "pogo": pogo,
-        "pogo_outer": pogo - proud,
-        "pogo_proud": proud,
-        "dish_t": con["pogo_height_mm"] - proud,
         "pouch": pouch_top,
     }
 
@@ -497,6 +508,117 @@ def pending(p: dict, placement: dict | None) -> list[str]:
     if placement is None or outline_matches(p, placement):
         return []
     return board_checks(p, placement)
+
+
+def usbc_checks(p: dict, fit: dict[str, float], board: Rect, pouch: Rect) -> list[str]:
+    """Dev / USB-C variant: J2 is a mid-mount receptacle on the -Y edge."""
+    errors: list[str] = []
+    con = p["connectors"]
+    acc = p["accessory"]
+    mag = p["magnet"]
+    st = stacks(p)
+    body = usbc_body_rect(con)
+    if body.x0 < board.x0 or body.x1 > board.x1 or body.y1 > board.y1:
+        errors.append("USB-C body runs off the PCB outline")
+    if abs(con["usbc_front_y_mm"] - board.y0) > 0.05:
+        errors.append(
+            f"USB-C front face y={con['usbc_front_y_mm']} is not on the -Y board edge "
+            f"y={board.y0}: the wall mouth assumes the shell meets the inner wall face"
+        )
+    if body.closest_r() < mag["od_mm"] / 2:
+        errors.append("USB-C body intersects the magnet ring")
+    ceiling = acc["thickness_mm"] - acc["shell_back_mm"]
+    shell_top = st["tray"] + con["usbc_above_top_mm"]
+    if shell_top > ceiling - USBC_LID_AIR_MM + 1e-6:
+        errors.append(
+            f"USB-C shell top {shell_top:.2f} mm leaves under {USBC_LID_AIR_MM} mm "
+            f"to the {ceiling:.2f} mm lid ceiling"
+        )
+    shell_bottom = st["tray"] - con["usbc_below_top_mm"]
+    if shell_bottom < st["floor"] + 1e-6:
+        errors.append(
+            f"USB-C shell bottom {shell_bottom:.2f} mm is into the "
+            f"{st['floor']:.2f} mm tray floor"
+        )
+    xs = [q[0] for q in con["usbc_slot_mm"]]
+    ys = [q[1] for q in con["usbc_slot_mm"]]
+    slot = Rect(min(xs), min(ys), max(xs), max(ys))
+    if slot.gap(pouch) < USBC_POUCH_AIR_MM:
+        errors.append(
+            f"USB-C board slot is {slot.gap(pouch):.2f} mm from the pouch; "
+            f"need {USBC_POUCH_AIR_MM} mm"
+        )
+    # Under the board: the shell hangs into the slot. Nothing in the tray may
+    # rise there: posts, the mic rib, or the clocking-magnet well (blind, below
+    # the floor, so only a post or rib could reach).
+    for cx, cy, pr in post_centres(p):
+        if circle_hits_rect(cx, cy, pr, slot.expanded(0.3)):
+            errors.append(f"tray post at ({cx:.1f}, {cy:.1f}) sits under the USB-C shell")
+    w = usbc_wall(p, fit)
+    sw = con["usbc_shell_w_mm"] + 2 * USBC_MOUTH_CLEAR_MM
+    sh = con["usbc_shell_h_mm"] + 2 * USBC_MOUTH_CLEAR_MM
+    if fit["usbc_mouth_w"] + 1e-6 < sw or fit["usbc_mouth_h"] + 1e-6 < sh:
+        errors.append(
+            f"USB-C mouth {fit['usbc_mouth_w']} x {fit['usbc_mouth_h']} mm does not clear the "
+            f"{con['usbc_shell_w_mm']} x {con['usbc_shell_h_mm']} mm shell by "
+            f"{USBC_MOUTH_CLEAR_MM} mm a side"
+        )
+    ow = con["usbc_plug_overmold_w_mm"] + 2 * USBC_OVERMOLD_CLEAR_MM
+    oh = con["usbc_plug_overmold_h_mm"] + 2 * USBC_OVERMOLD_CLEAR_MM
+    if fit["usbc_recess_w"] + 1e-6 < ow or fit["usbc_recess_h"] + 1e-6 < oh:
+        errors.append(
+            f"USB-C relief {fit['usbc_recess_w']} x {fit['usbc_recess_h']} mm is smaller than "
+            f"the {con['usbc_plug_overmold_w_mm']} x {con['usbc_plug_overmold_h_mm']} mm "
+            "USB-IF maximum overmold"
+        )
+    if w["reach"] > USBC_MAX_REACH_MM + 1e-6:
+        errors.append(
+            f"USB-C overmold stops {w['reach']:.2f} mm off the shell face; over "
+            f"{USBC_MAX_REACH_MM} mm a plug may not latch. Deepen the relief"
+        )
+    if w["web"] + 1e-6 < USBC_MIN_WEB_MM:
+        errors.append(
+            f"USB-C relief leaves a {w['web']:.2f} mm web; need {USBC_MIN_WEB_MM} mm"
+        )
+    if w["ledge"] + 1e-6 < USBC_MIN_LEDGE_MM:
+        errors.append(
+            f"USB-C relief leaves a {w['ledge']:.2f} mm ledge under the lid top; "
+            f"need {USBC_MIN_LEDGE_MM} mm"
+        )
+    if w["recess_z0"] < st["floor"] + 1e-6:
+        errors.append(
+            f"USB-C relief bottom z={w['recess_z0']:.2f} mm reaches the "
+            f"{st['floor']:.2f} mm magnet floor"
+        )
+    if w["recess_z1"] > acc["thickness_mm"] - 1e-6:
+        errors.append("USB-C relief breaks through the lid top")
+    if w["mouth_z1"] > acc["thickness_mm"] - acc["shell_back_mm"] - 1e-6:
+        errors.append("USB-C mouth cuts into the lid roof")
+    frame = min(
+        w["mouth_x0"] - w["recess_x0"],
+        w["recess_x1"] - w["mouth_x1"],
+        w["mouth_z0"] - w["recess_z0"],
+        w["recess_z1"] - w["mouth_z1"],
+    )
+    if frame + 1e-6 < USBC_MIN_FRAME_MM:
+        errors.append(
+            f"USB-C relief leaves {frame:.2f} mm of web around the mouth; "
+            f"need {USBC_MIN_FRAME_MM} mm for the overmold to stop on"
+        )
+    flat = acc["width_mm"] / 2 - fit["corner_r"]
+    if w["recess_x0"] < -flat or w["recess_x1"] > flat:
+        errors.append("USB-C relief runs into a rounded case corner")
+    for cx, cy, pr in post_centres(p):
+        if cx - pr < w["recess_x1"] and cx + pr > w["recess_x0"] and cy < 0:
+            errors.append(f"USB-C relief is in line with the tray post at ({cx:.1f}, {cy:.1f})")
+    ant = p.get("antenna")
+    if isinstance(ant, dict):
+        fpc = antenna_fpc_rect(p)
+        if fpc.overlaps(body):
+            errors.append("FPC tape zone overlaps the USB-C body")
+        if circle_hits_rect(ant["ipex_x_mm"], ant["ipex_y_mm"], ant["ipex_recess_d_mm"] / 2, body):
+            errors.append("IPEX well overlaps the USB-C body")
+    return errors
 
 
 def check(p: dict, placement: dict | None = None) -> list[str]:
@@ -569,22 +691,6 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
     st = stacks(p)
     limit = acc["thickness_mm"]
     lid_need = p["mcu"]["thickness_mm"] + MCU_LID_AIR_MM + acc["shell_back_mm"]
-    if st["pogo"] > limit + 1e-6:
-        errors.append(f"pogo height stack {st['pogo']:.2f} mm exceeds {limit} mm envelope")
-    if st["pogo_proud"] < -1e-6:
-        errors.append(
-            f"pogo proud {st['pogo_proud']:.2f} mm is recessed in the dish; "
-            "raise the local lid or lower the pad"
-        )
-    if st["pogo_proud"] > MAX_POGO_PROUD_MM + 1e-6:
-        errors.append(
-            f"pogo proud {st['pogo_proud']:.2f} mm is more than {MAX_POGO_PROUD_MM:.2f} mm; "
-            "the cable overmold will snag"
-        )
-    if st["dish_t"] + 1e-6 < MIN_DISH_LID_MM:
-        errors.append(
-            f"pogo dish leaves {st['dish_t']:.2f} mm of lid; need {MIN_DISH_LID_MM:.1f} mm"
-        )
     if st["tray"] + lid_need > limit + 1e-6:
         errors.append(
             f"battery height stack {st['pouch']:.2f} mm lifts the board to {st['tray']:.2f} mm; "
@@ -642,54 +748,10 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
             f"want {MIN_CELL_AIR_MM:.2f}–{MAX_CELL_AIR_MM:.2f} mm so the pouch is not a spacer"
         )
 
-    pogo = pogo_rect(con)
-    well = pogo_well_rect(con)
-    dish = pogo_dish_rect(con)
     pouch = pouch_rect(p)
-    if not board.contains_rect(pogo):
-        errors.append("pogo body extends past the PCB outline")
     if not board.contains_rect(pouch):
         errors.append("pouch outline extends past the PCB outline")
-    if well.x0 < inner.x0 + MIN_SKIN_MM or well.x1 > inner.x1 - MIN_SKIN_MM:
-        errors.append("pogo well leaves under 0.6 mm of lid wall on a long side")
-    if well.y1 > inner.y1 - MIN_SKIN_MM + 1e-6:
-        errors.append("pogo well leaves under 0.6 mm of lid wall at the top edge")
-    if well.y0 < inner.y0 + MIN_SKIN_MM - 1e-6:
-        errors.append("pogo well leaves under 0.6 mm of lid wall at the bottom edge")
-    if dish.x0 < inner.x0 or dish.x1 > inner.x1:
-        errors.append("pogo dish cuts into a lid wall")
-    if dish.y1 > inner.y1 + 1e-6:
-        errors.append("pogo dish cuts into the top lid wall")
-    if dish.y0 < inner.y0 - 1e-6:
-        errors.append("pogo dish cuts into the bottom lid wall")
-    if pogo.closest_r() < mag["od_mm"] / 2:
-        errors.append("pogo body intersects the magnet ring")
-    # Dev / USB-C variant: J2 is a mid-mount receptacle on the -Y edge.
-    if "usbc_x_mm" in con:
-        ceiling = acc["thickness_mm"] - acc["shell_back_mm"]
-        shell_top = st["tray"] + con["usbc_above_top_mm"]
-        if shell_top > ceiling - USBC_LID_AIR_MM + 1e-6:
-            errors.append(
-                f"USB-C shell top {shell_top:.2f} mm leaves under {USBC_LID_AIR_MM} mm "
-                f"to the {ceiling:.2f} mm lid ceiling"
-            )
-        shell_bottom = st["tray"] - con["usbc_below_top_mm"]
-        if shell_bottom < st["floor"] + 1e-6:
-            errors.append(
-                f"USB-C shell bottom {shell_bottom:.2f} mm is into the "
-                f"{st['floor']:.2f} mm tray floor"
-            )
-        xs = [q[0] for q in con["usbc_slot_mm"]]
-        ys = [q[1] for q in con["usbc_slot_mm"]]
-        slot = Rect(min(xs), min(ys), max(xs), max(ys))
-        if slot.gap(pouch) < USBC_POUCH_AIR_MM:
-            errors.append(
-                f"USB-C board slot is {slot.gap(pouch):.2f} mm from the pouch; "
-                f"need {USBC_POUCH_AIR_MM} mm"
-            )
-        mouth_z = st["tray"] + con["usbc_mouth_z_mm"]
-        if mouth_z - con["usbc_plug_overmold_h_mm"] / 2 < 0.0:
-            errors.append("USB-C plug overmold would hit the phone back")
+    errors += usbc_checks(p, fit, board, pouch)
     for cx, cy, pr in post_centres(p):
         gap = circle_rect_clearance(cx, cy, pr, pouch)
         if gap < MIN_POST_CLEAR_MM:
@@ -825,11 +887,6 @@ def check(p: dict, placement: dict | None = None) -> list[str]:
         fpc = antenna_fpc_rect(p)
         if not inner.contains_rect(fpc):
             errors.append("FPC tape zone runs into a lid wall")
-        dish = pogo_dish_rect(con)
-        if fpc.overlaps(dish):
-            errors.append("FPC tape zone overlaps the pogo dish")
-        if circle_hits_rect(*ipex_pt, ant["ipex_recess_d_mm"] / 2, dish):
-            errors.append("IPEX well overlaps the pogo dish")
         for boss in boss_rects(p):
             if fpc.overlaps(boss):
                 errors.append("FPC tape zone overlaps a lid boss")
@@ -879,13 +936,13 @@ def fit_report(p: dict, placement: dict | None = None) -> str:
         - acc["height_mm"] / 2
         - p["phone"]["camera_bar_from_top_mm"]
     )
-    pogo = pogo_rect(con)
+    usbc = usbc_body_rect(con)
     pouch = pouch_rect(p)
     pouch_z0 = st["pouch_z0"]
-    recess = acc["thickness_mm"] - st["pogo"]
     gap = button_gap(p)
     lid = acc.get("lid_material", "?")
-    proud = st["pogo_proud"]
+    fit = case_fit()
+    w = usbc_wall(p, fit)
     lines = [
         "Pixel Snap Voice - envelope / PETG fit report",
         "  origin: magnet center, +Y toward camera bar",
@@ -899,19 +956,22 @@ def fit_report(p: dict, placement: dict | None = None) -> str:
         f"long side toward 6 o'clock",
         f"  camera-bar XY gap: {bar_gap:.2f} mm (must be > 0)",
         f"  stacks (phone->shell, limit {acc['thickness_mm']} mm): tray {st['tray']:.2f}, "
-        f"pogo face {st['pogo']:.2f} ({proud:.2f} mm proud of the {st['pogo_outer']:.2f} mm dish; "
-        f"{recess:.2f} mm under the outer skin), "
+        f"USB-C shell {st['tray'] - con['usbc_below_top_mm']:.2f}-"
+        f"{st['tray'] + con['usbc_above_top_mm']:.2f}, "
         f"battery {st['pouch']:.2f} mm; lid cavity {st['cavity']:.2f} mm",
         f"  battery pocket: {bat['pocket_width_mm']} x {bat['pocket_height_mm']} x {bat['max_thickness_mm']} mm "
         f"= {vol:.0f} mm3 -> ~{est} mAh (current pick {bat['locked_mah']} mAh), taped to the board",
         f"  pouch: {pouch.x1 - pouch.x0:.1f} x {pouch.y1 - pouch.y0:.1f} mm at "
         f"({bat['offset_x_mm']:.1f}, {bat['offset_y_mm']:.1f}), z {pouch_z0:.2f}-"
         f"{st['pouch']:.2f} (under the board, {st['air']:.2f} mm air to the magnet backs); "
-        f"{pouch.gap(pogo):.1f} mm from the cell to the pogo",
-        f"  pogo: J2 {con['pogo_body_x_mm']:.1f} x {con['pogo_body_y_mm']:.1f} x "
-        f"{con['pogo_height_mm']:.1f} mm pad at ({con['pogo_x_mm']:.1f}, {con['pogo_y_mm']:.1f}); "
-        f"lid dishes to {st['pogo_outer']:.2f} mm ({st['dish_t']:.2f} mm local lid) so the pad "
-        f"is {proud:.2f} mm proud; well is through that dish",
+        f"{pouch.gap(usbc):.1f} mm from the cell to the USB-C body",
+        f"  USB-C: J2 at ({con['usbc_x_mm']:.1f}, {con['usbc_y_mm']:.1f}), shell face on y="
+        f"{con['usbc_front_y_mm']:.1f}; -Y wall mouth {fit['usbc_mouth_w']:.1f} x "
+        f"{fit['usbc_mouth_h']:.1f} mm x {w['mouth_x0']:.2f}..{w['mouth_x1']:.2f}, "
+        f"z {w['mouth_z0']:.2f}..{w['mouth_z1']:.2f}; overmold relief "
+        f"{fit['usbc_recess_w']:.1f} x {fit['usbc_recess_h']:.1f} x {fit['usbc_recess_d']:.2f} mm, "
+        f"z {w['recess_z0']:.2f}..{w['recess_z1']:.2f}, leaves a {w['web']:.2f} mm web "
+        f"(overmold {w['reach']:.2f} mm off the shell face) and a {w['ledge']:.2f} mm lid-top ledge",
         f"  BT1: B.Cu pigtail solder pads at ({con['batt_pad_x_mm']:.1f}, {con['batt_pad_y_mm']:.1f}), "
         f"no lid window or wrap",
         f"  mic: NPTH ({con['mic_npth_x_mm']:.2f}, {con['mic_npth_y_mm']:.2f}) -> {con['mic_edge']}-wall port "
@@ -934,7 +994,7 @@ def fit_report(p: dict, placement: dict | None = None) -> str:
         "    [ ] TPU pill clicks SW1 and springs back",
         "    [ ] side ridges give enough grip to slide it off the ring",
         "    [ ] ring and clocking magnet sit in the wells and the case does not spin",
-        "    [ ] lid dish sits over J2 and the pad is flush or a hair proud",
+        "    [ ] the wall mouth lines up with J2 and the plug overmold seats in the relief",
         "    [ ] taped dummy pouch clears the posts and the board still seats",
         "    [ ] IPEX well sits over U1 and the FPC mark is on the inner ceiling",
     ]
@@ -993,12 +1053,20 @@ def self_test() -> list[str]:
     expect("offset_y=22", check(old, placement), "pouch", "post")
 
     ring = copy.deepcopy(p)
-    ring["connectors"]["pogo_y_mm"] = 0.0
-    expect("pogo at origin", check(ring, None), "magnet ring")
+    ring["connectors"]["usbc_front_y_mm"] = -20.0
+    expect("USB-C at y=-20", check(ring, None), "USB-C", "magnet ring")
 
-    wall = copy.deepcopy(p)
-    wall["connectors"]["pogo_y_mm"] = 41.0
-    expect("J2 at y=41", check(wall, None), "top edge")
+    off_edge = copy.deepcopy(p)
+    off_edge["connectors"]["usbc_front_y_mm"] = -41.8
+    expect("USB-C 1 mm behind the edge", check(off_edge, None), "USB-C", "board edge")
+
+    fat = copy.deepcopy(p)
+    fat["connectors"]["usbc_plug_overmold_h_mm"] = 7.5
+    expect("7.5 mm overmold", check(fat, None), "USB-C relief", "overmold")
+
+    wide = copy.deepcopy(p)
+    wide["connectors"]["usbc_shell_w_mm"] = 9.4
+    expect("9.4 mm shell", check(wide, None), "USB-C mouth")
 
     shunt = copy.deepcopy(p)
     shunt["connectors"]["mic_npth_x_mm"] = 26.5
@@ -1035,14 +1103,6 @@ def self_test() -> list[str]:
     opaque["accessory"]["lid_finish"] = "black PETG"
     expect("opaque lid", check(opaque, None), "translucent")
 
-    recessed = copy.deepcopy(p)
-    recessed["connectors"]["pogo_proud_mm"] = -0.5
-    expect("recessed pad", check(recessed, None), "proud")
-
-    thin_dish = copy.deepcopy(p)
-    thin_dish["connectors"]["pogo_proud_mm"] = 1.0
-    expect("1 mm proud pad", check(thin_dish, None), "dish")
-
     flush = copy.deepcopy(p)
     flush["connectors"]["button_tip_inset_mm"] = -0.2
     expect("SW1 tip in the wall", check(flush, None), "SW1", "pressed")
@@ -1051,10 +1111,10 @@ def self_test() -> list[str]:
     deep_ipex["antenna"]["ipex_recess_depth_mm"] = p["accessory"]["shell_back_mm"]
     expect("IPEX well through the lid", check(deep_ipex, None), "IPEX well")
 
-    fpc_pogo = copy.deepcopy(p)
-    fpc_pogo["antenna"]["fpc_x_mm"] = p["connectors"]["pogo_x_mm"]
-    fpc_pogo["antenna"]["fpc_y_mm"] = p["connectors"]["pogo_y_mm"]
-    expect("FPC on the pogo dish", check(fpc_pogo, None), "FPC", "pogo")
+    fpc_usbc = copy.deepcopy(p)
+    fpc_usbc["antenna"]["fpc_x_mm"] = p["connectors"]["usbc_x_mm"]
+    fpc_usbc["antenna"]["fpc_y_mm"] = p["connectors"]["usbc_y_mm"]
+    expect("FPC on the USB-C body", check(fpc_usbc, None), "FPC", "USB-C")
 
     if placement is not None:
         mismatch = moved(placement, "J2", y_mm=99.0)
