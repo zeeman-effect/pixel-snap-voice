@@ -27,6 +27,7 @@ _autosave-*
 *.stl
 *.3mf
 *.step
+!hardware/kicad/recorder/PSV.pretty/*.step
 *.stp
 !hardware/kicad/exports/*.step
 !hardware/cad/export/metal/tray.step
