@@ -9,7 +9,7 @@ One-off / quick-turn. Prefer JLCPCB + LCSC Basic parts. Do not send Gerbers unti
 | Fab | JLCPCB (PCBWay is the backup) |
 | Layers | 4 (F.Cu, In1.Cu, In2.Cu, B.Cu) |
 | Thickness | 0.8 mm (`params.json`). 1.6 mm only if a later envelope check still passes |
-| Finish | OSP, the cheapest flat finish. Not HASL: its solder domes are risky under U2's 0.4 mm pitch and the bottom-pad parts (U1, J3, MK1). ENIG also works but buys shelf life this one-off does not need; J2's gold is on the part, not the board. OSP lasts ~6 months bare and weakens after reflow, so JLC assembles at once; solder the BT1 pigtail within a few weeks, with flux |
+| Finish | OSP, the cheapest flat finish. Not HASL: its solder domes are risky under U2's 0.4 mm pitch and the bottom-pad parts (U1, J3, MK1). ENIG also works but buys shelf life this one-off does not need; J2's contacts are on the part, not the board. OSP lasts ~6 months bare and weakens after reflow, so JLC assembles at once; solder the BT1 pigtail within a few weeks, with flux |
 | Impedance | None. Do not order the controlled-impedance option. USB is full speed only, so D+/D− are a plain 0.2 mm pair on a 0.4 mm pitch over In1 GND (~75 Ω). Reasoning in `hardware/kicad/README.md` |
 | Min trace / space | 0.15 mm. Inside standard capability, so no fine-line surcharge |
 | Via | 0.6 mm pad on a 0.3 mm drill, one size everywhere. 0.3 mm is JLC's preferred hole, so no small-via surcharge — do not let a re-route drop below it |
@@ -57,49 +57,20 @@ Pixel 10, back glass up:
 Stuffed board (PCB + pouch + kapton, then the PETG proto on the phone):
 
 1. Board outline width, height, thickness
-2. U1 and J2 height above F.Cu; J2 distance to the board edge
+2. U1 height above F.Cu; J2 shell top above F.Cu (1.60 mm on paper), shell bottom below B.Cu (0.76 mm), and its front face vs the board edge (flush on paper)
 3. Pouch width, height, thickness after tape and kapton; air under that wrap vs the tray floor
 4. SW1 actuator tip to the phone-left board edge
 5. MK1 sound-port hole to the phone-right board edge
 6. Four post / hole positions vs the board corners
-7. Closed PETG proto on the phone: camera bar still clear, ring on the Pixelsnap center, overall stack height, magnetic cable clearance
+7. Closed PETG proto on the phone: camera bar still clear, ring on the Pixelsnap center, overall stack height, a USB-C cable latches through the wall mouth and the plug misses the phone
 
 ## Battery
 
 Pouch is the Jauch **LP305166JH-PCM-2-WIRES-70MM** (DigiKey 13278052): 66 × 51.5 × 3.3 mm, 1200 mAh min, PCM, 70 mm leads. Tape to B.Cu at (0, 0), kapton-wrap, solder the leads to B.Cu BT1 at (−17, 35). The pack has a PCM; this board has no second protector.
 
-## Magnetic USB-A lead
+## Cable
 
-There is no finished LCSC SKU. `C5126845` is the male housing only. Do not Add-to-Cart that number and expect a USB-A cable. Do not buy Amazon MagSafe-style leads: they will not match this pad.
-
-J2 on the board is `C6276862`. JLCPCB places that one. Extra pads for a click-test are a separate LCSC parts line. JLC will not mail unused SMT extras, so do not try to get those pads from the assembly cart.
-
-Recipe (LCSC catalog 25 Oct 2026; housing 26 in stock, pad 135 in stock, both min 1):
-
-| Line | Qty | Notes |
-| --- | --- | --- |
-| Custom lead | **2 sets** (MOQ 1) | [lcsccable.com/customize](https://lcsccable.com/customize), quote in 24–48 h, no return |
-| Housing `C5126845` | **2** | Side A **Housing only**, no Terminal. Cable shop pulls them |
-| USB-A 2.0 male `C2765195` | **2** | Side B Housing. Molex `48037-2200`. Engineer may use an equivalent overmolded USB-A 2.0 male. No Type-C, no CC |
-| Extra pads `C6276862` | **3** | LCSC parts cart, loose. Click-test before you trust the pinout |
-
-Side A pin 1 VBUS, 2 D−, 3 D+, 4 GND to USB-A 1–4 (red / white / green / black) until that click-test. Length 1000 mm. Full field list is in [`docs/bom.md`](bom.md) under **Magnetic USB-A lead**.
-
-### Human clicks (you place this; the agent cannot)
-
-1. Sign in at [lcsc.com](https://www.lcsc.com).
-2. Open [C6276862](https://www.lcsc.com/product-detail/C6276862.html). Qty **3**. **Add to Cart**. This is the extra-pad line, not the cable.
-3. Open [lcsccable.com/customize](https://lcsccable.com/customize). Same login.
-4. **Consumer Electronics** → **Terminal Harness** → Shape **Single**.
-5. Side A: **Housing** → **MPN** → `YZP0048-20048-04025-03`. Do not pick Housing & Terminal. Do not type `C6276862`.
-6. Side B: **Housing** → **MPN** → `48037-2200`.
-7. Wire: black, **1000** mm. 24/28 AWG or a USB 2.0 4-core. Twisted **No**. Pinout **Other Pinout**. Paste the four-line map from `docs/bom.md`.
-8. Production Volume **2** Sets. **Save to Cart**.
-9. Open the cable cart. Tick the cable (it starts unticked). **Request for Quote**.
-10. Wait for the 24–48 h quote (or mail [cable@lcsc.com](mailto:cable@lcsc.com) if it stalls). Open **Cable Orders**, confirm the drawing, enter ship-to, pay.
-11. Click-test a finished lead on one loose `C6276862` before you trust 5 V or USB data on the SMT board.
-
-Do not pay Amazon for a lookalike. Do not put the female pad on either cable end.
+Dev / USB-C variant: J2 is a USB-C receptacle (HRO TYPE-C-31-M-13C, `C2848620`) and JLCPCB places it. Any USB-C cable with USB 2.0 data works, C-to-C or A-to-C. There is nothing custom to order. The magnetic lead recipe lives on `compact-final`.
 
 ## Order checklist
 
@@ -107,7 +78,7 @@ Do not pay Amazon for a lookalike. Do not put the female pad on either cable end
 2. `python scripts/check_gates.py` (envelope, `recorder_test`, schematic ERC, outline/holes, MCU SKU, pins). Official copper DRC is `kicad-cli pcb drc`. A clean run writes the whole upload package in one pass: `hardware/kicad/fab/` from `kicad-cli`, and `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` + `jlcpcb_extra.csv` from `generate_jlc.py`. Send them only if that run just happened. If gates or DRC fail, edit the board. Do not stop at the report.
 3. Optional: ngspice `sim/spice/power_path.cir`
 4. Human glance in KiCad 10: USB length/impedance, courtyard collisions, 3D vs case. Footprint XY: `hardware/kicad/recorder/placement.json`.
-5. Upload `hardware/kicad/fab/recorder-jlc.zip` (the Gerbers; not the loose files) + `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` from **this** `compact-final` board (59.6 × 85.6 mm). Set **0.8 mm** thickness and **OSP**; JLC defaults to 1.6 mm HASL. Tick **Confirm Parts Placement**: J2 has no 3D model in JLC's preview, and a 180° error swaps 5 V and ground. In the preview, every pink pin-1 dot must sit on our pad 1. Fix a wrong one in `JLC_ROTATION_OFFSET` in `generate_jlc.py` and re-run step 2, not on the order page. Do not upload the 64 × 86 mm files on `main`. Step 2 writes those from `recorder.kicad_pcb`, so upload the files that run just produced. Do not hand-edit the CSVs: LCSC order codes come from the tables in [`docs/bom.md`](bom.md), and which parts the machine places comes from the board's own `exclude_from_pos_files` / `exclude_from_bom` flags. A missing LCSC on an assembly-BOM part fails the generator. BT1 and the download pads are copper only. **J2** is C6276862; the land is the vendor stadium (22.30 × 7.70 mm). Confirm it in the assembly preview. ITERM and the magnetic-pad nets are routed; a clean `check_gates` is the go-ahead for this folder.
+5. Upload `hardware/kicad/fab/recorder-jlc.zip` (the Gerbers; not the loose files) + `hardware/kicad/jlcpcb_bom.csv` + `jlcpcb_cpl.csv` from **this** `revert-to-usb-c` dev / USB-C board (59.6 × 85.6 mm). Set **0.8 mm** thickness and **OSP**; JLC defaults to 1.6 mm HASL. Tick **Confirm Parts Placement**. J2 (C2848620) has a JLC model; check its mouth sits on the board edge in the slot and the contact row is over the pads (CPL rot 180, no offset yet). In the preview, every pink pin-1 dot must sit on our pad 1. Fix a wrong one in `JLC_ROTATION_OFFSET` in `generate_jlc.py` and re-run step 2, not on the order page. Do not upload the 64 × 86 mm files on `main`. Step 2 writes those from `recorder.kicad_pcb`, so upload the files that run just produced. Do not hand-edit the CSVs: LCSC order codes come from the tables in [`docs/bom.md`](bom.md), and which parts the machine places comes from the board's own `exclude_from_pos_files` / `exclude_from_bom` flags. A missing LCSC on an assembly-BOM part fails the generator. BT1 and the download pads are copper only. **J2** is C2848620 in a 9.24 × 6.54 mm slot on the phone-bottom edge. The slot is in the Edge.Cuts Gerber; JLC routes it, so no extra option is needed. ITERM and the USB-C nets are routed; a clean `check_gates` is the go-ahead for this folder.
 6. Order magnet ring and LiPo **before** locking CNC metal
-7. Order the magnetic USB-A lead from LCSC (2 custom sets + 3 extra `C6276862` pads). Clicks are in **Magnetic USB-A lead** above. Do not buy an Amazon lookalike.
+7. Have a USB-C cable with data on hand. Nothing custom to order.
 8. SMT board: follow [`docs/bringup-custom.md`](bringup-custom.md)

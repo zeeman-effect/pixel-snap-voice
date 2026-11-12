@@ -1,15 +1,21 @@
 ** Drc report for recorder.kicad_pcb **
-** Created on 2026-11-01T10:43:38 **
+** Created on 2026-11-02T22:48:26 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 0 DRC violations **
 
 ** Found 0 unconnected pads **
 
-** Found 10 Footprint errors **
-[footprint_symbol_field_mismatch]: Field 'Datasheet' differs (PCB: 'https://www.lcsc.com/product-detail/C6276862.html', Schematic: '~')
+** Found 12 Footprint errors **
+[footprint_symbol_field_mismatch]: Field 'Datasheet' differs (PCB: 'https://www.lcsc.com/product-detail/C2848620.html', Schematic: '~')
     Local override; warning
-    @(0.0000 mm, 36.0000 mm): Footprint J2
+    @(7.0000 mm, -38.1000 mm): Footprint J2
+[net_conflict]: Pad missing net given by schematic (unconnected-(J2-SBU1-PadA8))
+    Local override; warning
+    @(5.7500 mm, -35.4800 mm): Pad A8 [<no net>] of J2 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(J2-SBU2-PadB8))
+    Local override; warning
+    @(8.7500 mm, -35.4800 mm): Pad B8 [<no net>] of J2 on F.Cu
 [net_conflict]: Pad net (PA_EN) doesn't match net given by schematic (unconnected-(U1-IO8-Pad12))
     Local override; warning
     @(7.0000 mm, -14.6000 mm): Pad 12 [PA_EN] of U1 on F.Cu

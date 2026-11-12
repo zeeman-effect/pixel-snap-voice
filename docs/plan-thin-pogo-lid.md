@@ -1,5 +1,7 @@
 # Thin lid: drop speaker, bond pouch, magnetic pogo, plastic lid
 
+> **Historical on branch `revert-to-usb-c`.** This plan is for the magnetic-pad variant (`compact-final`). The dev / USB-C variant has no pogo pad, lid dish or through-well: J2 is a mid-mount USB-C on the phone-bottom edge with a wall mouth and overmold relief in `hardware/cad/case.scad`. The envelope, tray, pouch and plastic-lid choices below still hold.
+
 Living plan for the compact-final spin. The earlier drop-speaker / bond-pouch note is folded in here.
 
 ## Why

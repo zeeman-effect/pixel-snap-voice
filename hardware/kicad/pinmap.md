@@ -27,14 +27,14 @@ Strapping GPIO0 / GPIO45 / GPIO46 are not used as I2S or SD.
 | GPIO1 | BTN | input, pull-up | SW1 to GND |
 | GPIO2 | LED | output | D1 |
 | GPIO9 | CHG_STAT | input | U3 STAT (D2 charge LED on this net) |
-| GPIO43 / GPIO44 | UART_TX / UART_RX | UART0 | Labeled on U1 only. No header. Flash over the magnetic USB |
+| GPIO43 / GPIO44 | UART_TX / UART_RX | UART0 | Labeled on U1 only. No header. Flash over USB-C |
 | EN | EN | module enable | R1 10k / C2 plus **TP_EN** |
 
 ## Other
 
 | Net | Notes |
 | --- | --- |
-| J2 | C6276862 magnetic pad. 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND. No CC |
+| J2 | C2848620 USB-C (dev variant). A4/A9/B4/B9 VBUS, A6/B6 USB_DP, A7/B7 USB_DM, A5 CC1 (R2 5.1k), B5 CC2 (R3 5.1k), A8/B8 SBU open, A1/A12/B1/B12 + shell GND |
 | **VDD33** | U4 AP2112 → U5 AP22804. MCU digital rail |
 | 3V3A | U8 LP5907-2.8 from **VSYS** (~2.8 V); star return to AGND; no digital return through MK1. Named 3V3A; it is not 3.3 V |
 | J3 | MK MKDV4GCL-ABB 512 MB SD NAND, LGA-8. Pins: 3 CLK, 4 VSS, 5 CMD, 6 DAT0, 7 DAT1, 8 VDD. Format FAT if blank |

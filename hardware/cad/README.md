@@ -1,6 +1,6 @@
 # CAD envelope
 
-OpenSCAD and `params.json` must stay twins. `params.json` and `params.scad` share the same Pixel 10 + magnet-ring numbers. Change a number in both files. `check_envelope.py` fails if they drift, if the accessory hits a keepout, if the 51.5 × 66 mm pouch outline hits a tray post, or if the pogo well XY drifts from `placement.json` J2. `check_dfm.py` asks whether JLCCNC, JLC3DP, or PCBWay can make the same solids as-is. Metal CNC is the tray only; the lid stays natural translucent PETG. The record button is a captive TPU 95A pill.
+OpenSCAD and `params.json` must stay twins. `params.json` and `params.scad` share the same Pixel 10 + magnet-ring numbers. Change a number in both files. `check_envelope.py` fails if they drift, if the accessory hits a keepout, if the 51.5 × 66 mm pouch outline hits a tray post, or if the USB-C wall mouth drifts from `placement.json` J2 or stops letting a plug latch. `check_dfm.py` asks whether JLCCNC, JLC3DP, or PCBWay can make the same solids as-is. Metal CNC is the tray only; the lid stays natural translucent PETG. The record button is a captive TPU 95A pill.
 
 ```bash
 python hardware/cad/check_envelope.py
@@ -33,7 +33,8 @@ blender --background --python hardware/cad/renders/tray_magnets.py
 | Accessory | 62 × 88 × 10.65 mm |
 | PCB | 59.6 × 85.6 × 0.8 mm, 4-layer |
 | Tray | 0.85 mm closed skin, 2.35 mm inner floor, 1.2 mm wall, four 5.0 mm M1.6 posts |
-| Lid | natural translucent PETG, IPEX well over U1, FPC tape mark toward the phone-bottom end (J2 is camera / phone-top) |
+| Lid | natural translucent PETG, IPEX well over U1, FPC tape mark toward the phone-bottom end, flat top |
+| USB-C mouth | −Y end wall at x = 7.0: 9.5 × 3.7 mm through, inside a 12.8 × 6.7 × 0.7 mm overmold relief (0.5 mm web), split across tray and lid |
 
 The magnet wells are blind and 0.3 mm loose on the ring OD. Glue the steel face; do not tape the phone side of the magnets. Default `variant` is the PETG fit part. `-D variant="metal"` is the 6061 tray. The lid is always PETG. Not steel.
 
@@ -46,4 +47,4 @@ Shared origin, heights, and the PETG-on-Pixel checklist: [`INTERFACE.md`](INTERF
 - **PETG tray + lid.** `tray.stl` sits phone-face down. `lid.stl` is already outer-face down; leave it that way so the 0.35 mm IPEX skin is the first layers. Natural translucent PETG for the lid. Mating-face down turns the back skin into a 57 × 83 mm bridge.
 - **TPU 95A pills.** Print several `button.stl` copies. The nub is meant to rest 0.1 mm on the SW1 actuator; a squashed first layer or a short nub will miss the switch.
 - **Dummy pouch.** Print `dummy_pouch.stl` and stack it under a dummy board to check lid close before taping the Jauch cell.
-- **Then, by hand:** glue the ring and clocking magnet steel-face up, drop a pill in from inside the lid, tape the FPC on the inner ceiling mark, mate the pigtail in the IPEX well, screw the lid on, snap it to a Pixel. Confirm the camera bar is clear, the magnetic cable seats, the mic holes are on the phone-left wall, the pill clicks and springs back, and the ridges are enough to slide it off. Caliper a real phone before any 6061 toolpath; do not treat the table above as measured.
+- **Then, by hand:** glue the ring and clocking magnet steel-face up, drop a pill in from inside the lid, tape the FPC on the inner ceiling mark, mate the pigtail in the IPEX well, screw the lid on, snap it to a Pixel. Confirm the camera bar is clear, a USB-C cable latches through the end-wall mouth, the mic holes are on the phone-right wall, the pill clicks and springs back, and the ridges are enough to slide it off. Caliper a real phone before any 6061 toolpath; do not treat the table above as measured.

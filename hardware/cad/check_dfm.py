@@ -30,6 +30,7 @@ from check_envelope import (  # noqa: E402
     load_json,
     parse_scad,
     stacks,
+    usbc_wall,
 )
 
 # variant=metal shares the 0.85 mm magnet skin and TPU pill with PETG.
@@ -155,13 +156,7 @@ def features(p: dict, *, variant: str = "petg") -> dict[str, float]:
     rec_r = cavity_h / 10.0 + 0.5
     inner_r = max(0.4, scad["corner_r"] - wall)
     magnet_floor = fit["skin_t"]
-    con = p["connectors"]
-    pogo_well_w = con["pogo_body_x_mm"] + 2 * con["pogo_well_clear_mm"]
-    pogo_well_h = con["pogo_body_y_mm"] + 2 * con["pogo_well_clear_mm"]
-    dish_extra = con["pogo_well_clear_mm"] + con["pogo_dish_rim_mm"]
-    pogo_dish_w = con["pogo_body_x_mm"] + 2 * dish_extra
-    pogo_dish_h = con["pogo_body_y_mm"] + 2 * dish_extra
-    pogo_dish_t = con["pogo_height_mm"] - con["pogo_proud_mm"]
+    usbc = usbc_wall(p, fit)
     return {
         "acc_w": acc["width_mm"],
         "acc_h": acc["height_mm"],
@@ -188,12 +183,17 @@ def features(p: dict, *, variant: str = "petg") -> dict[str, float]:
         "wave_depth": scad["wave_depth"],
         "wave_stroke": scad["wave_stroke"],
         "wave_remain": back - scad["wave_depth"],
-        "pogo_well_w": pogo_well_w,
-        "pogo_well_h": pogo_well_h,
-        "pogo_dish_w": pogo_dish_w,
-        "pogo_dish_h": pogo_dish_h,
-        "pogo_dish_t": pogo_dish_t,
-        "pogo_proud": con["pogo_proud_mm"],
+        "usbc_mouth_w": fit["usbc_mouth_w"],
+        "usbc_mouth_h": fit["usbc_mouth_h"],
+        "usbc_recess_w": fit["usbc_recess_w"],
+        "usbc_recess_h": fit["usbc_recess_h"],
+        "usbc_recess_d": fit["usbc_recess_d"],
+        "usbc_web": usbc["web"],
+        "usbc_frame": min(
+            usbc["mouth_x0"] - usbc["recess_x0"],
+            usbc["mouth_z0"] - usbc["recess_z0"],
+        ),
+        "usbc_ledge": usbc["ledge"],
         "has_lid_cnc": 0.0,
         "inner_r": inner_r,
         "rec_r": rec_r,
@@ -233,6 +233,7 @@ def _wall_items(feat: dict[str, float]) -> dict[str, float]:
         "wall after grip flutes": feat["ridge_remain"],
         "skirt after grip flutes": feat["skirt_remain"],
         "wall after wave art": feat["wave_remain"],
+        "end-wall web in the USB-C relief": feat["usbc_web"],
     }
     # variant=metal is a 6061 tray. The lid stays PETG, so CNC must not
     # judge the back skin or wave as milled metal.
@@ -302,11 +303,11 @@ def _hole_findings(
     min_hole: float,
     min_col: float,
 ) -> None:
-    well = min(feat["pogo_well_w"], feat["pogo_well_h"])
-    if well + 1e-9 < min_hole:
+    mouth = min(feat["usbc_mouth_w"], feat["usbc_mouth_h"])
+    if mouth + 1e-9 < min_hole:
         proc.add(
             "fail",
-            f"pogo well is {feat['pogo_well_w']:.1f} x {feat['pogo_well_h']:.1f} mm; "
+            f"USB-C mouth is {feat['usbc_mouth_w']:.1f} x {feat['usbc_mouth_h']:.1f} mm; "
             f"{proc.shop} minimum opening is {min_hole:.2f} mm",
         )
     if feat["tap_d"] + 1e-9 < min_hole:
@@ -454,7 +455,7 @@ def evaluate_jlc_cnc(feat: dict[str, float]) -> ProcessResult:
         )
     proc.add(
         "info",
-        "lid is PETG with a dish and through pogo well; CNC is the 6061 tray only",
+        "lid is PETG with the top half of the USB-C mouth; CNC is the 6061 tray only",
     )
     return proc
 
@@ -509,12 +510,24 @@ def evaluate_local_fdm(feat: dict[str, float]) -> ProcessResult:
         proc.add("fail", f"side wall {feat['wall']:.2f} mm is under two 0.4 mm perimeters")
     if feat["magnet_floor"] < 0.4:
         proc.add("fail", f"magnet floor {feat['magnet_floor']:.2f} mm is under three 0.15 mm layers")
-    if min(feat["pogo_well_w"], feat["pogo_well_h"]) < 3.0:
-        proc.add("fail", "pogo well is too small to print as a through opening")
-    if feat["pogo_dish_t"] < 1.2:
+    if min(feat["usbc_mouth_w"], feat["usbc_mouth_h"]) < 3.0:
+        proc.add("fail", "USB-C mouth is too small to print as a wall opening")
+    if feat["usbc_web"] < 0.4:
         proc.add(
             "fail",
-            f"pogo dish leaves {feat['pogo_dish_t']:.2f} mm of lid; print wants 1.2 mm",
+            f"USB-C relief leaves a {feat['usbc_web']:.2f} mm web; under one 0.4 mm line",
+        )
+    elif feat["usbc_web"] < 0.8:
+        proc.add(
+            "warn",
+            f"USB-C relief leaves a {feat['usbc_web']:.2f} mm web, one line wide. "
+            "It has to be that thin for a plug to latch; print slow, no ironing",
+        )
+    if feat["usbc_ledge"] < 0.4:
+        proc.add(
+            "fail",
+            f"lid-top ledge over the USB-C relief is {feat['usbc_ledge']:.2f} mm; "
+            "under two layers",
         )
     hole = min(feat.get("btn_hole_y", 8.0), feat.get("btn_hole_z", 2.6))
     if hole < 1.2:
@@ -776,9 +789,10 @@ def report(p: dict, procs: list[ProcessResult], feat: dict[str, float]) -> str:
             "SW1 (2.2 N / 0.2 mm) is the spring"
         )
     lines += [
-        f"  pogo well: {feat['pogo_well_w']:.1f} x {feat['pogo_well_h']:.1f} mm through a "
-        f"{feat['pogo_dish_w']:.1f} x {feat['pogo_dish_h']:.1f} x {feat['pogo_dish_t']:.2f} mm "
-        f"dish ({feat['pogo_proud']:.2f} mm proud)",
+        f"  USB-C: {feat['usbc_mouth_w']:.1f} x {feat['usbc_mouth_h']:.1f} mm mouth in a "
+        f"{feat['usbc_recess_w']:.1f} x {feat['usbc_recess_h']:.1f} x "
+        f"{feat['usbc_recess_d']:.2f} mm overmold relief; {feat['usbc_web']:.2f} mm web, "
+        f"{feat['usbc_frame']:.2f} mm frame round the mouth",
         f"  lid cavity: {feat['cavity_h']:.2f} mm deep, inner R {feat['inner_r']:.2f} mm "
         f"(guide {feat['rec_r']:.2f} mm); {feat['standoff_d']:.1f} mm M1.6 posts",
     ]
@@ -829,8 +843,8 @@ def self_test() -> list[str]:
         failures.append(f"live magnet skin should be 0.85, got {feat['magnet_floor']}")
     if abs(feat["standoff_d"] - 5.0) > 0.02:
         failures.append(f"live posts should be 5.0 mm, got {feat['standoff_d']}")
-    if abs(feat["pogo_dish_t"] - 1.85) > 0.02:
-        failures.append(f"live pogo dish should leave 1.85 mm, got {feat['pogo_dish_t']}")
+    if abs(feat["usbc_web"] - 0.5) > 0.02:
+        failures.append(f"live USB-C relief web should be 0.5 mm, got {feat['usbc_web']}")
     if feat["has_flexure"] >= 0.5:
         failures.append("live model should not keep a PETG flexure")
 
@@ -869,12 +883,13 @@ def self_test() -> list[str]:
             "metal copy should pass JLCCNC: "
             + "; ".join(f.text for f in jlc_m.findings if f.severity == "fail")
         )
+    # The USB-C relief web is 0.5 mm so a plug overmold lands close enough to
+    # latch. That is JLCCNC's absolute metal floor and under PCBWay's 0.8 mm,
+    # so PCBWay may fail, but only on that web.
     pcb_m = evaluate_pcbway_cnc(metal)
-    if not pcb_m.ok:
-        failures.append(
-            "metal copy should pass PCBWay CNC: "
-            + "; ".join(f.text for f in pcb_m.findings if f.severity == "fail")
-        )
+    other = [f.text for f in pcb_m.findings if f.severity == "fail" and "USB-C" not in f.text]
+    if other:
+        failures.append("metal copy should pass PCBWay CNC apart from the USB-C web: " + "; ".join(other))
 
     tray = stl_stats(EXPORT / "tray.stl")
     # The tray solid includes the 1.2 mm mating lip above the board-top split.

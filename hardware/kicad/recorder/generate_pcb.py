@@ -178,23 +178,26 @@ def apply_project_policy(project_path=PROJECT):
 #
 # Floorplan, in board coordinates (59.6 x 85.6 mm: edges x = +/-29.8,
 # y = +/-42.8). The 6 o'clock end is -Y, with the camera at +Y. The board
-# and lid were spun 180° around the magnet origin so J2 sits at phone-top;
-# the tray clocking magnet stays at 6 o'clock.
-#   y +14 .. +42.8  Analog: mic, codec, analog LDO, oscillator, and magnetic
-#                   pad J2 at (0, +36) on the camera / phone-top end. No
-#                   USB-C mouth. No speaker or class-D amp.
+# and lid were spun 180° around the magnet origin; the tray clocking magnet
+# stays at 6 o'clock. Dev / USB-C variant: J2 is a mid-mount USB-C on the
+# phone-bottom edge, in a slot its footprint cuts (add_outline leaves the gap).
+#   y +14 .. +42.8  Analog: mic, codec, analog LDO, oscillator. No speaker
+#                   or class-D amp.
 #   y -33 .. +33    Ring interior and the 51.5 x 66 mm Jauch pouch taped
 #                   to B.Cu at (0, 0). Nothing taller than ~0.5 mm sits
 #                   under that tape outline. SW1 and the status LED stay
 #                   west (phone-left); I2C pull-ups and MK1 stay east.
-#   y -42.8 .. -26  Charger and both regulators on the phone-bottom end.
+#   y -42.8 .. -26  Charger, both regulators and USB-C J2 (+ U7, R2, R3) on
+#                   the phone-bottom end.
 # The magnet ring is an annulus from r = 22 to r = 28 about the origin. Every
 # analog part is placed outside r = 28.
 # ---------------------------------------------------------------------------
 PLACEMENT = {
-    # --- Magnetic pad + ESD (old speaker seat, lid face) ---
-    "J2": (0.0, 36.0, 0, "C6276862 4-pin magnetic pad, lid well at params pogo_x/y"),
-    "U7": (14.8, 36.0, 0, "USBLC6-2SC6 ESD, west of the 22.3 mm pogo body"),
+    # --- USB-C (dev variant) + ESD + CC Rd, phone-bottom edge ---
+    "J2": (7.0, -38.1, 180, "C2848620 mid-mount USB-C, mouth on y = -42.8, params usbc_x/y"),
+    "U7": (7.0, -29.3, 0, "USBLC6-2SC6 ESD, north of the J2 contact row"),
+    "R2": (10.9, -32.9, 270, "CC1 Rd 5.1k"),
+    "R3": (3.1, -32.9, 270, "CC2 Rd 5.1k"),
     # --- Battery charger (BQ24073 VQFN-16, phone-bottom island) ---
     # Same relative layout as the routed 64 x 86 board, shifted (-2.4, +0.2)
     # so U3 clears H2 at (26.3, -39.3) and the edge runs keep their margin.
@@ -283,7 +286,7 @@ PLACEMENT = {
     # --- Battery ---
     # BT1 is two SMT solder pads for the pouch pigtail on B.Cu, west of J2
     # and just north of the 66 mm cell. Flip to the back after placing; rot
-    # 0 keeps pad 1 west. The magnetic pad is the only 5 V inlet; VSYS
+    # 0 keeps pad 1 west. USB-C J2 is the only 5 V inlet; VSYS
     # stays up with BT1 open.
     "BT1": (-17.0, 35.0, 0, "B.Cu pouch pigtail pads, pad 1 VBAT (west), pad 2 GND"),
     "C20": (-25.5, 29.4, 90, "VBAT bulk at the pouch pads"),
@@ -376,9 +379,15 @@ def vec(x_mm, y_mm):
     return pcbnew.VECTOR2I(pcbnew.FromMM(x_mm), pcbnew.FromMM(y_mm))
 
 
+# J2's footprint carries the three inner sides of its board slot on Edge.Cuts;
+# the outline leaves the mouth open between these x values on y = -half_h.
+USBC_SLOT_X = (7.0 - 4.62, 7.0 + 4.62)
+
+
 def add_outline(board, half_w, half_h):
     for a, b in [
-        ((-half_w, -half_h), (half_w, -half_h)),
+        ((-half_w, -half_h), (USBC_SLOT_X[0], -half_h)),
+        ((USBC_SLOT_X[1], -half_h), (half_w, -half_h)),
         ((half_w, -half_h), (half_w, half_h)),
         ((half_w, half_h), (-half_w, half_h)),
         ((-half_w, half_h), (-half_w, -half_h)),

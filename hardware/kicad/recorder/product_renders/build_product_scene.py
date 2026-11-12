@@ -34,7 +34,7 @@ RESOLUTION = (1920, 1280)
 
 # KiCad XY, millimetres, from recorder.kicad_pcb. z is height of the body.
 # Only parts whose 3D model is missing from a stock KiCad 10 install. J2 has
-# its own WRL in PSV.pretty; BT1 is bare B.Cu pads, already in the GLB.
+# its own STEP in PSV.pretty (make_usbc_model.py); BT1 is bare B.Cu pads, already in the GLB.
 FALLBACKS = [
     {
         "ref": "U1",

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/zachr/repos/pixel-snap-voice/hardware/kicad/recorder/recorder.kicad_sch")
-		(date "2026-11-01T10:43:25")
+		(date "2026-11-02T22:48:12")
 		(tool "Eeschema 10.0.7-10.0.7~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -410,12 +410,12 @@
 		)
 		(comp
 			(ref "J2")
-			(value "YZ103915020T")
-			(footprint "PSV:YZ103915020T_4P")
+			(value "USB_C_16P")
+			(footprint "PSV:USB_C_Receptacle_HRO_TYPE-C-31-M-13C")
 			(datasheet "~")
 			(fields
 				(field
-					(name "Footprint") "PSV:YZ103915020T_4P")
+					(name "Footprint") "PSV:USB_C_Receptacle_HRO_TYPE-C-31-M-13C")
 				(field
 					(name "Datasheet") "~")
 				(field
@@ -423,9 +423,9 @@
 				)
 			)
 			(libsource
-				(lib "PSV")
-				(part "YZ103915020T_4P")
-				(description "Xinyangze 4-pin magnetic pad receptacle, 2.0 mm. LCSC C6276862. Pin 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise.")
+				(lib "Connector")
+				(part "USB_C_Receptacle_USB2.0_16P")
+				(description "USB 2.0-only 16P Type-C Receptacle connector")
 			)
 			(property
 				(name "Sheetname")
@@ -437,7 +437,11 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "magnetic pogo USB charge")
+				(value "usb universal serial bus type-C USB2.0")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "USB*C*Receptacle*")
 			)
 			(sheetpath
 				(names "/MCU_USB/")
@@ -449,16 +453,55 @@
 					(name "A")
 					(pins
 						(pin
-							(num "1")
+							(num "SH")
 						)
 						(pin
-							(num "2")
+							(num "B1")
 						)
 						(pin
-							(num "3")
+							(num "B12")
 						)
 						(pin
-							(num "4")
+							(num "A1")
+						)
+						(pin
+							(num "A12")
+						)
+						(pin
+							(num "A9")
+						)
+						(pin
+							(num "B4")
+						)
+						(pin
+							(num "B9")
+						)
+						(pin
+							(num "A4")
+						)
+						(pin
+							(num "A5")
+						)
+						(pin
+							(num "B5")
+						)
+						(pin
+							(num "A7")
+						)
+						(pin
+							(num "B7")
+						)
+						(pin
+							(num "A6")
+						)
+						(pin
+							(num "B6")
+						)
+						(pin
+							(num "A8")
+						)
+						(pin
+							(num "B8")
 						)
 					)
 				)
@@ -504,6 +547,114 @@
 				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
 			)
 			(tstamps "1761563e-e164-5fc5-9584-7caedb6a2c31")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R2")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MCU_USB")
+			)
+			(property
+				(name "Sheetfile")
+				(value "mcu_usb.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/MCU_USB/")
+				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
+			)
+			(tstamps "18dd5c09-2bd5-5a7c-a6b6-0e97b869315b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(datasheet "~")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MCU_USB")
+			)
+			(property
+				(name "Sheetfile")
+				(value "mcu_usb.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/MCU_USB/")
+				(tstamps "/c1322f1d-5771-5551-ac8d-1796da06e73c/")
+			)
+			(tstamps "e13db0aa-6be3-50fb-8c0f-0dd56e210d6e")
 			(units
 				(unit
 					(name "A")
@@ -3591,6 +3742,115 @@
 	(variants)
 	(libparts
 		(libpart
+			(lib "Connector")
+			(part "USB_C_Receptacle_USB2.0_16P")
+			(description "USB 2.0-only 16P Type-C Receptacle connector")
+			(docs "https://www.usb.org/sites/default/files/documents/usb_type-c.zip")
+			(footprints
+				(fp "USB*C*Receptacle*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "USB_C_Receptacle_USB2.0_16P")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "https://www.usb.org/sites/default/files/documents/usb_type-c.zip")
+				(field
+					(name "Description") "USB 2.0-only 16P Type-C Receptacle connector")
+			)
+			(pins
+				(pin
+					(num "A1")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "A4")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "A5")
+					(name "CC1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A6")
+					(name "D+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A7")
+					(name "D-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A8")
+					(name "SBU1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A9")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "A12")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "B1")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "B4")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "B5")
+					(name "CC2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B6")
+					(name "D+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B7")
+					(name "D-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B8")
+					(name "SBU2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B9")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "B12")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "SH")
+					(name "SHIELD")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
 			(lib "Device")
 			(part "Battery")
 			(description "Multiple-cell battery")
@@ -4109,46 +4369,6 @@
 				(pin
 					(num "1")
 					(name "1")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "PSV")
-			(part "YZ103915020T_4P")
-			(description "Xinyangze 4-pin magnetic pad receptacle, 2.0 mm. LCSC C6276862. Pin 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise.")
-			(docs "https://www.lcsc.com/product-detail/C6276862.html")
-			(fields
-				(field
-					(name "Reference") "J")
-				(field
-					(name "Value") "YZ103915020T_4P")
-				(field
-					(name "Footprint") "PSV:YZ103915020T_4P")
-				(field
-					(name "Datasheet") "https://www.lcsc.com/product-detail/C6276862.html")
-				(field
-					(name "Description") "Xinyangze 4-pin magnetic pad receptacle, 2.0 mm. LCSC C6276862. Pin 1 VBUS, 2 USB_DM, 3 USB_DP, 4 GND until a click-test says otherwise.")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "VBUS")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "D-")
-					(type "passive")
-				)
-				(pin
-					(num "3")
-					(name "D+")
-					(type "passive")
-				)
-				(pin
-					(num "4")
-					(name "GND")
 					(type "passive")
 				)
 			)
@@ -5211,6 +5431,38 @@
 		)
 		(net
 			(code "21")
+			(name "CC1")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "A5")
+				(pinfunction "CC1_A5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R2")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "CC2")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "B5")
+				(pinfunction "CC2_B5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R3")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "23")
 			(name "CHG_STAT")
 			(class "Default")
 			(node
@@ -5238,7 +5490,7 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "24")
 			(name "GND")
 			(class "Default")
 			(node
@@ -5309,8 +5561,32 @@
 			)
 			(node
 				(ref "J2")
-				(pin "4")
-				(pinfunction "GND_4")
+				(pin "A1")
+				(pinfunction "GND_A1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "A12")
+				(pinfunction "GND_A12")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "B1")
+				(pinfunction "GND_B1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "B12")
+				(pinfunction "GND_B12")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "SH")
+				(pinfunction "SHIELD_SH")
 				(pintype "passive")
 			)
 			(node
@@ -5326,6 +5602,16 @@
 			)
 			(node
 				(ref "R11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -5572,7 +5858,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "25")
 			(name "I2C_SCL")
 			(class "Default")
 			(node
@@ -5594,7 +5880,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "26")
 			(name "I2C_SDA")
 			(class "Default")
 			(node
@@ -5616,7 +5902,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "27")
 			(name "I2S_BCLK")
 			(class "Default")
 			(node
@@ -5633,7 +5919,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "28")
 			(name "I2S_DIN")
 			(class "Default")
 			(node
@@ -5650,7 +5936,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "29")
 			(name "I2S_DOUT")
 			(class "Default")
 			(node
@@ -5667,7 +5953,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "30")
 			(name "I2S_MCLK")
 			(class "Default")
 			(node
@@ -5690,7 +5976,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "31")
 			(name "I2S_WS")
 			(class "Default")
 			(node
@@ -5707,7 +5993,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "32")
 			(name "LED")
 			(class "Default")
 			(node
@@ -5724,7 +6010,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "33")
 			(name "MIC_P")
 			(class "Default")
 			(node
@@ -5740,7 +6026,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "34")
 			(name "SD_CLK")
 			(class "Default")
 			(node
@@ -5757,7 +6043,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "35")
 			(name "SD_CMD")
 			(class "Default")
 			(node
@@ -5779,7 +6065,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "36")
 			(name "SD_D0")
 			(class "Default")
 			(node
@@ -5801,7 +6087,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "37")
 			(name "SD_D1")
 			(class "Default")
 			(node
@@ -5823,7 +6109,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "38")
 			(name "SD_D2")
 			(class "Default")
 			(node
@@ -5845,7 +6131,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "39")
 			(name "SD_D3")
 			(class "Default")
 			(node
@@ -5867,14 +6153,20 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "40")
 			(name "USB_DM")
 			(class "USB,Default")
 			(node
 				(ref "J2")
-				(pin "2")
-				(pinfunction "D-_2")
-				(pintype "passive")
+				(pin "A7")
+				(pinfunction "D-_A7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J2")
+				(pin "B7")
+				(pinfunction "D-_B7")
+				(pintype "bidirectional")
 			)
 			(node
 				(ref "U1")
@@ -5896,14 +6188,20 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "41")
 			(name "USB_DP")
 			(class "USB,Default")
 			(node
 				(ref "J2")
-				(pin "3")
-				(pinfunction "D+_3")
-				(pintype "passive")
+				(pin "A6")
+				(pinfunction "D+_A6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J2")
+				(pin "B6")
+				(pinfunction "D+_B6")
+				(pintype "bidirectional")
 			)
 			(node
 				(ref "U1")
@@ -5925,7 +6223,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "42")
 			(name "VBAT")
 			(class "POWER,Default")
 			(node
@@ -5958,7 +6256,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "43")
 			(name "VBUS")
 			(class "POWER,Default")
 			(node
@@ -5968,8 +6266,26 @@
 			)
 			(node
 				(ref "J2")
-				(pin "1")
-				(pinfunction "VBUS_1")
+				(pin "A4")
+				(pinfunction "VBUS_A4")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "A9")
+				(pinfunction "VBUS_A9")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "B4")
+				(pinfunction "VBUS_B4")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "B9")
+				(pinfunction "VBUS_B9")
 				(pintype "passive")
 			)
 			(node
@@ -5980,7 +6296,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "44")
 			(name "VBUS_CHG")
 			(class "POWER,Default")
 			(node
@@ -6012,7 +6328,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "45")
 			(name "VDD33")
 			(class "Default")
 			(node
@@ -6135,7 +6451,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "46")
 			(name "VSYS")
 			(class "POWER,Default")
 			(node
@@ -6180,7 +6496,29 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "47")
+			(name "unconnected-(J2-SBU1-PadA8)")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "A8")
+				(pinfunction "SBU1_A8")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "48")
+			(name "unconnected-(J2-SBU2-PadB8)")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "B8")
+				(pinfunction "SBU2_B8")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "49")
 			(name "unconnected-(MK1-OUT--Pad3)")
 			(class "Default")
 			(node
@@ -6191,7 +6529,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "50")
 			(name "unconnected-(U1-IO3-Pad7)")
 			(class "Default")
 			(node
@@ -6202,7 +6540,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "51")
 			(name "unconnected-(U1-IO8-Pad12)")
 			(class "Default")
 			(node
@@ -6213,7 +6551,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "52")
 			(name "unconnected-(U1-IO21-Pad25)")
 			(class "Default")
 			(node
@@ -6224,7 +6562,7 @@
 			)
 		)
 		(net
-			(code "49")
+			(code "53")
 			(name "unconnected-(U1-IO26-Pad26)")
 			(class "Default")
 			(node
@@ -6235,7 +6573,7 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "54")
 			(name "unconnected-(U1-IO33-Pad28)")
 			(class "Default")
 			(node
@@ -6246,7 +6584,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "55")
 			(name "unconnected-(U1-IO34-Pad29)")
 			(class "Default")
 			(node
@@ -6257,7 +6595,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "56")
 			(name "unconnected-(U1-IO35-Pad31)")
 			(class "Default")
 			(node
@@ -6268,7 +6606,7 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "57")
 			(name "unconnected-(U1-IO36-Pad32)")
 			(class "Default")
 			(node
@@ -6279,7 +6617,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "58")
 			(name "unconnected-(U1-IO37-Pad33)")
 			(class "Default")
 			(node
@@ -6290,7 +6628,7 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "59")
 			(name "unconnected-(U1-IO38-Pad34)")
 			(class "Default")
 			(node
@@ -6301,7 +6639,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "60")
 			(name "unconnected-(U1-IO39-Pad35)")
 			(class "Default")
 			(node
@@ -6312,7 +6650,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "61")
 			(name "unconnected-(U1-IO40-Pad36)")
 			(class "Default")
 			(node
@@ -6323,7 +6661,7 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "62")
 			(name "unconnected-(U1-IO41-Pad37)")
 			(class "Default")
 			(node
@@ -6334,7 +6672,7 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "63")
 			(name "unconnected-(U1-IO42-Pad38)")
 			(class "Default")
 			(node
@@ -6345,7 +6683,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "64")
 			(name "unconnected-(U1-IO45-Pad41)")
 			(class "Default")
 			(node
@@ -6356,7 +6694,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "65")
 			(name "unconnected-(U1-IO46-Pad44)")
 			(class "Default")
 			(node
@@ -6367,7 +6705,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "66")
 			(name "unconnected-(U1-IO47-Pad27)")
 			(class "Default")
 			(node
@@ -6378,7 +6716,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "67")
 			(name "unconnected-(U1-IO48-Pad30)")
 			(class "Default")
 			(node
@@ -6389,7 +6727,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "68")
 			(name "unconnected-(U2-OUTN-Pad13)")
 			(class "Default")
 			(node
@@ -6400,7 +6738,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "69")
 			(name "unconnected-(U2-OUTP-Pad12)")
 			(class "Default")
 			(node
@@ -6411,7 +6749,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "70")
 			(name "unconnected-(U3-~{PGOOD}-Pad7)")
 			(class "Default")
 			(node
@@ -6422,7 +6760,7 @@
 			)
 		)
 		(net
-			(code "67")
+			(code "71")
 			(name "unconnected-(U4-NC-Pad4)")
 			(class "Default")
 			(node
@@ -6433,7 +6771,7 @@
 			)
 		)
 		(net
-			(code "68")
+			(code "72")
 			(name "unconnected-(U5-~{FLG}-Pad3)")
 			(class "Default")
 			(node
@@ -6444,7 +6782,7 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "73")
 			(name "unconnected-(U8-NC-Pad4)")
 			(class "Default")
 			(node

@@ -490,7 +490,20 @@ class Obstacles:
         self.holes = []     # (x, y, radius)
         self.tracks = []    # (x0, y0, x1, y1, half_width, netcode, layer)
         self.vias = []      # (x, y, radius, drill_radius, netcode)
+        # Board slots a footprint carries on Edge.Cuts (the mid-mount USB-C
+        # J2). in_bounds() only knows the outer rectangle, so without this the
+        # maze would happily route copper through the hole in the board.
+        self.cutouts = []   # (x0, y0, x1, y1)
         for fp in board.GetFootprints():
+            edge = [item.GetBoundingBox() for item in fp.GraphicalItems()
+                    if item.GetLayer() == pcbnew.Edge_Cuts]
+            if edge:
+                self.cutouts.append((
+                    min(pcbnew.ToMM(b.GetLeft()) for b in edge),
+                    min(pcbnew.ToMM(b.GetTop()) for b in edge),
+                    max(pcbnew.ToMM(b.GetRight()) for b in edge),
+                    max(pcbnew.ToMM(b.GetBottom()) for b in edge),
+                ))
             for pad in fp.Pads():
                 x, y = pad_xy(pad)
                 drill = pcbnew.ToMM(pad.GetDrillSizeX())
@@ -548,6 +561,9 @@ class Obstacles:
             return False
         if not self.in_bounds(x1, y1, EDGE_CLEAR + half):
             return False
+        for rect in self.cutouts:
+            if seg_rect_dist(x0, y0, x1, y1, rect) < EDGE_CLEAR + half:
+                return False
         for hx, hy, hr, hnet in self.holes:
             d = seg_point_dist(x0, y0, x1, y1, hx, hy)
             if drill_r and d < drill_r + hr + HOLE_TO_HOLE:
@@ -680,6 +696,10 @@ class MazeRouter:
         for layer in self.LAYERS:
             self._mark_border(blocked[layer], EDGE_CLEAR + half)
         self._mark_border(via_blocked, EDGE_CLEAR + vr)
+        for rect in self.ob.cutouts:
+            for layer in self.LAYERS:
+                self._mark_rect(blocked[layer], rect, EDGE_CLEAR + half)
+            self._mark_rect(via_blocked, rect, EDGE_CLEAR + vr)
 
         for hx, hy, hr, hnet in self.ob.holes:
             self._mark_capsule(via_blocked, hx, hy, hx, hy,
@@ -1118,7 +1138,14 @@ def stitch_islands(board, obstacles, half_w, half_h):
 # ---------------------------------------------------------------------------
 
 
-# J2 sits at (8.0, -39.15) rotated 180 so the mouth is on y = -42.8. The
+# STALE for the dev / USB-C variant: these numbers are the earlier top-mount
+# TYPE-C-31-M-12 spin. The board now has a mid-mount TYPE-C-31-M-13C J2 at
+# (7.0, -38.1) rot 180 with its contact row at y = -35.48, hand-escaped and
+# locked on the board (lanes to y = -33.725, 0.8 mm fan, D+ joined on B.Cu,
+# VBUS dives at y = -34.375). Re-derive these from the board before a full
+# re-route; --repair-only and --finish-only never call usb_escape().
+#
+# Old note: J2 sat at (8.0, -39.15) rotated 180 so the mouth is on y = -42.8. The
 # 16 SMD contacts are then one row at y = -35.105, already north of the
 # two 0.65 mm board-lock NPTH at y = -36.55. Climb +Y; do not dive south
 # through the locks. Same topology as the 64 x 86 board: climb, fan the
@@ -2586,7 +2613,7 @@ ROUTED_OPEN_ITEMS = [
     "Pixel body and Pixelsnap ring numbers in hardware/cad/params.json are "
     "published defaults. Caliper a real phone and a real magnet ring before "
     "cutting metal.",
-    "The magnetic pad is the only 5 V inlet. U3 is a BQ24073 power-path charger: OUT "
+    "USB-C J2 is the only 5 V inlet. U3 is a BQ24073 power-path charger: OUT "
     "(VSYS) stays up from USB with BT1 open, and BAT is the pouch only. Do "
     "not strap VSYS to VBAT. Buy a protected 1S pouch; this board has no "
     "pack protector. Playback now runs the NS4150 from VSYS (~4.4 V on USB, "
@@ -2622,7 +2649,7 @@ def usb_summary(board):
         f"{USB_WIDTH} mm traces on a {USB_PAIR_PITCH} mm pitch, F.Cu over the "
         "solid In1 GND plane, not impedance controlled (full-speed only)"
     )
-    # Say what the number is. USB_DP and USB_DM run from the magnetic pad
+    # Say what the number is. USB_DP and USB_DM run from USB-C J2
     # through U7 to U1. copper_mm is all copper on the net, which is longer
     # than the signal path, and is not comparable to a point-to-point length.
     out["measures"] = (
@@ -2668,9 +2695,10 @@ def update_placement_open_items(board, unconnected, violations):
         "and open_items blocks are refreshed by route_pcb.py. Footprint XY "
         "for the recorder PCB; keep this file in sync with recorder.kicad_pcb. "
         "Origin is the magnet-ring (Pixelsnap) centre; +X phone right, +Y "
-        "toward the camera bar. Coordinates are written verbatim into "
-        "recorder.kicad_pcb, so the USB edge is y = -43. Edit both files when "
-        "a part moves."
+        "toward the camera bar. The board and lid were spun 180\u00b0 around "
+        "that origin; on this dev / USB-C variant J2 is a mid-mount USB-C on "
+        "the phone-bottom (-Y) edge at y = -42.8, and the tray clocking magnet "
+        "stays at 6 o'clock. Edit both files when a part moves."
     )
     with open(PLACEMENT, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
